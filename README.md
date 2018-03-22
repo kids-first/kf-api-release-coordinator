@@ -4,7 +4,7 @@ Kids First Release Coordinator
 The Release Coordinator responds to requests to release data by orchestrating
 necessary tasks to execute and sync operations needed for a data release.
 
-[View the spec](http://petstore.swagger.io/?url=https://kids-first.github.io/kf-api-release-coordinator/task.yaml)
+[View the spec](http://petstore.swagger.io/?url=https://kids-first.github.io/kf-api-release-coordinator/coordinator.yaml)
 
 
 Implementing a Task Service
