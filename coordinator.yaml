@@ -1,4 +1,4 @@
-swagger: "2.0"
+wagger: "2.0"
 info:
   version: "1.0.0"
   title: "Kids First Release Coordinator Service"
@@ -6,7 +6,7 @@ info:
     The Kids First Release Coordination brings different services in the Kids First ecosystem together to release data in a syncrhonized manner. It consists of two types of services: The Coordinator Service and Task Services.
       
     The coordinator service is responsible for issueing new releases and keeping tabs on progress between the different task services.
-	The coordinator implements the spec outlined here so that users and task services may retrieve release information.
+    The coordinator implements the spec outlined here so that users and task services may retrieve release information.
     
     ### Release and Task Stages
     
@@ -28,11 +28,25 @@ basePath: "/"
 tags:
 - name: "Releases"
   description: "Operations provided by the coordinating service overseeing a number of tasks"
-- name: "Tasks"
-  description: "Operations provided by a service that is responsible for a given task"
 schemes:
 - "http"
 paths:
+  /status:
+    get:
+      tags:
+        - "Releases"
+      summary: "Get information about the service"
+      description: "Returns information about the Release Coordinator"
+      operationId: "getStatus"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Releases found"
+          schema:
+            $ref: "#/definitions/Status"
   /releases:
     get:
       tags:
@@ -103,13 +117,6 @@ paths:
       - "application/json"
       produces:
       - "application/json"
-      parameters:
-      - name: "Authorization"
-        in: "header"
-        description: "Token to verify the identity of the task"
-        required: true
-        type: "string"
-        format: "string"
       responses:
         200:
           description: "Release canceled"
@@ -121,14 +128,14 @@ paths:
       in: "path"
       description: "ID of the release the task is in"
       required: true
-      type: "integer"
-      format: "int64"
+      type: "string"
+      format: "string"
     - name: "taskId"
       in: "path"
       description: "ID of the task to return"
       required: true
-      type: "integer"
-      format: "int64"
+      type: "string"
+      format: "string"
     get:
       tags:
         - "Releases"
@@ -165,12 +172,6 @@ paths:
         required: true
         schema:
           $ref: "#/definitions/TaskState"
-      - in: "header"
-        name: "Authorization"
-        description: "Token to validate the task's identity"
-        required: true
-        type: "integer"
-        format: "int64"
       responses:
         200:
           description: "Task found"
@@ -185,6 +186,35 @@ paths:
           schema:
             $ref: "#/definitions/ApiResponse"
 definitions:
+  Status:
+    properties:
+      branch:
+        description: "API branch name"
+        example: "master"
+        type: "string"
+      code:
+        description: "HTTP response code"
+        example: 200
+        format: "int32"
+        type: "integer"
+      commit:
+        description: "API short commit hash"
+        example: "aef3b5a"
+        type: "string"
+      message:
+        description: "status message"
+        example: "success"
+        type: "string"
+      tags:
+        items:
+          description: "Any tags associated with the version"
+          example: "rc"
+          type: "string"
+        type: "array"
+      version:
+        description: "API version number"
+        example: "2.0.4"
+        type: "string"
   Task:
     properties:
       name:
@@ -222,21 +252,19 @@ definitions:
   Release:
     properties:
       release_id:
-        type: "integer"
-        format: "int64"
-        example: 62
+        type: "string"
+        format: "string"
+        example: "RE_00000001"
       state:
         type: "string"
         format: "string"
         example: "running"
-      version:
-        type: "string"
-        format: "string"
-        example: "3.0.0"
-      study_id:
-        type: "string"
-        format: "string"
-        example: "ST_00000001"
+      studies:
+        type: "array"
+        items:
+          type: "string"
+          format: "string"
+          example: "ST_00000001"
       date_submitted:
         type: "string"
         format: "date"

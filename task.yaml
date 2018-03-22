@@ -29,6 +29,22 @@ tags:
 schemes:
 - "http"
 paths:
+  /status:
+    get:
+      tags:
+        - "Releases"
+      summary: "Get information about the service"
+      description: "Returns information about the Release Coordinator"
+      operationId: "getStatus"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Releases found"
+          schema:
+            $ref: "#/definitions/Status"
   /tasks:
     post:
       tags:
@@ -112,6 +128,35 @@ paths:
           schema:
             $ref: "#/definitions/ApiResponse"
 definitions:
+  Status:
+    properties:
+      branch:
+        description: "API branch name"
+        example: "master"
+        type: "string"
+      code:
+        description: "HTTP response code"
+        example: 200
+        format: "int32"
+        type: "integer"
+      commit:
+        description: "API short commit hash"
+        example: "aef3b5a"
+        type: "string"
+      message:
+        description: "status message"
+        example: "success"
+        type: "string"
+      tags:
+        items:
+          description: "Any tags associated with the version"
+          example: "rc"
+          type: "string"
+        type: "array"
+      version:
+        description: "API version number"
+        example: "2.0.4"
+        type: "string"
   Task:
     properties:
       name:
