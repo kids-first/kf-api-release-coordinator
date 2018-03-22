@@ -163,14 +163,14 @@ definitions:
         type: "string"
         format: "string"
         example: "data model rollover"
-      task_id:
+      kf_id:
         type: "string"
         format: "string"
-        example: 4123
+        example: "TA_3G2409A2"
       release_id:
         type: "string"
         format: "string"
-        example: 2344
+        example: "RE_AB28FG90"
       state:
         type: "string"
         format: "string"
@@ -193,10 +193,10 @@ definitions:
           $ref: '#/definitions/Task'
   Release:
     properties:
-      release_id:
+      kf_id:
         type: "integer"
         format: "int64"
-        example: 62
+        example: "RE_00000001"
       state:
         type: "string"
         format: "string"
