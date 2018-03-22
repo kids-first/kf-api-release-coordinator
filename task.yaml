@@ -1,0 +1,200 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Kids First Release Coordinator Task Service"
+  description: |
+    ## Task Service
+
+    A task service runs a function that is a step in the release process such as: Rolling over version numbers, updating file states for download, and making new data visible to users. These tasks should expose a common interface for the Coordination Service to communicate with. A task service should implement the endpoints in this specification in order for the release coordinator to properly invoke tasks.
+    
+    ### Release and Task Stages
+    
+    Releases and tasks share a common lifecycle of states:
+    
+    - `pending` - The task is queued to begin
+    - `running` - The task or release in in progress
+    - `staged` - The task or release has compleded necessary processing
+    - `publishing` - The task is making the release public
+    - `published` - The task or release has completed or released successfully
+    - `failed` - The task or release has failed do to some error
+    - `canceled` - The task or release was canceled by a user
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "kids-first.io"
+basePath: "/"
+tags:
+- name: "Tasks"
+  description: "Operations provided by a service that is responsible for a given task"
+schemes:
+- "http"
+paths:
+  /tasks:
+    post:
+      tags:
+        - "Tasks"
+      summary: "Starts an instance of the task using the provided identifier"
+      description: "Begins execution of of a task"
+      operationId: "startTask"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Task source identifier"
+        required: true
+        schema:
+          $ref: "#/definitions/Task"
+      responses:
+        200:
+          description: "Task accepted"
+          schema:
+            $ref: "#/definitions/TaskResponse"
+        503:
+          description: "Task rejected"
+          schema:
+            $ref: "#/definitions/TaskResponse"
+  /tasks/{taskId}:
+    get:
+      tags:
+      - "Tasks"
+      summary: "Returns state of a task given its id"
+      description: "Returns the information of a task given its id"
+      operationId: "getTaskById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskId"
+        in: "path"
+        description: "ID of task to return"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "found task"
+          schema:
+            $ref: "#/definitions/Task"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Task not found"
+    delete:
+      tags:
+      - "Tasks"
+      summary: "Cancel a task"
+      description: "Cancels a task if it is running"
+      operationId: "cancelTask"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "taskId"
+        in: "path"
+        description: "ID of task to cancel"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "Task canceled"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        400:
+          description: "Invalid ID supplied"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: "Task not found"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+definitions:
+  Task:
+    properties:
+      name:
+        type: "string"
+        format: "string"
+        example: "data model rollover"
+      task_id:
+        type: "string"
+        format: "string"
+        example: 4123
+      release_id:
+        type: "string"
+        format: "string"
+        example: 2344
+      state:
+        type: "string"
+        format: "string"
+        example: "running"
+      date_submitted:
+        type: "string"
+        format: "date"
+        example: "2018-03-19T20:12:24.702813+00:00"
+  TaskState:
+    properties:
+      state:
+        type: "string"
+        format: "string"
+        example: "running"
+  TaskResponse:
+    allOf:
+    - $ref: '#/definitions/ApiResponse'
+    properties:
+        results:
+          $ref: '#/definitions/Task'
+  Release:
+    properties:
+      release_id:
+        type: "integer"
+        format: "int64"
+        example: 62
+      state:
+        type: "string"
+        format: "string"
+        example: "running"
+      version:
+        type: "string"
+        format: "string"
+        example: "3.0.0"
+      study_id:
+        type: "string"
+        format: "string"
+        example: "ST_00000001"
+      date_submitted:
+        type: "string"
+        format: "date"
+        example: "2018-03-19T20:12:24.702813+00:00"
+      tasks:
+        type: "array"
+        items:
+          $ref: "#/definitions/Task"
+  ReleaseResponse:
+    allOf:
+    - $ref: '#/definitions/ApiResponse'
+    properties:
+        results:
+          $ref: '#/definitions/Release'
+  ApiResponse:
+    properties:
+      _links:
+        type: "object"
+        properties:
+          self:
+            type: "string"
+            format: "string"
+            example: "/resource/{resourceId}"
+      _status:
+        type: "object"
+        properties:
+          code:
+            type: "integer"
+            format: "int32"
+            example: 200
+          message:
+            type: "string"
+            format: "string"
+            example: "success"
