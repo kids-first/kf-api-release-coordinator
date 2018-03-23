@@ -13,14 +13,14 @@ info:
     release coordinator to properly invoke tasks.
 
 
-    ## Task Sequence of Operation
+    ## Task Sequence of Operations
     Below is a basic overview of a task's expected sequence of operations and its states. See the sequence diagram \<link here\> for a detailed specification of the interaction between the Coordinator Service and a Task Service.
 
     1) Receive `initialize` action from coordinator and move to `pending` state. Respond to coordinator with state set to `pending`. This is important since the coordinator will not send the `start` action until all tasks within the release are in `pending` state.
 
     2) Receive `start` action from coordinator and move to `running` state. Respond to coordinator with state set to `running`.
 
-    3) (Optional) Update coordinator with progress
+    3) (Optional) Update coordinator with current progress as the task does its work.
 
     4) Complete processing and change state from `running` to `staged`
 
@@ -39,14 +39,14 @@ schemes:
 paths:
   /status:
     get:
-      summary: "Get information about the service"
+      summary: "Get information or health status of service"
       description: |
         Returns information about the Task service including the current
         status. This endpoint is used by the Coordinator to determine the health
         of the task service. Any non-200 response will imply that the service
-        is unavailable and any tasks that may have been issued to the service
-        will be assumed as failed, if enough consective non-200 responses
-        are recieved.
+        is unavailable. If enough consective non-200 responses
+        are recieved by the Coordinator, then any tasks that may have been issued to the task service
+        will be assumed as failed.
 
       operationId: "getStatus"
       consumes:
@@ -58,36 +58,73 @@ paths:
           description: "Service ok"
           schema:
             $ref: "#/definitions/Status"
-        4XX:
+        503:
           description: "Service unavailable"
           schema:
             $ref: "#/definitions/Status"
   /tasks:
     post:
-      summary: "Task action RPC"
+      summary: "Task initialization"
       description: |
-        Starts an action for a task.
+        When a release is begun, the Release Coordinator service will send a POST to this endpoint with an `initialize` action. The Coordinator will expect an ok response from all task services in the release to continue with the release process.
 
-        When a release is begun, the Release Coordinator service will call
-        downstream tasks with an `initialize` action. The Coordinator will
-        expect an ok response to continue with the release process. If any
-        non-200 response is returned, the Coordinator will cancel the release.
+        If any non-200 response is returned, the Coordinator will cancel the release.
 
         Once the Coordinator has verified that all tasks are ready for work,
-        it will issue a `start` action signaling the task to begin work.
+        it will signal the task service to begin work via a PATCH with action set to `start`.
 
-        Once work is completed, the task should reach a `staged` state.
-
-        The Coordinator will issue a `publish` action to the task when it is
-        time for the release to be made public.
-
-        If the release is ever halted due to an explicit stop or because
-        of a failure in another task, the Coordinator will issue a `cancel`
-        action informing the task to stop or discard any operations.
-
-        To summarize, the possible actions are:
+        To summarize, the possible actions in a POST to this endpoint are:
 
         - `initialize`
+
+      operationId: "taskInit"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Task action"
+        required: true
+        schema:
+          $ref: "#/definitions/TaskAction"
+      responses:
+        200:
+          description: "Task accepted"
+          schema:
+            $ref: "#/definitions/Task"
+        503:
+          description: "Task rejected"
+
+  /tasks/{taskId}:
+    parameters:
+    - name: "taskId"
+      in: "path"
+      description: "ID of task to return"
+      required: true
+      type: "string"
+      format: "string"
+
+    patch:
+      summary: "Task action RPC "
+      description: |
+        The Release Coordinator service will send a PATCH to this endpoint to communicate actions that the task service must execute. The Coordinator will expect an ok response from all task services in the release to continue with the release process.
+
+        If any non-200 response is returned, the Coordinator will cancel the release.
+
+        A this point the Coordinator has send out the `initialize` action via a POST and verified that all tasks are ready for work based on their responses. Next, the Coordinator will signal the task service to begin work via a PATCH with action set to `start`.
+
+        Once work is completed, the task should reach a `staged` state and task service should notify the Coordinator with its new state.
+
+        When its time for the data release to be made public, the Coordinator will signal the task service to begin publishing via a PATCH to this endpoint with action set to `publish`.
+
+        If the release is ever halted due to an explicit stop or because
+        of a failure in any task, the Coordinator will issue a `cancel`
+        action informing the task to stop or discard any operations.
+
+        To summarize, the possible actions in a PATCH to this endpoint are:
+
         - `start`
         - `publish`
         - `cancel`
@@ -111,7 +148,7 @@ paths:
             $ref: "#/definitions/Task"
         503:
           description: "Task rejected"
-  /tasks/{taskId}:
+
     get:
       summary: "Task state"
       description: |
@@ -121,7 +158,7 @@ paths:
 
         The state of the task depends on the where it is in its lifecycle:
 
-        - `pending` - Recieved the `initilize` action, but waiting for `start`
+        - `pending` - Recieved the `initialize` action, but waiting for `start`
         - `running` - After `start` action while the task is processing
         - `staged` - After completing work
         - `publishing` - While publicizing work
@@ -132,13 +169,7 @@ paths:
       operationId: "getTaskById"
       produces:
       - "application/json"
-      parameters:
-      - name: "taskId"
-        in: "path"
-        description: "ID of task to return"
-        required: true
-        type: "string"
-        format: "string"
+
       responses:
         200:
           description: "found task"
@@ -195,6 +226,20 @@ definitions:
         type: "string"
         format: "string"
         example: "start"
+      task_id:
+        type: "string"
+        format: "string"
+        example: "TA_3G2409A2"
+      release_id:
+        type: "string"
+        format: "string"
+        example: "RE_AB28FG90"
+  TaskInit:
+    properties:
+      action:
+        type: "string"
+        format: "string"
+        example: "initialize"
       task_id:
         type: "string"
         format: "string"
