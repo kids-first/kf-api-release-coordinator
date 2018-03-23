@@ -16,11 +16,17 @@ info:
     ## Task timeline
 
     1) recieve `init` action from coordinator and move to `pending` state
+
     2) recieve `start` action from coordinator and move to `running` state
+
     3) optionally update coordinator with progress
+
     4) complete processing and move from `running` to `staged`
+
     5) update coordinator with current state, or wait for coordinator status check
+
     6) recieve `publish` from coordinator and run final actions to make data public
+
 
   license:
     name: "Apache 2.0"
