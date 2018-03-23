@@ -6,10 +6,6 @@ info:
     ## Task Service
 
     A task service runs a function that is a step in the release process such as: Rolling over version numbers, updating file states for download, and making new data visible to users. These tasks should expose a common interface for the Coordination Service to communicate with. A task service should implement the endpoints in this specification in order for the release coordinator to properly invoke tasks.
-    
-    ### Task States
-    
-    A task traverses from state to state as it completes actions 
 
   license:
     name: "Apache 2.0"
@@ -53,7 +49,7 @@ paths:
     post:
       tags:
         - "Tasks"
-      summary: "RPC endpoint for task actions"
+      summary: "Task action RPC"
       description: |
         Starts an action for a task.
 
@@ -104,7 +100,7 @@ paths:
     get:
       tags:
       - "Tasks"
-      summary: "Returns state of a task given its id"
+      summary: "Task state"
       description: |
         Returns the information of a task given its id.
         The task service should return information regarding the current state
