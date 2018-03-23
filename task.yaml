@@ -7,17 +7,10 @@ info:
 
     A task service runs a function that is a step in the release process such as: Rolling over version numbers, updating file states for download, and making new data visible to users. These tasks should expose a common interface for the Coordination Service to communicate with. A task service should implement the endpoints in this specification in order for the release coordinator to properly invoke tasks.
     
-    ### Release and Task Stages
+    ### Task States
     
-    Releases and tasks share a common lifecycle of states:
-    
-    - `pending` - The task is queued to begin
-    - `running` - The task or release in in progress
-    - `staged` - The task or release has compleded necessary processing
-    - `publishing` - The task is making the release public
-    - `published` - The task or release has completed or released successfully
-    - `failed` - The task or release has failed do to some error
-    - `canceled` - The task or release was canceled by a user
+    A task traverses from state to state as it completes actions 
+
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -32,7 +25,7 @@ paths:
   /status:
     get:
       tags:
-        - "Releases"
+        - "Tasks"
       summary: "Get information about the service"
       description: "Returns information about the Release Coordinator"
       operationId: "getStatus"
@@ -49,8 +42,34 @@ paths:
     post:
       tags:
         - "Tasks"
-      summary: "Starts an instance of the task using the provided identifier"
-      description: "Begins execution of of a task"
+      summary: "RPC endpoint for task actions"
+      description: |
+        Starts an action for a task.
+
+        When a release is begun, the Release Coordinator service will call
+        downstream tasks with an `initialize` action. The Coordinator will
+        expect an ok response to continue with the release process. If any
+        non-200 response is returned, the Coordinator will cancel the release.
+
+        Once the Coordinator has verified that all tasks are ready for work,
+        it will issue a `start` action signaling the task to begin work.
+
+        Once work is completed, the task should reach a `staged` state.
+
+        The Coordinator will issue a `publish` action to the task when it is
+        time for the release to be made public.
+
+        If the release is ever halted due to an explicit stop or because
+        of a failure in another task, the Coordinator will issue a `cancel`
+        action informing the task to stop or discard any operations.
+
+        To summarize, the possible actions are:
+
+        - `initialize`
+        - `start`
+        - `publish`
+        - `cancel`
+
       operationId: "startTask"
       consumes:
       - "application/json"
@@ -59,10 +78,10 @@ paths:
       parameters:
       - in: "body"
         name: "body"
-        description: "Task source identifier"
+        description: "Task action"
         required: true
         schema:
-          $ref: "#/definitions/Task"
+          $ref: "#/definitions/TaskAction"
       responses:
         200:
           description: "Task accepted"
@@ -71,13 +90,27 @@ paths:
         503:
           description: "Task rejected"
           schema:
-            $ref: "#/definitions/TaskResponse"
+            $ref: "#/definitions/ApiResponse"
   /tasks/{taskId}:
     get:
       tags:
       - "Tasks"
       summary: "Returns state of a task given its id"
-      description: "Returns the information of a task given its id"
+      description: |
+        Returns the information of a task given its id.
+        The task service should return information regarding the current state
+        of the task.
+
+        The state of the task depends on the where it is in its lifecycle:
+
+        - `pending` - Recieved the `initilize` action, but waiting for `start`
+        - `running` - After `start` action while the task is processing
+        - `staged` - After completing work
+        - `publishing` - While publicizing work
+        - `published` - After successfully publishing
+        - `canceled` - Task was canceled by coordinator
+        - `failed` - Task failed at some stage
+
       operationId: "getTaskById"
       produces:
       - "application/json"
@@ -86,8 +119,8 @@ paths:
         in: "path"
         description: "ID of task to return"
         required: true
-        type: "integer"
-        format: "int64"
+        type: "string"
+        format: "string"
       responses:
         200:
           description: "found task"
@@ -185,6 +218,16 @@ definitions:
         type: "string"
         format: "string"
         example: "running"
+  TaskAction:
+    properties:
+      action:
+        type: "string"
+        format: "string"
+        example: "start"
+      task_id:
+        type: "string"
+        format: "string"
+        example: "TA_3G2409A2"
   TaskResponse:
     allOf:
     - $ref: '#/definitions/ApiResponse'
