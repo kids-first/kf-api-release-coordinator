@@ -12,16 +12,11 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 host: "kids-first.io"
 basePath: "/"
-tags:
-- name: "Tasks"
-  description: "Operations provided by a service that is responsible for a given task"
 schemes:
 - "http"
 paths:
   /status:
     get:
-      tags:
-        - "Tasks"
       summary: "Get information about the service"
       description: |
         Returns information about the Task service including the current
@@ -47,8 +42,6 @@ paths:
             $ref: "#/definitions/Status"
   /tasks:
     post:
-      tags:
-        - "Tasks"
       summary: "Task action RPC"
       description: |
         Starts an action for a task.
@@ -98,8 +91,6 @@ paths:
           description: "Task rejected"
   /tasks/{taskId}:
     get:
-      tags:
-      - "Tasks"
       summary: "Task state"
       description: |
         Returns the information of a task given its id.
