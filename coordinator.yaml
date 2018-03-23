@@ -1,4 +1,4 @@
-wagger: "2.0"
+swagger: "2.0"
 info:
   version: "1.0.0"
   title: "Kids First Release Coordinator Service"
@@ -7,35 +7,18 @@ info:
       
     The coordinator service is responsible for issueing new releases and keeping tabs on progress between the different task services.
     The coordinator implements the spec outlined here so that users and task services may retrieve release information.
-    
-    ### Release and Task Stages
-    
-    Releases and tasks share a common lifecycle of states:
-    
-    - `pending` - The task is queued to begin
-    - `running` - The task or release in in progress
-    - `staged` - The task or release has compleded necessary processing
-    - `publishing` - The task is making the release public
-    - `published` - The task or release has completed or released successfully
-    - `failed` - The task or release has failed do to some error
-    - `canceled` - The task or release was canceled by a user
 
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 host: "kids-first.io"
 basePath: "/"
-tags:
-- name: "Releases"
-  description: "Operations provided by the coordinating service overseeing a number of tasks"
 schemes:
 - "http"
 paths:
   /status:
     get:
-      tags:
-        - "Releases"
-      summary: "Get information about the service"
+      summary: "Get service status"
       description: "Returns information about the Release Coordinator"
       operationId: "getStatus"
       consumes:
@@ -49,8 +32,6 @@ paths:
             $ref: "#/definitions/Status"
   /releases:
     get:
-      tags:
-        - "Releases"
       summary: "Get information about releases"
       description: "Returns information about releases performed by the Release Coordinator"
       operationId: "getReleases"
@@ -64,8 +45,6 @@ paths:
           schema:
             $ref: "#/definitions/ReleaseResponse"
     post:
-      tags:
-        - "Releases"
       summary: "Create a new release"
       description: |
         The Coordinator will create a new release for the given studies and tag it with an appropriate release version. It will then invoke 
@@ -88,9 +67,7 @@ paths:
         type: "integer"
         format: "int64"
     get:
-      tags:
-        - "Releases"
-      summary: "Get detailed information about a release"
+      summary: "Get infor for a release"
       description: "Returns a detailed view of a release performed by the Release Coordinator"
       operationId: "getRelease"
       consumes:
@@ -107,8 +84,6 @@ paths:
           schema:
             $ref: "#/definitions/ApiResponse"
     delete:
-      tags:
-        - "Releases"
       summary: "Cancel a release"
       description: |
         Cancels a release that is pending, running, or staged. If there are pending or running tasks, the coordinator will attempt to stop them. 
@@ -137,8 +112,6 @@ paths:
       type: "string"
       format: "string"
     get:
-      tags:
-        - "Releases"
       summary: "Get detailed information about a release"
       description: "Returns a detailed view of a release performed by the Release Coordinator"
       operationId: "getReleaseTask"
@@ -156,8 +129,6 @@ paths:
           schema:
             $ref: "#/definitions/ApiResponse"
     patch:
-      tags:
-        - "Releases"
       summary: "Update information about a release's task"
       description: "Used to update the state of a task in a release, typically by the task itself"
       operationId: "updateReleaseTask"
