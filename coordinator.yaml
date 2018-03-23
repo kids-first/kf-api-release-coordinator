@@ -208,6 +208,10 @@ definitions:
         type: "string"
         format: "string"
         example: "running"
+      progress:
+        type: "string"
+        format: "string"
+        example: "50%"
       date_submitted:
         type: "string"
         format: "date"
@@ -218,6 +222,10 @@ definitions:
         type: "string"
         format: "string"
         example: "running"
+      progress:
+        type: "string"
+        format: "string"
+        example: "50%"
   TaskResponse:
     allOf:
     - $ref: '#/definitions/ApiResponse'
