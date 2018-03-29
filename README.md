@@ -30,22 +30,20 @@ Sequence of Operations (Success Case)
 The diagram below illustrates the sequence of operations between the Coordinator service and a Task service for a
 successful release publish.
 
-Publishing a release consists of 4 steps:
+Publishing a release consists of 3 steps:
 
-1. Task service registration
-    * This step is only required one time
-    * A task service must register with the coordinator service so that the coordinator service knows which endpoint to communicate with.
-    * Additionally, the coordinator service will also store and update each task service's `health_status` throughout the publishing process.
-2. Task initialization
-    * The coordinator service will send a POST with `action=initialize` to each of the registered endpoints.
+1. Task initialization
+    * The coordinator service will send a POST with `action=initialize` to each task service's /tasks endpoint.
     * The coordinator service will wait until all task services have responded with `state=pending` and then send the next action
 2. Staging of release data
-    * The coordinator will send a POST with `action=start` along with the list of retrieval urls to each of the registered endpoints.
+    * The coordinator will send a POST with `action=start` along with the list of retrieval urls to each task service's /tasks endpoint.
     * The task services will begin requesting release data from the given urls and staging the data. The task services will set `state=running` during this step.
+    * The coordinator service will begin polling each task service for status/health via a POST with `action=get_status`. Any non-200 response will result in a failed release publish. If this happens the task service will send a POST to all task services with `action=cancel`.
     * The coordinator service will wait until all task services have responded with `state=staged` and then send the next action
 3. Publishing of release data
-    * The coordinator will send a POST with `action=publish` to each of the registered endpoints.
+    * Upon receiving a publish request from the user, the coordinator will send a POST with `action=publish` to each of the registered endpoints.
     * The task services will begin publishing the staged release data. The task services will set `state=publishing` during this step.
+    * The coordinator service will begin polling each task service for status/health via a POST with `action=get_status`. Any non-200 response will result in a failed release publish. If this happens the task service will send a POST to all task services with `action=cancel`.
     * Once all task services have responded with `state=published`, the publish is complete.
 
 ![Diagram](ReleaseCoordinatorFlow.png)

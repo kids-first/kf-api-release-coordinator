@@ -64,70 +64,49 @@ paths:
             $ref: "#/definitions/Status"
   /tasks:
     post:
-      summary: "Task initialization"
+      summary: "Task RPC action"
       description: |
-        When a release is begun, the Release Coordinator service will send a POST to this endpoint with an `initialize` action. The Coordinator will expect an ok response from all task services in the release to continue with the release process.
+        The Release Coordinator will use this endpoint to communicate all actions (via POSTs) that the task service must take during the release publish.
+        When a release is begun, the Release Coordinator service will send a POST to this endpoint with an `initialize` action. The task service should set its state to `pending` and respond with a status code 200.
+        The Coordinator will expect a 200 response from all task services in the release to continue with the release process.
 
         If any non-200 response is returned, the Coordinator will cancel the release.
 
         Once the Coordinator has verified that all tasks are ready for work,
-        it will signal the task service to begin work via a PATCH with action set to `start`.
+        it will signal the task service to begin staging data via a POST with action set to `start`.
+        Upon receiving the `start` action, the task service should begin staging the data and set it's state to `running`.
+
+        During the staging process the Release Coordinator will poll the task service for status via a POST and action set to `get_status`.
+        The task service should respond with its latest `state` and `progress`.
+        If any non-200 response is returned, the Coordinator will cancel the release. Once work is completed, the task should set its state to `staged` and task service should notify the Coordinator with its new state.
+
+        When its time for the data release to be made public, the Coordinator will signal the task service to begin publishing via a POST to this endpoint with action set to `publish`.
+        Upon receiving the `publish` action, the task service should set it's state to `publishing`.
+        Once again, the Release Coordinator will poll the task service for status via a POST and action set to `get_status`.
+        If any non-200 response is returned, the Coordinator will cancel the release.
+
+        If a task ever needs to be explicitly stopped at any point in time due to a failure of any kind, the task service may set its state to `failed`.
+        If the release is ever halted due to an explicit stop or because
+        of a failure in any task, the Coordinator will issue a `cancel`
+        action to all task services informing them to stop their task or discard any operations.
 
         To summarize, the possible actions in a POST to this endpoint are:
 
         - `initialize`
-
-      operationId: "taskInit"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Task action"
-        required: true
-        schema:
-          $ref: "#/definitions/TaskAction"
-      responses:
-        200:
-          description: "Task accepted"
-          schema:
-            $ref: "#/definitions/Task"
-        503:
-          description: "Task rejected"
-
-  /tasks/{taskId}:
-    parameters:
-    - name: "taskId"
-      in: "path"
-      description: "ID of task to return"
-      required: true
-      type: "string"
-      format: "string"
-
-    patch:
-      summary: "Task action RPC "
-      description: |
-        The Release Coordinator service will send a PATCH to this endpoint to communicate actions that the task service must execute. The Coordinator will expect an ok response from all task services in the release to continue with the release process.
-
-        If any non-200 response is returned, the Coordinator will cancel the release.
-
-        A this point the Coordinator has send out the `initialize` action via a POST and verified that all tasks are ready for work based on their responses. Next, the Coordinator will signal the task service to begin work via a PATCH with action set to `start`.
-
-        Once work is completed, the task should reach a `staged` state and task service should notify the Coordinator with its new state.
-
-        When its time for the data release to be made public, the Coordinator will signal the task service to begin publishing via a PATCH to this endpoint with action set to `publish`.
-
-        If the release is ever halted due to an explicit stop or because
-        of a failure in any task, the Coordinator will issue a `cancel`
-        action informing the task to stop or discard any operations.
-
-        To summarize, the possible actions in a PATCH to this endpoint are:
-
         - `start`
         - `publish`
+        - `get_status`
         - `cancel`
+
+        The possible states of a task are:
+
+        - `pending` - Recieved the `initialize` action, but waiting for `start`
+        - `running` - After `start` action while the task is processing
+        - `staged` - After completing work
+        - `publishing` - While publicizing work
+        - `published` - After successfully publishing
+        - `canceled` - Task was canceled by coordinator
+        - `failed` - Task failed at some stage
 
       operationId: "taskAction"
       consumes:
@@ -148,37 +127,11 @@ paths:
             $ref: "#/definitions/Task"
         503:
           description: "Task rejected"
-
-    get:
-      summary: "Task state"
-      description: |
-        Returns the information of a task given its id.
-        The task service should return information regarding the current state
-        of the task.
-
-        The state of the task depends on the where it is in its lifecycle:
-
-        - `pending` - Recieved the `initialize` action, but waiting for `start`
-        - `running` - After `start` action while the task is processing
-        - `staged` - After completing work
-        - `publishing` - While publicizing work
-        - `published` - After successfully publishing
-        - `canceled` - Task was canceled by coordinator
-        - `failed` - Task failed at some stage
-
-      operationId: "getTaskById"
-      produces:
-      - "application/json"
-
-      responses:
-        200:
-          description: "found task"
-          schema:
-            $ref: "#/definitions/Task"
         400:
           description: "Invalid ID supplied"
         404:
           description: "Task not found"
+
 definitions:
   Status:
     properties:
@@ -191,7 +144,7 @@ definitions:
         example: "ready for work"
         type: "string"
       version:
-        description: "Task version number"
+        description: "Task service version number"
         example: "2.0.4"
         type: "string"
   Task:
@@ -234,13 +187,3 @@ definitions:
         type: "string"
         format: "string"
         example: "RE_AB28FG90"
-  TaskInit:
-    properties:
-      action:
-        type: "string"
-        format: "string"
-        example: "initialize"
-      task_id:
-        type: "string"
-        format: "string"
-        example: "TA_3G2409A2"

@@ -42,13 +42,13 @@ paths:
       - "application/json"
       responses:
         200:
-          description: "Releases found"
+          description: "Service status found"
           schema:
             $ref: "#/definitions/Status"
   /task_services:
     get:
       summary: "Get task services"
-      description: "Returns information about a task service registered with the Release Coordinator"
+      description: "Returns information about task services orchestrated by the Release Coordinator"
       operationId: "getTaskServices"
       consumes:
       - "application/json"
@@ -59,20 +59,6 @@ paths:
           description: "Task services found"
           schema:
             $ref: "#/definitions/TaskServiceResponse"
-  /register_service:
-    post:
-      summary: "Register new task service"
-      description: "Creates and registers new task service with Release Coordinator"
-      operationId: "createTaskService"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      responses:
-        201:
-          description: "Task service created"
-          schema:
-            $ref: "#/definitions/RegisterResponse"
 
   /task_services/{taskServiceId}:
     parameters:
@@ -84,7 +70,7 @@ paths:
         format: "int64"
     get:
       summary: "Get a task service by ID"
-      description: "Returns a detailed view of a task service registered with the Release Coordinator"
+      description: "Returns a detailed view of a task service orchestrated by the Release Coordinator"
       operationId: "getTaskService"
       consumes:
       - "application/json"
@@ -97,49 +83,6 @@ paths:
             $ref: "#/definitions/TaskServiceResponse"
         404:
           description: "Task service not found"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-    delete:
-      summary: "Delete a task service"
-      description: |
-        Deletes a task service.
-      operationId: "deleteTaskService"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      responses:
-        200:
-          description: "Task service deleted"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-    patch:
-      summary: "Update a task service"
-      description: |
-        Used to update fields in the task service (i.e. name, url)
-      operationId: "updateTaskService"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Updated state"
-        required: true
-        schema:
-          $ref: "#/definitions/UpdateTaskService"
-      responses:
-        200:
-          description: "Task service found"
-          schema:
-            $ref: "#/definitions/TaskServiceResponse"
-        400:
-          description: "Bad input"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-        404:
-          description: "Task service was not found"
           schema:
             $ref: "#/definitions/ApiResponse"
 
@@ -247,7 +190,7 @@ paths:
       summary: "Update a tasks state"
       description: |
         Used to update the state or progress of a task in a release,
-        typically by the task itself
+        typically by the task service itself
       operationId: "updateReleaseTask"
       consumes:
       - "application/json"
@@ -340,9 +283,25 @@ definitions:
         format: "string"
         example: "50%"
   TaskResponse:
-    allOf:
-    - $ref: '#/definitions/ApiResponse'
     properties:
+        _links:
+           type: "object"
+           properties:
+             self:
+               type: "string"
+               format: "string"
+               example: "/resource/{resourceId}"
+        _status:
+           type: "object"
+           properties:
+             code:
+               type: "integer"
+               format: "int32"
+               example: 200
+             message:
+               type: "string"
+               format: "string"
+               example: "success"
         results:
           $ref: '#/definitions/Task'
   TaskService:
@@ -363,16 +322,6 @@ definitions:
         type: "string"
         format: "string"
         example: "good"
-  UpdateTaskService:
-    properties:
-      kf_id:
-        type: "string"
-        format: "string"
-        example: "TS_00000001"
-      name:
-        type: "string"
-        format: "string"
-        example: "Cavatica"
   Release:
     properties:
       kf_id:
@@ -439,7 +388,7 @@ definitions:
             example: "success"
       results:
         $ref: '#/definitions/Release'
-  RegisterResponse:
+  ReleasesResponse:
     properties:
       _links:
         type: "object"
@@ -447,7 +396,7 @@ definitions:
           self:
             type: "string"
             format: "string"
-            example: "/task_services/{taskServiceId}"
+            example: "/resource/{resourceId}"
       _status:
         type: "object"
         properties:
@@ -460,7 +409,9 @@ definitions:
             format: "string"
             example: "success"
       results:
-        $ref: "#/definitions/TaskService"
+        type: "array"
+        items:
+          $ref: '#/definitions/Release'
   TaskServiceResponse:
     properties:
       _links:
