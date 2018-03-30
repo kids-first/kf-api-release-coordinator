@@ -13,19 +13,20 @@ info:
     release coordinator to properly invoke tasks.
 
 
-    ## Task timeline
+    ## Task Sequence of Operations
+    Below is a basic overview of a task's expected sequence of operations and its states. See the sequence diagram \<link here\> for a detailed specification of the interaction between the Coordinator Service and a Task Service.
 
-    1) recieve `init` action from coordinator and move to `pending` state
+    1) Receive `initialize` action from coordinator and move to `pending` state. Respond to coordinator with state set to `pending`. This is important since the coordinator will not send the `start` action until all tasks within the release are in `pending` state.
 
-    2) recieve `start` action from coordinator and move to `running` state
+    2) Receive `start` action from coordinator and move to `running` state. Respond to coordinator with state set to `running`.
 
-    3) optionally update coordinator with progress
+    3) (Optional) Update coordinator with current progress as the task does its work.
 
-    4) complete processing and move from `running` to `staged`
+    4) Complete processing and change state from `running` to `staged`
 
-    5) update coordinator with current state, or wait for coordinator status check
+    5) Update coordinator with current state. This is import since the coordinator will not send the `publish` action until all tasks within the release have sent a request with state set to `staged`.
 
-    6) recieve `publish` from coordinator and run final actions to make data public
+    6) Recieve `publish` from coordinator and run final actions to make data public
 
 
   license:
@@ -38,14 +39,14 @@ schemes:
 paths:
   /status:
     get:
-      summary: "Get information about the service"
+      summary: "Get information or health status of service"
       description: |
         Returns information about the Task service including the current
         status. This endpoint is used by the Coordinator to determine the health
         of the task service. Any non-200 response will imply that the service
-        is unavailable and any tasks that may have been issued to the service
-        will be assumed as failed, if enough consective non-200 responses
-        are recieved.
+        is unavailable. If enough consective non-200 responses
+        are recieved by the Coordinator, then any tasks that may have been issued to the task service
+        will be assumed as failed.
 
       operationId: "getStatus"
       consumes:
@@ -57,39 +58,55 @@ paths:
           description: "Service ok"
           schema:
             $ref: "#/definitions/Status"
-        4XX:
+        503:
           description: "Service unavailable"
           schema:
             $ref: "#/definitions/Status"
   /tasks:
     post:
-      summary: "Task action RPC"
+      summary: "Task RPC action"
       description: |
-        Starts an action for a task.
+        The Release Coordinator will use this endpoint to communicate all actions (via POSTs) that the task service must take during the release publish.
+        When a release is begun, the Release Coordinator service will send a POST to this endpoint with an `initialize` action. The task service should set its state to `pending` and respond with a status code 200.
+        The Coordinator will expect a 200 response from all task services in the release to continue with the release process.
 
-        When a release is begun, the Release Coordinator service will call
-        downstream tasks with an `initialize` action. The Coordinator will
-        expect an ok response to continue with the release process. If any
-        non-200 response is returned, the Coordinator will cancel the release.
+        If any non-200 response is returned, the Coordinator will cancel the release.
 
         Once the Coordinator has verified that all tasks are ready for work,
-        it will issue a `start` action signaling the task to begin work.
+        it will signal the task service to begin staging data via a POST with action set to `start`.
+        Upon receiving the `start` action, the task service should begin staging the data and set it's state to `running`.
 
-        Once work is completed, the task should reach a `staged` state.
+        During the staging process the Release Coordinator will poll the task service for status via a POST and action set to `get_status`.
+        The task service should respond with its latest `state` and `progress`.
+        If any non-200 response is returned, the Coordinator will cancel the release. Once work is completed, the task should set its state to `staged` and task service should notify the Coordinator with its new state.
 
-        The Coordinator will issue a `publish` action to the task when it is
-        time for the release to be made public.
+        When its time for the data release to be made public, the Coordinator will signal the task service to begin publishing via a POST to this endpoint with action set to `publish`.
+        Upon receiving the `publish` action, the task service should set it's state to `publishing`.
+        Once again, the Release Coordinator will poll the task service for status via a POST and action set to `get_status`.
+        If any non-200 response is returned, the Coordinator will cancel the release.
 
+        If a task ever needs to be explicitly stopped at any point in time due to a failure of any kind, the task service may set its state to `failed`.
         If the release is ever halted due to an explicit stop or because
-        of a failure in another task, the Coordinator will issue a `cancel`
-        action informing the task to stop or discard any operations.
+        of a failure in any task, the Coordinator will issue a `cancel`
+        action to all task services informing them to stop their task or discard any operations.
 
-        To summarize, the possible actions are:
+        To summarize, the possible actions in a POST to this endpoint are:
 
         - `initialize`
         - `start`
         - `publish`
+        - `get_status`
         - `cancel`
+
+        The possible states of a task are:
+
+        - `pending` - Recieved the `initialize` action, but waiting for `start`
+        - `running` - After `start` action while the task is processing
+        - `staged` - After completing work
+        - `publishing` - While publicizing work
+        - `published` - After successfully publishing
+        - `canceled` - Task was canceled by coordinator
+        - `failed` - Task failed at some stage
 
       operationId: "taskAction"
       consumes:
@@ -110,43 +127,11 @@ paths:
             $ref: "#/definitions/Task"
         503:
           description: "Task rejected"
-  /tasks/{taskId}:
-    get:
-      summary: "Task state"
-      description: |
-        Returns the information of a task given its id.
-        The task service should return information regarding the current state
-        of the task.
-
-        The state of the task depends on the where it is in its lifecycle:
-
-        - `pending` - Recieved the `initilize` action, but waiting for `start`
-        - `running` - After `start` action while the task is processing
-        - `staged` - After completing work
-        - `publishing` - While publicizing work
-        - `published` - After successfully publishing
-        - `canceled` - Task was canceled by coordinator
-        - `failed` - Task failed at some stage
-
-      operationId: "getTaskById"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "taskId"
-        in: "path"
-        description: "ID of task to return"
-        required: true
-        type: "string"
-        format: "string"
-      responses:
-        200:
-          description: "found task"
-          schema:
-            $ref: "#/definitions/Task"
         400:
           description: "Invalid ID supplied"
         404:
           description: "Task not found"
+
 definitions:
   Status:
     properties:
@@ -159,7 +144,7 @@ definitions:
         example: "ready for work"
         type: "string"
       version:
-        description: "Task version number"
+        description: "Task service version number"
         example: "2.0.4"
         type: "string"
   Task:
@@ -198,3 +183,7 @@ definitions:
         type: "string"
         format: "string"
         example: "TA_3G2409A2"
+      release_id:
+        type: "string"
+        format: "string"
+        example: "RE_AB28FG90"
