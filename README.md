@@ -22,7 +22,7 @@ The task service endpoints expose a common interface for the Coordinator Service
 The Release Coordinator responds to requests to release data by orchestrating
 necessary tasks to execute and sync operations needed for a data release.
 
-[View the spec](https://kids-first.github.io/kf-api-release-coordinator/feedback/natasha/docs/coordinator.html)
+[View the spec](https://kids-first.github.io/kf-api-release-coordinator/docs/coordinator.html)
 
 
 Sequence of Operations (Success Case)
