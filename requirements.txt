@@ -5,3 +5,4 @@ djangorestframework==3.8.2
 psycopg2==2.7.4
 requests==2.18.4
 urllib3==1.22
+base32-crockford==0.3.0

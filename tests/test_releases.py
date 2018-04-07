@@ -30,10 +30,18 @@ def test_new_release(client, transactional_db):
 
     assert resp.status_code == 201
     assert Release.objects.count() == 1
+    assert resp.json()['kf_id'].startswith('RE_')
+    assert len(resp.json()['kf_id']) == 11
 
 
 def test_get_release_by_id(client, transactional_db, release):
+    """ Test that releases may be retrieved by id """
+    assert release['kf_id'].startswith('RE_')
+    assert len(release['kf_id']) == 11
+
     resp = client.get('http://testserver/releases/'+release['kf_id'])
 
     assert resp.status_code == 200
     assert Release.objects.count() == 1
+    assert resp.json()['kf_id'].startswith('RE_')
+    assert len(resp.json()['kf_id']) == 11

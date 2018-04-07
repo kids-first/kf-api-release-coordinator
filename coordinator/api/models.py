@@ -1,7 +1,10 @@
 import uuid
 import datetime
+
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+
+from coordinator.utils import kf_id_generator
 
 
 STATES= [
@@ -21,12 +24,24 @@ STATUSES = [
 ]
 
 
+def task_id():
+    return kf_id_generator('TA')()
+
+
+def task_service_id():
+    return kf_id_generator('TS')()
+
+
+def release_id():
+    return kf_id_generator('RE')()
+
+
 class Task(models.Model):
     """
     A Task is a process that is run on a Task Service as part of a Release
     """
-    kf_id = models.CharField(max_length=36, primary_key=True, default=uuid.uuid4,
-                             help_text='Kids First ID assigned to the task')
+    kf_id = models.CharField(max_length=11, primary_key=True,
+			     default=task_id)
     uuid = models.UUIDField(default=uuid.uuid4,
                             help_text='UUID used internally')
     state = models.CharField(max_length=100, choices=STATES, default='pending',
@@ -41,7 +56,8 @@ class TaskService(models.Model):
     """
     A Task Service runs a particular Task that is required for a release
     """
-    kf_id = models.CharField(max_length=36, primary_key=True, default=uuid.uuid4,
+    kf_id = models.CharField(max_length=11, primary_key=True,
+			     default=task_service_id,
                              help_text='Kids First ID assigned to the service')
     uuid = models.UUIDField(default=uuid.uuid4,
                             help_text='UUID used internally')
@@ -61,7 +77,8 @@ class Release(models.Model):
     A Release is composed of several tasks that run process that prepare and
     publish data for a release
     """
-    kf_id = models.CharField(max_length=36, default=uuid.uuid4,
+    kf_id = models.CharField(max_length=11, primary_key=True,
+			     default=release_id,
                              help_text='Kids First ID assigned to the'
                              ' release')
     uuid = models.UUIDField(default=uuid.uuid4,
