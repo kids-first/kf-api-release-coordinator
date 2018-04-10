@@ -18,6 +18,9 @@ class TaskServiceSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
+    tags = serializers.ListField(
+                child=serializers.CharField(max_length=50, allow_blank=False,
+                                            validators=[]))
     studies = serializers.ListField(
                 child=serializers.CharField(max_length=11, allow_blank=False,
                                             validators=[validate_study]),
@@ -26,5 +29,6 @@ class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Release
-        fields = ('kf_id', 'name', 'state', 'studies', 'created_at')
-        read_only_fields = ('kf_id', 'name', 'state', 'created_at')
+        fields = ('kf_id', 'name', 'description', 'state', 'studies',
+                  'created_at', 'tags', 'author')
+        read_only_fields = ('kf_id', 'state', 'author', 'created_at')

@@ -84,9 +84,17 @@ class Release(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,
                             help_text='UUID used internally')
     tasks = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
-    name = models.CharField(max_length=200)
-    state = models.CharField(max_length=200, choices=STATES, default='pending',
+    author = models.CharField(max_length=100, blank=False, default='admin',
+                              help_text='The user who created the release')
+    name = models.CharField(max_length=100,
+                            help_text='Name of the release')
+    description = models.CharField(max_length=500, blank=True,
+                                   help_text='Release notes')
+    state = models.CharField(max_length=100, choices=STATES, default='pending',
                              help_text='The current state of the release')
+    tags = ArrayField(models.CharField(max_length=50, blank=True),
+                      blank=True, default=[],
+                      help_text='Tags to group the release by')
     studies = ArrayField(models.CharField(max_length=11, blank=False),
                          help_text='kf_ids of the studies in this release')
     created_at = models.DateTimeField(auto_now_add=True,
