@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  pg:
+    image: postgres:9.5
+    environment:
+      POSTGRES_DB: "dataservice"
+  redis:
+    image: redis:latest
+  coordinator:
+    build: .
+    command: /bin/ash -c "sleep 5; ./bin/run.sh"
+    volumes:
+      - .:/app
+    ports:
+      - "5000:80"
+    environment:
+      - PG_NAME=dataservice
+      - PG_HOST=pg
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - pg
+      - redis 

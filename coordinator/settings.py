@@ -85,27 +85,69 @@ WSGI_APPLICATION = 'coordinator.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dev',
-        'USER': 'postgres',
-        # 'PASSWORD': 'mypassword',
-        'HOST': '127.0.0.1',
-        'PORT': '5433',
+def get_databases():
+    """ Will try to load from vault or default to environmet """
+    db = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('PG_NAME', 'dev'),
+            'USER': os.environ.get('PG_USER','postgres'),
+            'PASSWORD': os.environ.get('PG_PASS', None),
+            'HOST': os.environ.get('PG_HOST', '127.0.0.1'),
+            'PORT': os.environ.get('PG_PORT', '5432'),
+        }
     }
-}
+    vault_url = os.environ.get('VAULT_URL', None)
+    vault_role = os.environ.get('VAULT_ROLE', None)
+    pg_secret = os.environ.get('PG_SECRET', None)
+    # Default to the above config if the required vault vars are not present
+    if not vault_url or not vault_role or not pg_secret:
+        return db
+
+    import hvac
+    client = hvac.Client(url=vault_url)
+    client.auth_iam(vault_role)
+    pg_secrets = client.read(pg_secret)
+    client.logout()
+
+    db['default']['USER'] = pg_secrets['data']['user']
+    db['default']['PASSWORD'] = pg_secrets['data']['password']
+
+    return db
+
+DATABASES = get_databases()
+
 
 # Redis
-RQ_QUEUES = {
-    'default': {
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
-        'DEFAULT_TIMEOUT': 360,
-    },
-}
+def get_queues():
+    """ Will try to load from vault or default to environmet """
+    rq = {
+        'default': {
+            'HOST': os.environ.get('REDIS_HOST', 'localhost'),
+            'PORT': os.environ.get('REDIS_PORT', 6379),
+            'DB': 0,
+            'DEFAULT_TIMEOUT': 360,
+        },
+    }
+    vault_url = os.environ.get('VAULT_URL', None)
+    vault_role = os.environ.get('VAULT_ROLE', None)
+    redis_secret = os.environ.get('REDIS_SECRET', None)
+    # Default to the above config if the required vault vars are not present
+    if not vault_url or not vault_role or not redis_secret:
+        return rq
 
+    import hvac
+    client = hvac.Client(url=vault_url)
+    client.auth_iam(vault_role)
+    redis_secrets = client.read(redis_secret)
+    client.logout()
+
+    rq['default']['PASSWORD'] = redis_secrets['data']['password']
+
+    return rq
+
+
+RQ_QUEUES = get_queues()
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -144,3 +186,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/static/'
