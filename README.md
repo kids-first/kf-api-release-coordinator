@@ -50,7 +50,7 @@ Publishing a release consists of 3 steps:
 
 Failures
 ---------------------------------------------------
-A release publish can fail in 4 ways:
+A release can fail in 4 ways:
 
 1. A task can fail unexpectedly caused by an internal server error. Any non-200 response from a task service is considered a task service failure.
 2. A task can deliberately cancel its operation by responding with a 400 status and including `state=canceled` in the response body.
@@ -60,7 +60,7 @@ A release publish can fail in 4 ways:
 Upon failure of a release publish:
 1. The coordinator service will notify the other task services to stop work via a cancel request
 2. The coordinator service will update the release’s state to canceled so that the user and task services know about the failure or cancellation.
-3. The only way to start release publish again is by user action. Thus, upon cancellation of the release, the user must initiate the release publish process again.
+3. The only way to initiate a release again is by user action. Thus, upon cancellation of the release, the user must initiate the release process again.
 
 See the sequence diagrams below for details of operations during failures.
 
