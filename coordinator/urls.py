@@ -11,4 +11,5 @@ router.register(r'releases', views.ReleaseViewSet)
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     url(r'^', include(router.urls)),
+    url(r'^django-rq/', include('django_rq.urls')),
 ]

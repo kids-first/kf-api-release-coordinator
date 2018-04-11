@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_rq',
 ]
 
 MIDDLEWARE = [
@@ -93,6 +94,16 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '5433',
     }
+}
+
+# Redis
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 360,
+    },
 }
 
 
