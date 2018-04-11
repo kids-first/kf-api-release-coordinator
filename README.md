@@ -1,3 +1,5 @@
+![Data Service](docs/kf_releasecoordinator.png)
+
 Kids First Release Coordinator
 ==============================
 
