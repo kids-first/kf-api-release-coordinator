@@ -25,7 +25,7 @@ necessary tasks to execute and sync operations needed for a data release.
 [View the spec](https://kids-first.github.io/kf-api-release-coordinator/docs/coordinator.html)
 
 
-Sequence of Operations (Success Case)
+Success Case - Sequence of Operations
 ---------------------------------------------------
 The diagram below illustrates the sequence of operations between the Coordinator service and a Task service for a
 successful release publish.
@@ -46,10 +46,27 @@ Publishing a release consists of 3 steps:
     * The coordinator service will begin polling each task service for status/health via a POST with `action=get_status`. Any non-200 response will result in a failed release publish. If this happens the task service will send a POST to all task services with `action=cancel`.
     * Once all task services have responded with `state=published`, the publish is complete.
 
-![Diagram](ReleaseCoordinatorFlow.png)
+![Diagram](docs/ReleaseCoordinatorFlow.png)
 
-Sequence of Operations (Failure Case 1)
+Failures
 ---------------------------------------------------
-The diagram below illustrates the sequence of operations between the Coordinator service and a Task service for an example
-failed release publish.
-TODO
+A release can fail in 4 ways:
+
+1. A task can fail unexpectedly caused by an internal server error. Any non-200 response from a task service is considered a task service failure.
+2. A task can deliberately cancel its operation by responding with a 400 status and including `state=canceled` in the response body.
+3. If any task service is unresponsive to 3 successive health checks, then that task service is considered to have failed.
+4. The user can cancel a release publish at any time
+
+Upon failure of a release publish:
+1. The coordinator service will notify the other task services to stop work via a cancel request
+2. The coordinator service will update the release’s state to canceled so that the user and task services know about the failure or cancellation.
+3. The only way to initiate a release again is by user action. Thus, upon cancellation of the release, the user must initiate the release process again.
+
+See the sequence diagrams below for details of operations during failures.
+
+
+Failure Handling - Sequence of Operations
+---------------------------------------------------
+The diagram below illustrates the sequence of operations between the Coordinator service and a Task service when a release publish fails due to any one of the 4 failure cases.
+
+![Diagram](docs/ReleaseCoordinatorFailureHandling.png)
