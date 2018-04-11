@@ -73,11 +73,11 @@ WSGI_APPLICATION = 'coordinator.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'test',
-        'USER': 'postgres',
-        # 'PASSWORD': 'mypassword',
-        'HOST': '127.0.0.1',
-        'PORT': '5433',
+        'NAME': os.environ.get('PG_NAME', 'test'),
+        'USER': os.environ.get('PG_USER','postgres'),
+        'PASSWORD': os.environ.get('PG_PASS', None),
+        'HOST': os.environ.get('PG_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('PG_PORT', '5432'),
     }
 }
 
