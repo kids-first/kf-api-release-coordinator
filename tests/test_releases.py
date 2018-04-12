@@ -77,6 +77,19 @@ def test_get_release_by_id(client, transactional_db, release):
     assert len(resp.json()['results']['kf_id']) == 11
 
 
+def test_cancel_release(client, transactional_db, release):
+    """ Test that a release is canceled and not deleted """
+    kf_id = release['kf_id']
+    assert Release.objects.count() == 1
+    resp = client.delete('http://testserver/releases/'+kf_id)
+    assert Release.objects.count() == 1
+    res = resp.json()['results']
+    assert res['state'] == 'canceled'
+    resp = client.get('http://testserver/releases/'+kf_id)
+    res = resp.json()['results']
+    assert res['state'] == 'canceled'
+
+
 def test_study_validator(client, transactional_db):
     """ Test that only correctly formatted study ids are accepted """
     release = {

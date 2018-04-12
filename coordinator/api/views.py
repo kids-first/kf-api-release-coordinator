@@ -1,8 +1,9 @@
+import django_rq
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
-import django_rq
 from coordinator.api.models import Task, TaskService, Release
 from coordinator.api.serializers import (
     TaskSerializer,
@@ -53,6 +54,29 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
             django_rq.enqueue(set_state, kf_id, state='running', delay=3)
             django_rq.enqueue(set_state, kf_id, state='staged', delay=8)
         return res
+
+    def destroy(self, request, kf_id=None):
+        """
+        Cancel a release
+
+        When a release is cancelled:
+        - All running tasks should sent a cancel action
+        - The release should not be deleted
+        """
+        try:
+            release = Release.objects.get(kf_id=kf_id)
+        except ObjectDoesNotExist:
+            return Response({
+                '_status': {
+                    'message': 'Release {} does not exist'.format(kf_id),
+                    'code': 404,
+                }
+            }, 404)
+
+        release.state = 'canceled'
+        release.save()
+        # Do other cancel logic here
+        return self.retrieve(request, kf_id)
 
     @action(methods=['post'], detail=True)
     def publish(self, request, kf_id=None):
