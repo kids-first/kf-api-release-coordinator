@@ -11,7 +11,7 @@ def release(client, transactional_db):
 	'studies': ['SD_00000001']
     }
     resp = client.post('http://testserver/releases', data=release)
-    return resp.json()['results']
+    return resp.json()
 
 
 def test_no_releases(client, transactional_db):
@@ -33,7 +33,7 @@ def test_new_release(client, transactional_db):
 
     assert resp.status_code == 201
     assert Release.objects.count() == 1
-    res = resp.json()['results']
+    res = resp.json()
     assert res['kf_id'].startswith('RE_')
     assert len(res['kf_id']) == 11
     assert res['author'] == 'admin'
@@ -53,15 +53,15 @@ def test_new_tag(client, transactional_db):
 
     assert resp.status_code == 201
     assert Release.objects.count() == 1
-    assert resp.json()['results']['tags'] == []
+    assert resp.json()['tags'] == []
 
-    kf_id = resp.json()['results']['kf_id']
+    kf_id = resp.json()['kf_id']
     tags = {'tags': ['Needs Review', 'Data Fix'], 'studies': ['SD_00000001']}
     resp = client.patch('http://testserver/releases/'+kf_id,
                         data=json.dumps(tags),
                         content_type='application/json')
     assert resp.status_code == 200
-    assert resp.json()['results']['tags'] == tags['tags']
+    assert resp.json()['tags'] == tags['tags']
 
 
 def test_get_release_by_id(client, transactional_db, release):
@@ -73,8 +73,8 @@ def test_get_release_by_id(client, transactional_db, release):
 
     assert resp.status_code == 200
     assert Release.objects.count() == 1
-    assert resp.json()['results']['kf_id'].startswith('RE_')
-    assert len(resp.json()['results']['kf_id']) == 11
+    assert resp.json()['kf_id'].startswith('RE_')
+    assert len(resp.json()['kf_id']) == 11
 
 
 def test_cancel_release(client, transactional_db, release):
@@ -83,11 +83,24 @@ def test_cancel_release(client, transactional_db, release):
     assert Release.objects.count() == 1
     resp = client.delete('http://testserver/releases/'+kf_id)
     assert Release.objects.count() == 1
-    res = resp.json()['results']
+    res = resp.json()
     assert res['state'] == 'canceled'
     resp = client.get('http://testserver/releases/'+kf_id)
-    res = resp.json()['results']
+    res = resp.json()
     assert res['state'] == 'canceled'
+
+
+def test_cancel_release_404(client, transactional_db, release):
+    """ Test that a release is canceled and not deleted """
+    kf_id = release['kf_id']
+    assert Release.objects.count() == 1
+    resp = client.delete('http://testserver/releases/RE_00000000')
+    assert Release.objects.count() == 1
+    res = resp.json()
+
+    resp = client.get('http://testserver/releases/'+kf_id)
+    res = resp.json()
+    assert res['state'] == 'pending'
 
 
 def test_study_validator(client, transactional_db):
@@ -98,7 +111,7 @@ def test_study_validator(client, transactional_db):
     }
     resp = client.post('http://testserver/releases', data=release)
     assert resp.status_code == 400
-    res = resp.json()['results']
+    res = resp.json()
     assert 'studies' in res
     assert len(res['studies']) == 1
     assert res['studies']['0'] == ['SD_000 is not a valid study kf_id']
@@ -108,7 +121,7 @@ def test_study_validator(client, transactional_db):
     }
     resp = client.post('http://testserver/releases', data=release)
     assert resp.status_code == 400
-    res = resp.json()['results']
+    res = resp.json()
     assert 'studies' in res
     assert len(res['studies']) == 1
     assert 'Ensure this field has at least 1' in res['studies'][0]
