@@ -66,12 +66,7 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
         try:
             release = Release.objects.get(kf_id=kf_id)
         except ObjectDoesNotExist:
-            return Response({
-                '_status': {
-                    'message': 'Release {} does not exist'.format(kf_id),
-                    'code': 404,
-                }
-            }, 404)
+            return Response({}, status=404)
 
         release.state = 'canceled'
         release.save()

@@ -26,7 +26,6 @@ class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
                                             validators=[validate_study]),
                 min_length=1)
 
-
     class Meta:
         model = Release
         fields = ('kf_id', 'name', 'description', 'state', 'studies',

@@ -7,7 +7,7 @@ from django.contrib.postgres.fields import ArrayField
 from coordinator.utils import kf_id_generator
 
 
-STATES= [
+STATES = [
     ('pending', 'pending'),
     ('running', 'running'),
     ('staged', 'staged'),
@@ -41,13 +41,15 @@ class Task(models.Model):
     A Task is a process that is run on a Task Service as part of a Release
     """
     kf_id = models.CharField(max_length=11, primary_key=True,
-			     default=task_id)
+                             default=task_id)
     uuid = models.UUIDField(default=uuid.uuid4,
                             help_text='UUID used internally')
     state = models.CharField(max_length=100, choices=STATES, default='pending',
                              help_text='The current state of the task')
-    progress = models.IntegerField(help_text='Optional field representing what'
-                                   ' percentage of the task has been completed')
+    progress = models.IntegerField(default=0, help_text='Optional field'
+                                   ' representing what percentage of the task'
+                                   ' has been completed')
+
     created_at = models.DateTimeField(auto_now_add=True,
                                       help_text='Time the task was created')
 
@@ -57,7 +59,7 @@ class TaskService(models.Model):
     A Task Service runs a particular Task that is required for a release
     """
     kf_id = models.CharField(max_length=11, primary_key=True,
-			     default=task_service_id,
+                             default=task_service_id,
                              help_text='Kids First ID assigned to the service')
     uuid = models.UUIDField(default=uuid.uuid4,
                             help_text='UUID used internally')
@@ -78,12 +80,13 @@ class Release(models.Model):
     publish data for a release
     """
     kf_id = models.CharField(max_length=11, primary_key=True,
-			     default=release_id,
+                             default=release_id,
                              help_text='Kids First ID assigned to the'
                              ' release')
     uuid = models.UUIDField(default=uuid.uuid4,
                             help_text='UUID used internally')
-    tasks = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
+    tasks = models.ForeignKey(Task, on_delete=models.CASCADE, null=True,
+                              blank=True)
     author = models.CharField(max_length=100, blank=False, default='admin',
                               help_text='The user who created the release')
     name = models.CharField(max_length=100,
