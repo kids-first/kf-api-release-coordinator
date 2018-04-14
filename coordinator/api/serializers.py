@@ -13,8 +13,10 @@ class TaskSerializer(serializers.HyperlinkedModelSerializer):
 class TaskServiceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = TaskService
-        fields = ('kf_id', 'name', 'health_status', 'url', 'created_at')
-        read_only_fields = ('kf_id', 'health_status', 'created_at')
+        fields = ('kf_id', 'name', 'last_ok_status', 'health_status',
+                  'url', 'created_at')
+        read_only_fields = ('kf_id', 'last_ok_status', 'health_status',
+                            'created_at')
 
 
 class ReleaseSerializer(serializers.HyperlinkedModelSerializer):

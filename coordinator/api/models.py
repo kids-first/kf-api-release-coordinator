@@ -1,5 +1,6 @@
 import uuid
 import datetime
+import requests
 
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -57,6 +58,17 @@ class Task(models.Model):
 class TaskService(models.Model):
     """
     A Task Service runs a particular Task that is required for a release
+
+    :param kf_id: The Kids First identifier, 'TS' prefix
+    :param uuid: A uuid assigned to the task service for identification
+    :param name: The name of the task service
+    :param url: The root url of the task service api
+    :param last_ok_status: The number of pings since the last 200 response
+        from the /status endpoint on the task service
+    :param health_status: The status of the service. 'ok' if one of the last
+        3 pings to the /status endpoint returned 200, 'down' otherwise
+    :created_at: The time that the task service was registered with the
+        coordinator.
     """
     kf_id = models.CharField(max_length=11, primary_key=True,
                              default=task_service_id,
@@ -66,12 +78,29 @@ class TaskService(models.Model):
     name = models.CharField(max_length=100,
                             help_text='The name of the service')
     url = models.URLField(help_text='endpoint for the task\'s API')
-    health_status = models.CharField(max_length=10, choices=STATUSES,
-                                     default='green',
-                                     help_text='The current status of the'
-                                     ' task service')
+    last_ok_status = models.IntegerField(default=0,
+                                         help_text='number of pings since last'
+                                         ' 200 response from the task\'s '
+                                         ' /status endpoint')
     created_at = models.DateTimeField(auto_now_add=True,
                                       help_text='Time the task was created')
+
+    @property
+    def health_status(self):
+        return 'ok' if self.last_ok_status <= 3 else 'down'
+
+    def health_check(self):
+        """
+        Ping the TaskService /status endpoint to check that the service is
+        healthy.
+        """
+        resp = requests.get(self.url+'/status')
+        if resp.status_code != 200:
+            self.last_ok_status += 1
+            self.save()
+        elif self.last_ok_status > 0:
+            self.last_ok_status = 0
+            self.save()
 
 
 class Release(models.Model):
