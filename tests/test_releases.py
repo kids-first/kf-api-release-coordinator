@@ -1,17 +1,6 @@
 import json
 import pytest
-from rest_framework.test import APIRequestFactory, RequestsClient
 from coordinator.api.models import Release
-
-
-@pytest.yield_fixture
-def release(client, transactional_db):
-    release = {
-        'name': 'test release',
-	'studies': ['SD_00000001']
-    }
-    resp = client.post('http://testserver/releases', data=release)
-    return resp.json()
 
 
 def test_no_releases(client, transactional_db):
