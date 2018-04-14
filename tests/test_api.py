@@ -41,8 +41,8 @@ def tasks(client, releases, task_services):
         ts = task_services[random.choice(list(task_services.keys()))]['kf_id']
         r = client.post(BASE_URL+'/tasks',
                         {'name': 'TASK {}'.format(i),
-                         'release_id': rel,
-                         'task_service_id': ts})
+                         'release': BASE_URL+'/releases/'+rel,
+                         'task_service': BASE_URL+'/task-services/'+ts})
         ta[r.json()['kf_id']] = r.json()
     return ta
 

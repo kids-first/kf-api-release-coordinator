@@ -6,8 +6,13 @@ from coordinator.api.validators import validate_study
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Task
-        fields = ('kf_id', 'state', 'progress', 'created_at')
-        read_only_fields = ('kf_id', 'state', 'created_at')
+        fields = ('kf_id', 'state', 'progress', 'release', 'task_service',
+                  'created_at')
+        read_only_fields = ('kf_id', 'created_at')
+        extra_kwargs = {
+            'release': {'allow_null': False, 'lookup_field': 'kf_id'},
+            'task_service': {'allow_null': False, 'lookup_field': 'kf_id'},
+        }
 
 
 class TaskServiceSerializer(serializers.HyperlinkedModelSerializer):

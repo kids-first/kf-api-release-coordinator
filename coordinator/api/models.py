@@ -37,24 +37,6 @@ def release_id():
     return kf_id_generator('RE')()
 
 
-class Task(models.Model):
-    """
-    A Task is a process that is run on a Task Service as part of a Release
-    """
-    kf_id = models.CharField(max_length=11, primary_key=True,
-                             default=task_id)
-    uuid = models.UUIDField(default=uuid.uuid4,
-                            help_text='UUID used internally')
-    state = models.CharField(max_length=100, choices=STATES, default='pending',
-                             help_text='The current state of the task')
-    progress = models.IntegerField(default=0, help_text='Optional field'
-                                   ' representing what percentage of the task'
-                                   ' has been completed')
-
-    created_at = models.DateTimeField(auto_now_add=True,
-                                      help_text='Time the task was created')
-
-
 class TaskService(models.Model):
     """
     A Task Service runs a particular Task that is required for a release
@@ -114,8 +96,6 @@ class Release(models.Model):
                              ' release')
     uuid = models.UUIDField(default=uuid.uuid4,
                             help_text='UUID used internally')
-    tasks = models.ForeignKey(Task, on_delete=models.CASCADE, null=True,
-                              blank=True)
     author = models.CharField(max_length=100, blank=False, default='admin',
                               help_text='The user who created the release')
     name = models.CharField(max_length=100,
@@ -131,3 +111,33 @@ class Release(models.Model):
                          help_text='kf_ids of the studies in this release')
     created_at = models.DateTimeField(auto_now_add=True,
                                       help_text='Date created')
+
+
+class Task(models.Model):
+    """
+    A Task is a process that is run on a Task Service as part of a Release
+    
+    :param kf_id: The Kids First identifier, 'TA' prefix
+    :param uuid: A uuid assigned to the task for identification
+    :param state: The state of the task
+    :created_at: The time that the task was registered with the coordinator.
+    """
+    kf_id = models.CharField(max_length=11, primary_key=True,
+                             default=task_id)
+    uuid = models.UUIDField(default=uuid.uuid4,
+                            help_text='UUID used internally')
+    state = models.CharField(max_length=100, choices=STATES, default='pending',
+                             help_text='The current state of the task')
+    progress = models.IntegerField(default=0, help_text='Optional field'
+                                   ' representing what percentage of the task'
+                                   ' has been completed')
+    release = models.ForeignKey(Release,
+                                on_delete=models.CASCADE,
+                                null=False,
+                                blank=False)
+    task_service = models.ForeignKey(TaskService,
+                                     on_delete=models.CASCADE,
+                                     null=False,
+                                     blank=False)
+    created_at = models.DateTimeField(auto_now_add=True,
+                                      help_text='Time the task was created')
