@@ -92,6 +92,9 @@ RQ_QUEUES = {
     },
 }
 
+if DEBUG or TESTING:
+    RQ_QUEUES['default']['ASYNC'] = False
+
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 

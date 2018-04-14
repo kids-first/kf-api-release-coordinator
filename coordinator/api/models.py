@@ -10,6 +10,7 @@ from coordinator.utils import kf_id_generator
 
 STATES = [
     ('pending', 'pending'),
+    ('waiting', 'waiting'),
     ('running', 'running'),
     ('staged', 'staged'),
     ('publishing', 'publishing'),
@@ -102,7 +103,7 @@ class Release(models.Model):
                             help_text='Name of the release')
     description = models.CharField(max_length=500, blank=True,
                                    help_text='Release notes')
-    state = models.CharField(max_length=100, choices=STATES, default='pending',
+    state = models.CharField(max_length=100, choices=STATES, default='waiting',
                              help_text='The current state of the release')
     tags = ArrayField(models.CharField(max_length=50, blank=True),
                       blank=True, default=[],
@@ -116,7 +117,7 @@ class Release(models.Model):
 class Task(models.Model):
     """
     A Task is a process that is run on a Task Service as part of a Release
-    
+
     :param kf_id: The Kids First identifier, 'TA' prefix
     :param uuid: A uuid assigned to the task for identification
     :param state: The state of the task
@@ -126,7 +127,7 @@ class Task(models.Model):
                              default=task_id)
     uuid = models.UUIDField(default=uuid.uuid4,
                             help_text='UUID used internally')
-    state = models.CharField(max_length=100, choices=STATES, default='pending',
+    state = models.CharField(max_length=100, choices=STATES, default='waiting',
                              help_text='The current state of the task')
     progress = models.IntegerField(default=0, help_text='Optional field'
                                    ' representing what percentage of the task'
