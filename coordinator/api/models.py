@@ -134,10 +134,12 @@ class Task(models.Model):
     release = models.ForeignKey(Release,
                                 on_delete=models.CASCADE,
                                 null=False,
-                                blank=False)
+                                blank=False,
+                                related_name='tasks')
     task_service = models.ForeignKey(TaskService,
                                      on_delete=models.CASCADE,
                                      null=False,
-                                     blank=False)
+                                     blank=False,
+                                     related_name='tasks')
     created_at = models.DateTimeField(auto_now_add=True,
                                       help_text='Time the task was created')

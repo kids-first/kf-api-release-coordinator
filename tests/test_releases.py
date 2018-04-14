@@ -114,3 +114,11 @@ def test_study_validator(client, transactional_db):
     assert 'studies' in res
     assert len(res['studies']) == 1
     assert 'Ensure this field has at least 1' in res['studies'][0]
+
+def test_release_relations(client, transactional_db, task):
+    resp = client.get('http://testserver/releases')
+    res = resp.json()['results'][0]
+    assert 'tasks' in res
+    assert len(res['tasks']) == 1
+    assert 'kf_id' in res['tasks'][0]
+    assert res['tasks'][0]['progress'] == 0

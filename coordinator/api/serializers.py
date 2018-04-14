@@ -16,10 +16,12 @@ class TaskSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TaskServiceSerializer(serializers.HyperlinkedModelSerializer):
+    tasks = TaskSerializer(read_only=True, many=True)
+
     class Meta:
         model = TaskService
         fields = ('kf_id', 'name', 'last_ok_status', 'health_status',
-                  'url', 'created_at')
+                  'url', 'tasks', 'created_at')
         read_only_fields = ('kf_id', 'last_ok_status', 'health_status',
                             'created_at')
 
@@ -32,9 +34,10 @@ class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
                 child=serializers.CharField(max_length=11, allow_blank=False,
                                             validators=[validate_study]),
                 min_length=1)
+    tasks = TaskSerializer(read_only=True, many=True)
 
     class Meta:
         model = Release
         fields = ('kf_id', 'name', 'description', 'state', 'studies',
-                  'created_at', 'tags', 'author')
-        read_only_fields = ('kf_id', 'state', 'author', 'created_at')
+                  'tasks', 'created_at', 'tags', 'author')
+        read_only_fields = ('kf_id', 'state', 'author', 'tasks', 'created_at')
