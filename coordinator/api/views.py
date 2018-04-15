@@ -4,7 +4,7 @@ from rest_framework import viewsets
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from coordinator.tasks import init_release
+from coordinator.tasks import init_release, publish_release
 from coordinator.api.models import Task, TaskService, Release
 from coordinator.api.serializers import (
     TaskSerializer,
@@ -20,6 +20,28 @@ class TaskViewSet(viewsets.ModelViewSet):
     lookup_field = 'kf_id'
     queryset = Task.objects.order_by('-created_at').all()
     serializer_class = TaskSerializer
+
+    def partial_update(self, request, kf_id=None):
+        resp = super(TaskViewSet, self).partial_update(request, kf_id)
+        # If the task is being updated to staged
+        if resp.data['state'] == 'staged':
+            kf_id = resp.data['kf_id']
+            task = Task.objects.select_related().get(kf_id=kf_id)
+            release = task.release
+            # Check if all the release's tasks have been staged
+            if all([t.state == 'staged' for t in release.tasks.all()]):
+                release.state = 'staged'
+                release.save()
+        # If the task is being updated to published
+        elif resp.data['state'] == 'published':
+            kf_id = resp.data['kf_id']
+            task = Task.objects.select_related().get(kf_id=kf_id)
+            release = task.release
+            # Check if all the release's tasks have been published
+            if all([t.state == 'published' for t in release.tasks.all()]):
+                release.state = 'published'
+                release.save()
+        return resp
 
 
 class TaskServiceViewSet(viewsets.ModelViewSet):
@@ -67,9 +89,8 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
 
     @action(methods=['post'], detail=True)
     def publish(self, request, kf_id=None):
-        return Response({
-            '_status': {
-                'message': 'submitted for publication',
-                'code': 200,
-            }
-        })
+        release = Release.objects.get(kf_id=kf_id)
+        release.state = 'publishing'
+        release.save()
+        django_rq.enqueue(publish_release, release.kf_id)
+        return self.retrieve(request, kf_id)

@@ -85,6 +85,32 @@ def start_release(release_id):
 
 
 @django_rq.job
+def publish_release(release_id):
+    """
+    Publish a release by sending 'publish' action to all tasks
+    """
+    release = Release.objects.select_related().get(kf_id=release_id)
+
+    for task in release.tasks.all():
+        body = {
+            'action': 'publish',
+            'task_id': task.kf_id,
+            'release_id': release.kf_id
+        }
+        resp = requests.post(task.task_service.url+'/tasks', json=body)
+        # Check that command was accepted
+        if resp.status_code != 200:
+            release.state = 'failed'
+            release.save()
+            task.state = 'failed'
+            django_rq.enqueue(cancel_release, release_id)
+            return
+
+        task.state = resp.json()['state']
+        task.save()
+
+
+@django_rq.job
 def cancel_release(release_id):
     """
     Cancels a release by sending 'cancel' action to all tasks

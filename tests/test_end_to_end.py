@@ -54,7 +54,7 @@ def test_full_release(client, transactional_db, mocker):
     assert resp.status_code == 201
     release_id = resp.json()['kf_id']
 
-    # Check that the release was initialized and started
+    # Check that the task was initialized and started
     assert mock_task_requests.post.call_count == 2
     init_args, init_kwargs = mock_task_requests.post.call_args_list[0]
     start_args, start_kwargs = mock_task_requests.post.call_args_list[1]
@@ -69,3 +69,66 @@ def test_full_release(client, transactional_db, mocker):
 
     assert Release.objects.first().state == 'running'
     assert Task.objects.first().state == 'running'
+
+    resp = client.get(BASE_URL+'/releases/'+release_id)
+    assert resp.status_code == 200
+    res = resp.json()
+    task_id = res['tasks'][0]['kf_id']
+    assert len(res['tasks']) == 1
+    assert res['tasks'][0]['state'] == 'running'
+    assert Task.objects.first().kf_id == task_id
+
+    resp = client.get(BASE_URL+'/tasks/'+task_id)
+    assert resp.status_code == 200
+    res = resp.json()
+    assert res['state'] == 'running'
+    assert res['progress'] == 0
+    assert res['release'] == BASE_URL+'/releases/'+release_id
+
+    # Send back a response to the coordinator mocking the task
+    resp = client.patch(BASE_URL+'/tasks/'+task_id,
+                        json.dumps({'progress': 50}),
+                        content_type='application/json')
+    assert resp.status_code == 200
+    res = resp.json()
+    assert res['state'] == 'running'
+    assert res['progress'] == 50
+
+    # Tell the coordinator the task has been staged
+    # Send back a response to the coordinator mocking the task
+    resp = client.patch(BASE_URL+'/tasks/'+task_id,
+                        json.dumps({'state': 'staged', 'progress': 100}),
+                        content_type='application/json')
+    assert resp.status_code == 200
+    res = resp.json()
+    assert res['state'] == 'staged'
+    assert res['progress'] == 100
+
+    resp = client.get(BASE_URL+'/releases/'+release_id)
+    assert resp.status_code == 200
+    res = resp.json()
+    assert res['state'] == 'staged'
+    assert all([t['state'] == 'staged' for t in res['tasks']])
+    
+    # Send publish command
+    mock_task_action.json.return_value = {'state': 'publishing'}
+
+    resp = client.post(BASE_URL+'/releases/'+release_id+'/publish')
+    assert resp.status_code == 200
+    res = resp.json()
+    assert res['state'] == 'publishing'
+    assert all([t['state'] == 'publishing' for t in res['tasks']])
+
+    # Mock a task's response telling the coordinator it has published
+    resp = client.patch(BASE_URL+'/tasks/'+task_id,
+                        json.dumps({'state': 'published', 'progress': 100}),
+                        content_type='application/json')
+    assert resp.status_code == 200
+    res = resp.json()
+    assert res['state'] == 'published'
+
+    resp = client.get(BASE_URL+'/releases/'+release_id)
+    assert resp.status_code == 200
+    res = resp.json()
+    assert res['state'] == 'published'
+    assert all([t['state'] == 'published' for t in res['tasks']])
