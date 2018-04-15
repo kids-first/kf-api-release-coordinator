@@ -2,6 +2,7 @@ FROM        python:3-alpine3.7
 
 ADD         requirements.txt /app/
 WORKDIR     /app
+ENV         WORKER false
 
 RUN apk update && apk add py3-psycopg2 musl-dev \
     nginx supervisor git \
@@ -28,7 +29,8 @@ COPY        bin/nginx.conf /etc/nginx/nginx.conf
 
 # Setup supervisord
 RUN         mkdir -p /var/log/supervisor/conf.d
-COPY        bin/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY        bin/worker.conf /etc/supervisor/conf.d/worker.conf
+COPY        bin/api.conf /etc/supervisor/conf.d/api.conf
 
 # Start processes
 CMD ["/app/bin/run.sh"]

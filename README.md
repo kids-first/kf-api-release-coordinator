@@ -1,9 +1,27 @@
-![Data Service](docs/kf_releasecoordinator.png)
+<p align="center">
+  <img src="docs/kf_releasecoordinator.png">
+</p>
 
 Kids First Release Coordinator
 ==============================
 
 The Kids First Release Coordinator brings different services in the Kids First ecosystem together to release data in a synchronized manner.
+
+
+## Development Quick Start
+
+Getting up and running with a fully functional Release Coordinator is as easy as:
+```
+git clone https://github.com/kids-first/kf-api-release-coordinator
+cd kf-api-release-coordinator
+docker-compose up -d
+```
+
+This will stand up a couple different services:
+- The Coordinator API on port `5000`
+- A task worker to process different release jobs
+- A redis instance to manage the work queue
+- A postgres database to store information about releases, tasks, and services
 
 ## Background
 There are several services which drive end user apps in the Kids First ecosystem. These services all consume Kids First data and must stay in sync with one and other in terms of the state of their data. One service cannot have more up to date data then another service. Additionally, there may be other services outside of the Kids First ecosystem that are interested in staying in sync with the latest Kids First data as new releases get published.

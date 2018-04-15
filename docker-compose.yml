@@ -9,6 +9,7 @@ services:
     image: redis:latest
   coordinator:
     build: .
+    image: coordinator:latest
     command: /bin/ash -c "sleep 5; ./bin/run.sh"
     volumes:
       - .:/app
@@ -19,6 +20,23 @@ services:
       - PG_HOST=pg
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - WORKER=false
     depends_on:
       - pg
       - redis 
+  worker:
+    build: .
+    image: coordinator:latest
+    command: /bin/ash -c "sleep 6; ./bin/run.sh"
+    volumes:
+      - .:/app
+    environment:
+      - PG_NAME=dataservice
+      - PG_HOST=pg
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - WORKER=true
+    depends_on:
+      - pg
+      - redis 
+      - coordinator
