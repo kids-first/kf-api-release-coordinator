@@ -121,7 +121,8 @@ class Task(models.Model):
     :param kf_id: The Kids First identifier, 'TA' prefix
     :param uuid: A uuid assigned to the task for identification
     :param state: The state of the task
-    :param created_at: The time that the task was registered with the coordinator.
+    :param created_at: The time that the task was registered with the
+        coordinator.
     """
     kf_id = models.CharField(max_length=11, primary_key=True,
                              default=task_id)

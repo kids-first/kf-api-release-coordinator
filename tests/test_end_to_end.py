@@ -7,6 +7,7 @@ from coordinator.api.models import Release, Task, TaskService
 
 BASE_URL = 'http://testserver'
 
+
 def test_full_release(client, transactional_db, mocker):
     """
     Test a full release:
@@ -109,7 +110,7 @@ def test_full_release(client, transactional_db, mocker):
     res = resp.json()
     assert res['state'] == 'staged'
     assert all([t['state'] == 'staged' for t in res['tasks']])
-    
+
     # Send publish command
     mock_task_action.json.return_value = {'state': 'publishing'}
 

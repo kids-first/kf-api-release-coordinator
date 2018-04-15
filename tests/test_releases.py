@@ -16,7 +16,7 @@ def test_new_release(client, transactional_db):
 
     release = {
         'name': 'My Release',
-	'studies': ['SD_00000001']
+        'studies': ['SD_00000001']
     }
     resp = client.post('http://testserver/releases', data=release)
 
@@ -36,7 +36,7 @@ def test_new_tag(client, transactional_db):
 
     release = {
         'name': 'My Release',
-	'studies': ['SD_00000001']
+        'studies': ['SD_00000001']
     }
     resp = client.post('http://testserver/releases', data=release)
 
@@ -96,7 +96,7 @@ def test_study_validator(client, transactional_db):
     """ Test that only correctly formatted study ids are accepted """
     release = {
         'name': 'My Release',
-	'studies': ['SD_000', 'SD_00000000'],
+        'studies': ['SD_000', 'SD_00000000'],
     }
     resp = client.post('http://testserver/releases', data=release)
     assert resp.status_code == 400
@@ -106,7 +106,7 @@ def test_study_validator(client, transactional_db):
     assert res['studies']['0'] == ['SD_000 is not a valid study kf_id']
 
     release = {
-	'studies': [],
+        'studies': [],
     }
     resp = client.post('http://testserver/releases', data=release)
     assert resp.status_code == 400
@@ -114,6 +114,7 @@ def test_study_validator(client, transactional_db):
     assert 'studies' in res
     assert len(res['studies']) == 1
     assert 'Ensure this field has at least 1' in res['studies'][0]
+
 
 def test_release_relations(client, transactional_db, task):
     resp = client.get('http://testserver/releases')

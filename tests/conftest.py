@@ -10,7 +10,7 @@ def release(client, transactional_db):
     """ Creates a release """
     release = {
         'name': 'test release',
-	'studies': ['SD_00000001']
+        'studies': ['SD_00000001']
     }
     resp = client.post('http://testserver/releases', data=release)
     return resp.json()
