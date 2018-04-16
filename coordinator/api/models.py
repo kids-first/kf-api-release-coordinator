@@ -45,6 +45,7 @@ class TaskService(models.Model):
     :param kf_id: The Kids First identifier, 'TS' prefix
     :param uuid: A uuid assigned to the task service for identification
     :param name: The name of the task service
+    :param description: Description of the task service's function
     :param url: The root url of the task service api
     :param last_ok_status: The number of pings since the last 200 response
         from the /status endpoint on the task service
@@ -60,6 +61,9 @@ class TaskService(models.Model):
                             help_text='UUID used internally')
     name = models.CharField(max_length=100,
                             help_text='The name of the service')
+    description = models.CharField(max_length=500,
+                                   help_text='Description of the service\'s'
+                                   'function')
     url = models.URLField(help_text='endpoint for the task\'s API')
     last_ok_status = models.IntegerField(default=0,
                                          help_text='number of pings since last'
