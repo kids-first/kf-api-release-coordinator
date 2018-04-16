@@ -1,6 +1,7 @@
 import random
 import importlib
 import pytest
+from mock import Mock, patch
 from django.conf import settings
 
 
@@ -25,11 +26,18 @@ def releases(client):
 @pytest.yield_fixture
 def task_services(client):
     ts = {}
-    for i in range(10):
-        r = client.post(BASE_URL+'/task-services',
-                        {'name': 'TASK SERVICE {}'.format(i),
-                         'url': 'http://localhost'})
-        ts[r.json()['kf_id']] = r.json()
+    with patch('coordinator.api.validators.requests') as mock_requests:
+        mock_resp = Mock()
+        mock_resp.content = '{"name": "test"}'
+        mock_resp.status_code = 200
+        mock_requests.get.return_value = mock_resp
+
+        for i in range(10):
+            r = client.post(BASE_URL+'/task-services',
+                            {'name': 'TASK SERVICE {}'.format(i),
+                             'url': 'http://localhost',
+                             'description': 'test'})
+            ts[r.json()['kf_id']] = r.json()
     return ts
 
 

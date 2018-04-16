@@ -22,6 +22,49 @@ def test_basic_task_service(client, transactional_db, task_service):
     assert res['count'] == 1
 
 
+def test_url_validation(client, db, task_service):
+    """ Test that urls are validated by pinging their status endpoint """
+    orig = TaskService.objects.count()
+    with patch('coordinator.api.validators.requests') as mock_requests:
+        mock_requests.get = Mock()
+        mock_resp = Mock()
+        mock_resp.content = '{}'
+        mock_requests.get.return_value = mock_resp
+        mock_requests.get.status_code.return_value = 404
+
+        # Test basic url field validation
+        service = {'url': 'not a url',
+                   'name': 'test service',
+                   'description': 'lorem ipsum'}
+        resp = client.post(BASE_URL+'/task-services', data=service)
+        res = resp.json()
+        assert res['url'][0] == 'Enter a valid URL.'
+        assert TaskService.objects.count() == orig
+
+        # Test validation against endpoint
+
+        service['url'] = 'http://validurl.com'
+        resp = client.post(BASE_URL+'/task-services', data=service)
+        res = resp.json()
+        assert 'validurl.com did not return the expected /st' in res['url'][0]
+        assert TaskService.objects.count() == orig
+
+        mock_resp.status_code = 200
+        mock_resp.content = '{}'
+        mock_requests.get.return_value = mock_resp
+        resp = client.post(BASE_URL+'/task-services', data=service)
+        res = resp.json()
+        assert 'validurl.com did not return the expected /st' in res['url'][0]
+        assert TaskService.objects.count() == orig
+
+        mock_resp.content = '{"name": "test"}'
+        mock_requests.get.return_value = mock_resp
+        resp = client.post(BASE_URL+'/task-services', data=service)
+        res = resp.json()
+        assert 'kf_id' in res
+        assert TaskService.objects.count() == orig + 1
+
+
 @pytest.mark.parametrize('field', [
     'kf_id',
     'url',

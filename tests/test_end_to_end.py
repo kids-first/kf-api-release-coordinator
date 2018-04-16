@@ -14,21 +14,23 @@ def test_full_release(client, transactional_db, mocker):
     1) Create task service
     2) Create release
     """
-    mock_requests = mocker.patch('coordinator.api.models.requests')
-    mock_resp = mock.Mock()
-    mock_resp.status_code = 200
-    mock_requests.get.return_value = mock_resp
-
     mock_task_requests = mocker.patch('coordinator.tasks.requests')
     mock_task_action = mock.Mock()
     mock_task_action.status_code = 200
     mock_task_action.json.return_value = {'state': 'running'}
     mock_task_requests.post.return_value = mock_task_action
 
+    mock_service_requests = mocker.patch('coordinator.api.models.requests')
+    mock_service_resp = mock.Mock()
+    mock_service_resp.status_code = 200
+    mock_service_resp.content = '{"name": "test"}'
+    mock_service_requests.get.return_value = mock_service_resp
+
     # Register a task service
     service = {
         'name': 'test release',
-        'url': 'http://ts.com'
+        'url': 'http://ts.com',
+        'description': 'lorem ipsum'
     }
     resp = client.post(BASE_URL+'/task-services', data=service)
     assert resp.status_code == 201
@@ -38,6 +40,11 @@ def test_full_release(client, transactional_db, mocker):
     assert Release.objects.count() == 0
     resp = client.get('http://testserver/releases')
     assert resp.status_code == 200
+
+    mock_requests = mocker.patch('coordinator.api.models.requests')
+    mock_resp = mock.Mock()
+    mock_resp.status_code = 200
+    mock_requests.get.return_value = mock_resp
 
     # Test health check
     ts = TaskService.objects.first()

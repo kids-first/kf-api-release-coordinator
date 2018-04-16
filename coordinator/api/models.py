@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
 from coordinator.utils import kf_id_generator
+from coordinator.api.validators import validate_endpoint
 
 
 STATES = [
@@ -64,7 +65,8 @@ class TaskService(models.Model):
     description = models.CharField(max_length=500,
                                    help_text='Description of the service\'s'
                                    'function')
-    url = models.URLField(help_text='endpoint for the task\'s API')
+    url = models.URLField(validators=[validate_endpoint],
+                          help_text='endpoint for the task\'s API')
     last_ok_status = models.IntegerField(default=0,
                                          help_text='number of pings since last'
                                          ' 200 response from the task\'s '

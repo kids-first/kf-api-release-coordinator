@@ -1,4 +1,5 @@
 import pytest
+from mock import Mock, patch
 from coordinator.api.models import Release, TaskService
 
 
@@ -20,9 +21,15 @@ def release(client, transactional_db):
 def task_service(client, transactional_db):
     service = {
         'name': 'test release',
-        'url': 'http://ts.com'
+        'url': 'http://ts.com',
+        'description': 'lorem ipsum'
     }
-    resp = client.post(BASE_URL+'/task-services', data=service)
+    with patch('coordinator.api.validators.requests') as mock_requests:
+        mock_resp = Mock()
+        mock_resp.content = '{"name": "test"}'
+        mock_resp.status_code = 200
+        mock_requests.get.return_value = mock_resp
+        resp = client.post(BASE_URL+'/task-services', data=service)
     return resp.json()
 
 
