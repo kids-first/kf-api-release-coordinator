@@ -13,6 +13,8 @@ services:
     command: /bin/ash -c "sleep 5; ./bin/run.sh"
     volumes:
       - .:/app
+    external_links:
+      - task
     ports:
       - "8000:80"
     environment:
@@ -40,10 +42,8 @@ services:
       - pg
       - redis 
       - coordinator
-  task:
-    build: ../kf-task-example
-    image: exapmle-task:latest
-    volumes:
-      - .:/app
+  scheduler:
+    image: tutum/curl:latest
+    command: /bin/bash -c "while true; do sleep 10; curl -XPOST coordinator/task-services/health_checks; done"
     depends_on:
       - coordinator

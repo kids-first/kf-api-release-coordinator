@@ -90,6 +90,12 @@ RQ_QUEUES = {
         'DB': 0,
         'DEFAULT_TIMEOUT': 360,
     },
+    'health_checks': {
+        'HOST': os.environ.get('REDIS_HOST', 'localhost'),
+        'PORT': os.environ.get('REDIS_PORT', 6379),
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 30,
+    },
 }
 
 if DEBUG or TESTING:

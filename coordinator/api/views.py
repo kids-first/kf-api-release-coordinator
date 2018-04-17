@@ -4,7 +4,7 @@ from rest_framework import viewsets
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from coordinator.tasks import init_release, publish_release
+from coordinator.tasks import init_release, publish_release, health_check
 from coordinator.api.models import Task, TaskService, Release
 from coordinator.api.serializers import (
     TaskSerializer,
@@ -52,6 +52,13 @@ class TaskServiceViewSet(viewsets.ModelViewSet):
     queryset = TaskService.objects.order_by('-created_at').all()
     serializer_class = TaskServiceSerializer
 
+    @action(methods=['post'], detail=False)
+    def health_checks(self, request):
+        task_services = TaskService.objects.all()
+        for service in task_services:
+            django_rq.enqueue(health_check, service.kf_id)
+
+        return Response({'status': 'ok'}, 200)
 
 class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
     """

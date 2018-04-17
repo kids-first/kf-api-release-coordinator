@@ -2,6 +2,7 @@ import uuid
 import datetime
 import requests
 
+from requests.exceptions import ConnectionError, HTTPError
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
@@ -65,7 +66,7 @@ class TaskService(models.Model):
     description = models.CharField(max_length=500,
                                    help_text='Description of the service\'s'
                                    'function')
-    url = models.URLField(validators=[validate_endpoint],
+    url = models.CharField(max_length=200, validators=[validate_endpoint],
                           help_text='endpoint for the task\'s API')
     last_ok_status = models.IntegerField(default=0,
                                          help_text='number of pings since last'
@@ -83,11 +84,14 @@ class TaskService(models.Model):
         Ping the TaskService /status endpoint to check that the service is
         healthy.
         """
-        resp = requests.get(self.url+'/status')
-        if resp.status_code != 200:
+        try:
+            resp = requests.get(self.url+'/status')
+            resp.raise_for_status()
+        except (ConnectionError, HTTPError):
             self.last_ok_status += 1
             self.save()
-        elif self.last_ok_status > 0:
+
+        if self.last_ok_status > 0:
             self.last_ok_status = 0
             self.save()
 

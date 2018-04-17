@@ -4,6 +4,17 @@ from coordinator.api.models import Task, TaskService, Release
 
 
 @django_rq.job
+def health_check(task_service_id):
+    """
+    Check the health of a task service
+
+    :param task_service_id: The kf_id of the service to check
+    """
+    task_service = TaskService.objects.get(kf_id=task_service_id)
+    task_service.health_check()
+
+
+@django_rq.job
 def init_release(release_id):
     """
     Initilializes a release by creating new tasks for each service and

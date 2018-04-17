@@ -26,7 +26,7 @@ SECRET_KEY = str(uuid.uuid4())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["coordinator"]
 APPEND_SLASH = False
 
 
@@ -129,6 +129,12 @@ def get_queues():
             'PORT': os.environ.get('REDIS_PORT', 6379),
             'DB': 0,
             'DEFAULT_TIMEOUT': 360,
+        },
+        'health_checks': {
+            'HOST': os.environ.get('REDIS_HOST', 'localhost'),
+            'PORT': os.environ.get('REDIS_PORT', 6379),
+            'DB': 0,
+            'DEFAULT_TIMEOUT': 30,
         },
     }
     vault_url = os.environ.get('VAULT_URL', None)
