@@ -1,4 +1,5 @@
 import pytest
+from requests.exceptions import ConnectionError
 from mock import Mock, patch
 from coordinator.api.models import TaskService
 
@@ -28,7 +29,7 @@ def test_url_validation(client, db, task_service):
     with patch('coordinator.api.validators.requests') as mock_requests:
         mock_requests.get = Mock()
         mock_resp = Mock()
-        mock_resp.content = '{}'
+        mock_resp.content = ''
         mock_requests.get.return_value = mock_resp
         mock_requests.get.status_code.return_value = 404
 
@@ -83,7 +84,9 @@ def test_task_service_bad_status(client, db, task_service):
     kf_id = task_service['kf_id']
     ts = TaskService.objects.get(kf_id=kf_id)
     with patch('coordinator.api.models.requests') as mock_requests:
-        mock_requests.get.return_value = Mock()
+        mock_resp = Mock()
+        mock_resp.raise_for_status.side_effect = ConnectionError()
+        mock_requests.get.return_value = mock_resp
         mock_requests.get.status_code.return_value = 404
         ts.health_check()
         assert mock_requests.get.call_count == 1

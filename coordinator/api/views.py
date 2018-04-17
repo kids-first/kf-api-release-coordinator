@@ -60,6 +60,7 @@ class TaskServiceViewSet(viewsets.ModelViewSet):
 
         return Response({'status': 'ok'}, 200)
 
+
 class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
     """
     endpoint for releases

@@ -67,7 +67,7 @@ class TaskService(models.Model):
                                    help_text='Description of the service\'s'
                                    'function')
     url = models.CharField(max_length=200, validators=[validate_endpoint],
-                          help_text='endpoint for the task\'s API')
+                           help_text='endpoint for the task\'s API')
     last_ok_status = models.IntegerField(default=0,
                                          help_text='number of pings since last'
                                          ' 200 response from the task\'s '
@@ -90,6 +90,7 @@ class TaskService(models.Model):
         except (ConnectionError, HTTPError):
             self.last_ok_status += 1
             self.save()
+            return
 
         if self.last_ok_status > 0:
             self.last_ok_status = 0

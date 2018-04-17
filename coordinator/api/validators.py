@@ -1,5 +1,5 @@
 import requests
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, HTTPError
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -16,20 +16,17 @@ def validate_study(study):
 
 def validate_endpoint(url):
     """ Check that a url provided as an endpoint has expected format """
-    URLValidator()(url)
-    resp = None
-    fail = False
+    # URLValidator()(url)
+    if not (url.startswith('http')):
+        raise ValidationError(
+            _('Enter a valid URL.')
+        )
+
     try:
         resp = requests.get(url+'/status')
-    except ConnectionError:
-        fail = True
-
-    if (resp and (
-            resp.status_code != 200 or
-            'name' not in resp.content)):
-        fail = True
-
-    if fail:
+        resp.raise_for_status()
+        assert 'name' in resp.content
+    except (ConnectionError, HTTPError, AssertionError):
         raise ValidationError(
             _('%(value)s did not return the expected /status response'),
             params={'value': url},
