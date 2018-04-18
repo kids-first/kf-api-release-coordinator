@@ -30,7 +30,8 @@ def test_full_release(client, transactional_db, mocker):
     service = {
         'name': 'test release',
         'url': 'http://ts.com',
-        'description': 'lorem ipsum'
+        'description': 'lorem ipsum',
+        'enabled': True
     }
     resp = client.post(BASE_URL+'/task-services', data=service)
     assert resp.status_code == 201
@@ -56,9 +57,11 @@ def test_full_release(client, transactional_db, mocker):
     release = {
         'name': 'First release',
         'description': 'Testing',
-        'studies': 'SD_00000000'
+        'studies': ['SD_00000000'],
+        'tags': []
     }
     resp = client.post(BASE_URL+'/releases', data=release)
+
     assert resp.status_code == 201
     release_id = resp.json()['kf_id']
 

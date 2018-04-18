@@ -27,8 +27,9 @@ def init_release(release_id):
 
     release.state = 'pending'
     release.save()
-
     for service in task_services:
+        if not service.enabled:
+            continue
         # Create and start new task
         task = Task(task_service=service, release=release)
         task.save()

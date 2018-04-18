@@ -22,7 +22,8 @@ def task_service(client, transactional_db):
     service = {
         'name': 'test release',
         'url': 'http://ts.com',
-        'description': 'lorem ipsum'
+        'description': 'lorem ipsum',
+        'enabled': True
     }
     with patch('coordinator.api.validators.requests') as mock_requests:
         mock_resp = Mock()

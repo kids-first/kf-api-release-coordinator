@@ -26,7 +26,7 @@ SECRET_KEY = str(uuid.uuid4())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["coordinator"]
+ALLOWED_HOSTS = ["coordinator", "localhost"]
 APPEND_SLASH = False
 
 

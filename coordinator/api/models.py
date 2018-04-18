@@ -53,7 +53,8 @@ class TaskService(models.Model):
         from the /status endpoint on the task service
     :param health_status: The status of the service. 'ok' if one of the last
         3 pings to the /status endpoint returned 200, 'down' otherwise
-    :created_at: The time that the task service was registered with the
+    :param enabled: Only enabled tasks will be run in a release
+    :param created_at: The time that the task service was registered with the
         coordinator.
     """
     kf_id = models.CharField(max_length=11, primary_key=True,
@@ -72,6 +73,9 @@ class TaskService(models.Model):
                                          help_text='number of pings since last'
                                          ' 200 response from the task\'s '
                                          ' /status endpoint')
+    enabled = models.BooleanField(default=True,
+                                  help_text='Whether to run the task as part '
+                                  'of a release.')
     created_at = models.DateTimeField(auto_now_add=True,
                                       help_text='Time the task was created')
 
