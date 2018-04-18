@@ -25,7 +25,7 @@ def validate_endpoint(url):
     try:
         resp = requests.get(url+'/status')
         resp.raise_for_status()
-        assert 'name' in resp.content
+        assert 'name' in resp.content.decode()
     except (ConnectionError, HTTPError, AssertionError):
         raise ValidationError(
             _('%(value)s did not return the expected /status response'),

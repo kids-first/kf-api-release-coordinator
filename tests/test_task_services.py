@@ -29,7 +29,7 @@ def test_url_validation(client, db, task_service):
     with patch('coordinator.api.validators.requests') as mock_requests:
         mock_requests.get = Mock()
         mock_resp = Mock()
-        mock_resp.content = ''
+        mock_resp.content = str.encode('')
         mock_requests.get.return_value = mock_resp
         mock_requests.get.status_code.return_value = 404
 
@@ -51,14 +51,14 @@ def test_url_validation(client, db, task_service):
         assert TaskService.objects.count() == orig
 
         mock_resp.status_code = 200
-        mock_resp.content = '{}'
+        mock_resp.content = str.encode('{}')
         mock_requests.get.return_value = mock_resp
         resp = client.post(BASE_URL+'/task-services', data=service)
         res = resp.json()
         assert 'validurl.com did not return the expected /st' in res['url'][0]
         assert TaskService.objects.count() == orig
 
-        mock_resp.content = '{"name": "test"}'
+        mock_resp.content = str.encode('{"name": "test"}')
         mock_requests.get.return_value = mock_resp
         resp = client.post(BASE_URL+'/task-services', data=service)
         res = resp.json()
@@ -72,7 +72,7 @@ def test_disabled_task(client, db, task_service, mocker):
     mock_service_requests = mocker.patch('coordinator.api.validators.requests')
     mock_service_resp = Mock()
     mock_service_resp.status_code = 200
-    mock_service_resp.content = '{"name": "test"}'
+    mock_service_resp.content = str.encode('{"name": "test"}')
     mock_service_requests.get.return_value = mock_service_resp
 
     # Register a task service
@@ -88,7 +88,8 @@ def test_disabled_task(client, db, task_service, mocker):
     new_task_service = resp.json()
     # Disable task service
     resp = client.patch(BASE_URL+'/task-services/'+new_task_service['kf_id'],
-                        data='{"enabled": false}', content_type='application/json')
+                        data='{"enabled": false}',
+                        content_type='application/json')
     assert resp.status_code == 200
     assert not TaskService.objects.get(kf_id=new_task_service['kf_id']).enabled
 
@@ -117,9 +118,9 @@ def test_disabled_task(client, db, task_service, mocker):
         'release_id': ta.release.kf_id
     }
     mock_tasks_requests.post.assert_any_call('http://ts.com/tasks',
-            json=expected)
+                                             json=expected)
     for call in mock_tasks_requests.post.call_args_list:
-        assert 'http://task/' not in call[0] 
+        assert 'http://task/' not in call[0]
 
 
 @pytest.mark.parametrize('field', [

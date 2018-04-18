@@ -28,7 +28,7 @@ def task_services(client):
     ts = {}
     with patch('coordinator.api.validators.requests') as mock_requests:
         mock_resp = Mock()
-        mock_resp.content = '{"name": "test"}'
+        mock_resp.content = str.encode('{"name": "test"}')
         mock_resp.status_code = 200
         mock_requests.get.return_value = mock_resp
 

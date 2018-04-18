@@ -23,7 +23,7 @@ def test_full_release(client, transactional_db, mocker):
     mock_service_requests = mocker.patch('coordinator.api.validators.requests')
     mock_service_resp = mock.Mock()
     mock_service_resp.status_code = 200
-    mock_service_resp.content = '{"name": "test"}'
+    mock_service_resp.content = str.encode('{"name": "test"}')
     mock_service_requests.get.return_value = mock_service_resp
 
     # Register a task service
