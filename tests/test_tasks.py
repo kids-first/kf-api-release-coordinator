@@ -28,7 +28,8 @@ def test_basic_task(client, transactional_db, task):
     'progress',
     'release',
     'task_service',
-    'created_at'
+    'created_at',
+    'service_name'
 ])
 def test_task_fields(client, db, task, field):
     resp = client.get(BASE_URL+'/tasks')

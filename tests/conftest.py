@@ -20,7 +20,7 @@ def release(client, transactional_db):
 @pytest.yield_fixture
 def task_service(client, transactional_db):
     service = {
-        'name': 'test release',
+        'name': 'test service',
         'url': 'http://ts.com',
         'description': 'lorem ipsum',
         'enabled': True
