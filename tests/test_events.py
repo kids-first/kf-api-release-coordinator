@@ -23,7 +23,7 @@ def test_new_event(client, transactional_db, task):
 
 
 def test_filters(client, transactional_db, event):
-    assert len(client.get(BASE_URL+'/events').json()['results']) == 1
+    assert len(client.get(BASE_URL+'/events').json()['results']) == 2
     # Get the task that was made
     resp = client.get(BASE_URL+'/tasks')
     task1 = resp.json()['results'][0]
@@ -38,7 +38,7 @@ def test_filters(client, transactional_db, event):
 
     # Check that there is only one event
     resp = client.get(BASE_URL+'/events')
-    assert len(resp.json()['results']) == 1
+    assert len(resp.json()['results']) == 2
     assert resp.json()['results'][0]['task'].endswith(task1['kf_id'])
 
     # Make a new task
@@ -60,13 +60,25 @@ def test_filters(client, transactional_db, event):
 
     # Release should now have two events, but only one event per task
     resp = client.get(BASE_URL+'/events')
-    assert len(resp.json()['results']) == 2
+    assert len(resp.json()['results']) == 3
     resp = client.get(BASE_URL+'/events?release='+release['kf_id'])
-    assert len(resp.json()['results']) == 2
+    assert len(resp.json()['results']) == 3
     resp = client.get(BASE_URL+'/events?task='+task1['kf_id'])
     assert len(resp.json()['results']) == 1
     resp = client.get(BASE_URL+'/events?task='+task2['kf_id'])
     assert len(resp.json()['results']) == 1
+
+
+def test_event_for_release(client, db, task):
+    """ Check that there is an event created for a new release """
+    release = client.get(task['release']).json()
+    assert Event.objects.filter(release_id=release['kf_id']).count() == 1
+    event = Event.objects.filter(release_id=release['kf_id']).get()
+
+    assert event.event_type == 'info'
+    assert 'release started' in event.message
+    assert event.task is None
+    assert event.task_service is None
 
 
 @pytest.mark.parametrize('field', [
@@ -89,7 +101,7 @@ def test_event_relations(client, transactional_db, event):
     assert Release.objects.count() == 1
     assert TaskService.objects.count() == 1
     assert Task.objects.count() == 1
-    assert Event.objects.count() == 1
+    assert Event.objects.count() == 2
 
     release = event['release']
     task_service = event['task_service']

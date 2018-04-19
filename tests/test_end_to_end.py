@@ -2,7 +2,7 @@ import json
 import pytest
 import mock
 from django_rq import get_worker
-from coordinator.api.models import Release, Task, TaskService
+from coordinator.api.models import Release, Task, TaskService, Event
 
 
 BASE_URL = 'http://testserver'
@@ -28,7 +28,7 @@ def test_full_release(client, transactional_db, mocker):
 
     # Register a task service
     service = {
-        'name': 'test release',
+        'name': 'test service',
         'url': 'http://ts.com',
         'description': 'lorem ipsum',
         'enabled': True
@@ -88,6 +88,12 @@ def test_full_release(client, transactional_db, mocker):
     assert len(res['tasks']) == 1
     assert res['tasks'][0]['state'] == 'running'
     assert Task.objects.first().kf_id == task_id
+    events = Task.objects.first().events.all()
+    assert len(events) == 3
+    messages = {ev.message for ev in events}
+    assert "initializing new 'test service' task" in messages
+    assert "task for 'test service' has started" in messages
+    assert "task for 'test service' was accepted" in messages
 
     resp = client.get(BASE_URL+'/tasks/'+task_id)
     assert resp.status_code == 200
