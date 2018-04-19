@@ -5,11 +5,12 @@ from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from coordinator.tasks import init_release, publish_release, health_check
-from coordinator.api.models import Task, TaskService, Release
+from coordinator.api.models import Task, TaskService, Release, Event
 from coordinator.api.serializers import (
     TaskSerializer,
     TaskServiceSerializer,
-    ReleaseSerializer
+    ReleaseSerializer,
+    EventSerializer
 )
 
 
@@ -102,3 +103,25 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
         release.save()
         django_rq.enqueue(publish_release, release.kf_id)
         return self.retrieve(request, kf_id)
+
+
+class EventViewSet(viewsets.ModelViewSet):
+    """
+    endpoint for events
+    """
+    lookup_field = 'kf_id'
+    serializer_class = EventSerializer
+
+    def get_queryset(self):
+        """
+        Filter by relase, task_sevice, and/or task
+        """
+        queryset = Event.objects.order_by('-created_at')
+
+        for field_name in ['release', 'task_service', 'task']:
+            field = self.request.query_params.get(field_name, None)
+            if field is not None:
+                kwargs = {field_name: field}
+                queryset = queryset.filter(**kwargs)
+
+        return queryset
