@@ -10,3 +10,4 @@ base32-crockford==0.3.0
 django-rq==1.0.1
 rq==0.10.0
 -e git+https://github.com/dankolbman/hvac#egg=hvac
+drf-yasg==1.6.1
