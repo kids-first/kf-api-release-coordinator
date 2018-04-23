@@ -1,0 +1,25 @@
+import django_rq
+from django.core.exceptions import objectdoesnotexist
+from rest_framework import viewsets
+from rest_framework.mixins import updatemodelmixin
+from rest_framework.decorators import action
+from rest_framework.response import response
+from drf_yasg.generators import openapischemagenerator
+from coordinator.tasks import init_release, publish_release, health_check
+from coordinator.api.models import task, taskservice, release, event
+from coordinator.api.serializers import (
+    taskserializer,
+    taskserviceserializer,
+    releaseserializer,
+    eventserializer
+)
+
+
+class SwaggerSchema(OpenAPISchemaGenerator):
+    """ Custom schema generator to inject x-logo and remove security """
+    def get_schema(self, request=None, public=False):
+        schema = super(SwaggerSchema, self).get_schema(request, public)
+        schema['info']['x-logo'] = {'url': '/static/kf_releasecoordinator.png'}
+        del schema['security']
+        del schema['securityDefinitions']
+        return schema
