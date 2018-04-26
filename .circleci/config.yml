@@ -1,0 +1,51 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.1
+      - image: postgres:9.5
+      - image: redis:latest
+        environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_DB=test
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "requirements.txt" }}
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r dev-requirements.txt
+            pip install -r requirements.txt
+            pip install -e .
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+        
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            pytest --ds=tests.settings --cov=coordinator --pep8
+            coverage xml
+            python-codacy-coverage -r coverage.xml
+          environment:
+            - FLASK_APP: "manage"
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports

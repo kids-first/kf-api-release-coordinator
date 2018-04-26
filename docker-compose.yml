@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  pg:
+    image: postgres:9.5
+    environment:
+      POSTGRES_DB: "coordinator"
+  redis:
+    image: redis:latest
+  coordinator:
+    build: .
+    image: coordinator:latest
+    command: /bin/ash -c "sleep 5; ./bin/run.sh"
+    volumes:
+      - .:/app
+    external_links:
+      - task
+    ports:
+      - "8000:80"
+    environment:
+      - PG_NAME=coordinator
+      - PG_HOST=pg
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - WORKER=false
+    depends_on:
+      - pg
+      - redis 
+  worker:
+    build: .
+    image: coordinator:latest
+    command: /bin/ash -c "sleep 6; ./bin/run.sh"
+    volumes:
+      - .:/app
+    environment:
+      - PG_NAME=coordinator
+      - PG_HOST=pg
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - WORKER=true
+    depends_on:
+      - pg
+      - redis 
+      - coordinator
+  scheduler:
+    image: tutum/curl:latest
+    command: /bin/bash -c "while true; do sleep 10; curl -XPOST coordinator/task-services/health_checks; done"
+    depends_on:
+      - coordinator
