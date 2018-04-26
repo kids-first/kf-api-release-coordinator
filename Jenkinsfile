@@ -166,5 +166,40 @@ pipeline {
        slackSend (color: '#41aa58', message: ":white_check_mark: kf-api-release-coordinator DEPLOYED TO PRD: (${env.BUILD_URL})")
      }
     }
+    stage("Rollback to previous version of the application with DB Rollback") {
+      when {
+             expression {
+               return env.BRANCH_NAME == 'master';
+             }
+             expression {
+               return tag != '';
+             }
+           }
+      steps {
+             script {
+                     env.ROLLBACK_PRD = input message: 'User input required',
+                                     submitter: 'lubneuskia,heatha',
+                                     parameters: [choice(name: 'kf-api-release-coordinator: Rollback PRD to Previous Version?', choices: 'no\nyes', description: 'Choose "yes" if you want to rollback the PRD deployment to previous stable release')]
+             }
+     }
+    }
+    stage('Rollback PRD') {
+      when {
+       environment name: 'ROLLBACK_PRD', value: 'yes'
+       expression {
+           return env.BRANCH_NAME == 'master';
+       }
+       expression {
+         return tag != '';
+       }
+     }
+     steps {
+       slackSend (color: '#005e99', message: ":deploying_prd: kf-api-release-coordinator DEPLOYING TO PRD: (${env.BUILD_URL})")
+       sh '''
+       kf-api-release-coordinator-config/aws-ecs-service-type-1/ci-scripts/rollback/rollback.sh
+       '''
+       slackSend (color: '#41aa58', message: ":white_check_mark: kf-api-release-coordinator DEPLOYED TO PRD: (${env.BUILD_URL})")
+     }
+    }
   }
 }
