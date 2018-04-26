@@ -158,6 +158,8 @@ def get_queues():
 
 RQ_QUEUES = get_queues()
 
+SNS_ARN = os.environ.get('SNS_ARN', None)
+
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 

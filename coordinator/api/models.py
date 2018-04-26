@@ -1,10 +1,16 @@
-import uuid
+import boto3
 import datetime
+import json
+import uuid
 import requests
 
 from requests.exceptions import ConnectionError, HTTPError
 from django.db import models
+from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 from coordinator.utils import kf_id_generator
 from coordinator.api.validators import validate_endpoint
@@ -209,3 +215,16 @@ class Event(models.Model):
                              null=True,
                              blank=True,
                              related_name='events')
+
+
+@receiver(post_save, sender=Event)
+def send_sns(sender, instance, **kwargs):
+    if settings.SNS_ARN is not None:
+        client = boto3.client('sns')
+        message = {
+            'event_type': instance.event_type,
+            'message': instance.message
+        }
+        client.publish(TopicArn=settings.SNS_ARN,
+                       MessageStructure='json',
+                       Message=json.dumps(message))
