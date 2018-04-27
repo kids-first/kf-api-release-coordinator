@@ -11,15 +11,14 @@ RUN apk update && apk add py3-psycopg2 musl-dev \
  && pip install --upgrade pip \
  && pip install virtualenv
 
-RUN         virtualenv -p python3 /app/venv
-RUN         source /app/venv/bin/activate \
-            && /app/venv/bin/pip install -r /app/requirements.txt
 ADD         . /app
-RUN         /app/venv/bin/python /app/setup.py install
+RUN         virtualenv -p python3 /app/venv \
+            && source /app/venv/bin/activate \
+            && pip install -r /app/requirements.txt \
+            && python /app/setup.py install \
+            && python /app/manage.py collectstatic -v0 --noinput
 
 EXPOSE      80
-RUN         /app/venv/bin/python /app/manage.py collectstatic -v0 --noinput
-
 
 # Setup nginx
 RUN         mkdir -p /run/nginx
