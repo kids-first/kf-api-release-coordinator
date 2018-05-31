@@ -43,7 +43,7 @@ class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
         model = Release
         fields = ('kf_id', 'name', 'description', 'state', 'studies',
                   'tasks', 'created_at', 'tags', 'author')
-        read_only_fields = ('kf_id', 'state', 'author', 'tasks', 'created_at')
+        read_only_fields = ('kf_id', 'state', 'tasks', 'created_at')
 
 
 class EventSerializer(serializers.HyperlinkedModelSerializer):

@@ -16,7 +16,8 @@ def test_new_release(client, transactional_db):
 
     release = {
         'name': 'My Release',
-        'studies': ['SD_00000001']
+        'studies': ['SD_00000001'],
+        'author': 'bob'
     }
     resp = client.post('http://testserver/releases', data=release)
 
@@ -25,7 +26,7 @@ def test_new_release(client, transactional_db):
     res = resp.json()
     assert res['kf_id'].startswith('RE_')
     assert len(res['kf_id']) == 11
-    assert res['author'] == 'admin'
+    assert res['author'] == 'bob'
     assert res['tags'] == []
     assert res['studies'] == ['SD_00000001']
 
