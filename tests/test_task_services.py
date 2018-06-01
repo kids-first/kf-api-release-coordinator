@@ -23,7 +23,7 @@ def test_basic_task_service(client, transactional_db, task_service):
     assert res['count'] == 1
 
 
-def test_url_validation(client, db, task_service):
+def test_url_validation(admin_client, db, task_service):
     """ Test that urls are validated by pinging their status endpoint """
     orig = TaskService.objects.count()
     with patch('coordinator.api.validators.requests') as mock_requests:
@@ -37,7 +37,7 @@ def test_url_validation(client, db, task_service):
         service = {'url': 'not a url',
                    'name': 'test service',
                    'description': 'lorem ipsum'}
-        resp = client.post(BASE_URL+'/task-services', data=service)
+        resp = admin_client.post(BASE_URL+'/task-services', data=service)
         res = resp.json()
         assert res['url'][0] == 'Enter a valid URL.'
         assert TaskService.objects.count() == orig
@@ -45,7 +45,7 @@ def test_url_validation(client, db, task_service):
         # Test validation against endpoint
 
         service['url'] = 'http://validurl.com'
-        resp = client.post(BASE_URL+'/task-services', data=service)
+        resp = admin_client.post(BASE_URL+'/task-services', data=service)
         res = resp.json()
         assert 'validurl.com did not return the expected /st' in res['url'][0]
         assert TaskService.objects.count() == orig
@@ -53,20 +53,20 @@ def test_url_validation(client, db, task_service):
         mock_resp.status_code = 200
         mock_resp.content = str.encode('{}')
         mock_requests.get.return_value = mock_resp
-        resp = client.post(BASE_URL+'/task-services', data=service)
+        resp = admin_client.post(BASE_URL+'/task-services', data=service)
         res = resp.json()
         assert 'validurl.com did not return the expected /st' in res['url'][0]
         assert TaskService.objects.count() == orig
 
         mock_resp.content = str.encode('{"name": "test"}')
         mock_requests.get.return_value = mock_resp
-        resp = client.post(BASE_URL+'/task-services', data=service)
+        resp = admin_client.post(BASE_URL+'/task-services', data=service)
         res = resp.json()
         assert 'kf_id' in res
         assert TaskService.objects.count() == orig + 1
 
 
-def test_disabled_task(client, db, task_service, mocker):
+def test_disabled_task(admin_client, db, task_service, mocker):
     orig = TaskService.objects.count()
 
     mock_service_requests = mocker.patch('coordinator.api.validators.requests')
@@ -82,14 +82,15 @@ def test_disabled_task(client, db, task_service, mocker):
         'description': 'lorem ipsum',
         'enabled': True
     }
-    resp = client.post(BASE_URL+'/task-services', data=service)
+    resp = admin_client.post(BASE_URL+'/task-services', data=service)
     assert resp.status_code == 201
     assert TaskService.objects.count() == orig + 1
     new_task_service = resp.json()
     # Disable task service
-    resp = client.patch(BASE_URL+'/task-services/'+new_task_service['kf_id'],
-                        data='{"enabled": false}',
-                        content_type='application/json')
+    url = BASE_URL+'/task-services/'+new_task_service['kf_id']
+    resp = admin_client.patch(url,
+                              data='{"enabled": false}',
+                              content_type='application/json')
     assert resp.status_code == 200
     assert not TaskService.objects.get(kf_id=new_task_service['kf_id']).enabled
 
@@ -108,7 +109,7 @@ def test_disabled_task(client, db, task_service, mocker):
     release = {
         'name': 'v1', 'description': 'Testing', 'studies': 'SD_00000000'
     }
-    resp = client.post(BASE_URL+'/releases', data=release)
+    resp = admin_client.post(BASE_URL+'/releases', data=release)
     # Check that the disabled service was never called
     ta = TaskService.objects.get(kf_id=task_service['kf_id'])
     ta = TaskService.objects.get(kf_id=task_service['kf_id']).tasks.all()[0]

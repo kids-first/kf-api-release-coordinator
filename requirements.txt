@@ -12,3 +12,5 @@ rq==0.10.0
 -e git+https://github.com/dankolbman/hvac#egg=hvac
 drf-yasg==1.6.1
 boto==2.48.0
+PyJWT==1.6.4
+cryptography==2.2.2
