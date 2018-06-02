@@ -14,11 +14,13 @@ class EgoAuthentication(authentication.BaseAuthentication):
             None otherwise.
         :raises: AuthenticationFailed if the token is not valid
         """
-        header = request.META.get('headers')
-        # No headers
-        if header is None:
-            return ({}, None)
-        token = header.get('Authorization', None)
+        token = request.META.get('HTTP_AUTHORIZATION')
+        if token is None:
+            header = request.META.get('headers')
+            # No headers
+            if header is None:
+                return ({}, None)
+            token = header.get('Authorization', None)
         # No Authorization header
         if token is None:
             return ({}, None)
