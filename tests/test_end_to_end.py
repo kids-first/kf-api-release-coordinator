@@ -34,6 +34,7 @@ def test_full_release(client, transactional_db, mocker):
     service = {
         'name': 'test service',
         'url': 'http://ts.com',
+        'author': 'daniel@d3b.center',
         'description': 'lorem ipsum',
         'enabled': True
     }

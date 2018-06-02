@@ -69,6 +69,7 @@ def test_new_service(client, db, fakes, mocker, token, response_code):
     resp = client.post(BASE_URL+'/task-services',
                        data={'name': 'test',
                              'description': 'my service',
+                             'author': 'daniel@d3b.center',
                              'url': BASE_URL},
                        headers={'Authorization': 'Bearer '+token})
 

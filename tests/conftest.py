@@ -38,6 +38,7 @@ def task_service(admin_client, transactional_db):
     service = {
         'name': 'test service',
         'url': 'http://ts.com',
+        'author': 'daniel@d3b.center',
         'description': 'lorem ipsum',
         'enabled': True
     }
@@ -99,6 +100,7 @@ def task_services(admin_client):
             r = admin_client.post(BASE_URL+'/task-services',
                                   {'name': 'TASK SERVICE {}'.format(i),
                                    'url': 'http://localhost',
+                                   'author': 'daniel@d3b.center',
                                    'description': 'test'})
             ts[r.json()['kf_id']] = r.json()
     return ts

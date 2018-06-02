@@ -36,6 +36,7 @@ def test_url_validation(admin_client, db, task_service):
         # Test basic url field validation
         service = {'url': 'not a url',
                    'name': 'test service',
+                   'author': 'daniel@d3b.center',
                    'description': 'lorem ipsum'}
         resp = admin_client.post(BASE_URL+'/task-services', data=service)
         res = resp.json()
@@ -66,6 +67,29 @@ def test_url_validation(admin_client, db, task_service):
         assert TaskService.objects.count() == orig + 1
 
 
+def test_no_author(admin_client, db, task_service, mocker):
+    """ Check that author default to the token's user's name """
+    mock_service_requests = mocker.patch('coordinator.api.validators.requests')
+    mock_service_resp = Mock()
+    mock_service_resp.status_code = 200
+    mock_service_resp.content = str.encode('{"name": "test"}')
+    mock_service_requests.get.return_value = mock_service_resp
+
+    # Register a task service
+    service = {
+        'name': 'test release',
+        'url': 'http://task',
+        'author': 'daniel@d3b.center',
+        'description': 'lorem ipsum',
+        'enabled': True
+    }
+    resp = admin_client.post(BASE_URL+'/task-services', data=service)
+    assert resp.status_code == 201
+    new_task_service = resp.json()
+    obj = TaskService.objects.get(kf_id=new_task_service['kf_id'])
+    assert obj.author == 'daniel@d3b.center'
+
+
 def test_disabled_task(admin_client, db, task_service, mocker):
     orig = TaskService.objects.count()
 
@@ -79,6 +103,7 @@ def test_disabled_task(admin_client, db, task_service, mocker):
     service = {
         'name': 'test release',
         'url': 'http://task',
+        'author': 'daniel@d3b.center',
         'description': 'lorem ipsum',
         'enabled': True
     }
@@ -127,6 +152,7 @@ def test_disabled_task(admin_client, db, task_service, mocker):
 @pytest.mark.parametrize('field', [
     'kf_id',
     'url',
+    'author',
     'health_status',
     'last_ok_status',
     'enabled',

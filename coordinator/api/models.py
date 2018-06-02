@@ -65,6 +65,7 @@ class TaskService(models.Model):
     :param name: The name of the task service
     :param description: Description of the task service's function
     :param url: The root url of the task service api
+    :param author: The creator of the service
     :param last_ok_status: The number of pings since the last 200 response
         from the /status endpoint on the task service
     :param health_status: The status of the service. 'ok' if one of the last
@@ -85,6 +86,8 @@ class TaskService(models.Model):
                                    'function')
     url = models.CharField(max_length=200, validators=[validate_endpoint],
                            help_text='endpoint for the task\'s API')
+    author = models.CharField(max_length=100, blank=False,
+                              help_text='The user who created the service')
     last_ok_status = models.IntegerField(default=0,
                                          help_text='number of pings since last'
                                          ' 200 response from the task\'s '
