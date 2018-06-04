@@ -55,7 +55,12 @@ class GroupPermission(permissions.BasePermission):
         # If the user is trying to create a release
         if request.method == 'POST' and 'studies' in request.data:
             # Check that the user is in groups for all studies in the release
-            return all([s in groups for s in request.data.getlist('studies')])
+            if hasattr(request.data, 'getlist'):
+                return all([s in groups
+                            for s in request.data.getlist('studies')])
+            else:
+                return all([s in groups
+                            for s in request.data.getlist('studies')])
         # If the user is trying to publish a release
         if request.method == 'POST' and request.path.endswith('publish'):
             # Continue on to check object permissions

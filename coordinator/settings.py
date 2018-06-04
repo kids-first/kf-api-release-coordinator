@@ -202,3 +202,6 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static")
 ]
 
+# APIs
+EGO_API = os.environ.get('EGO_URL', None)
+DATASERVICE_API = os.environ.get('DATASERVICE_URL', None)

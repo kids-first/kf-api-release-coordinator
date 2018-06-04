@@ -14,6 +14,15 @@ with open(os.path.join(os.path.dirname(__file__), 'user_token.txt')) as f:
     USER_TOKEN = f.read().strip()
 
 
+@pytest.yield_fixture(autouse=True)
+def mock_ego(mocker):
+    mock_auth_requests = mocker.patch('coordinator.authentication.requests')
+    mock_auth_resp = Mock()
+    mock_auth_resp.status_code = 200
+    mock_auth_resp.json.return_value = True
+    mock_auth_requests.get.return_value = mock_auth_resp
+
+
 @pytest.yield_fixture
 def admin_client():
     """ Injects admin JWT into each request """

@@ -1,4 +1,6 @@
 import jwt
+import requests
+from django.conf import settings
 from rest_framework import authentication
 from rest_framework import exceptions
 
@@ -35,5 +37,11 @@ class EgoAuthentication(authentication.BaseAuthentication):
             user = context['user']
         except (KeyError, jwt.exceptions.DecodeError):
             raise exceptions.AuthenticationFailed('Not a valid JWT')
+
+        # Check that this is a valid JWT from ego
+        verify_url = settings.EGO_API + '/oauth/verify'
+        resp = requests.get(verify_url, headers={'token': token})
+        if resp.status_code != 200 or resp.json() is False:
+            raise exceptions.AuthenticationFailed('Auth service unavailable')
 
         return (user, None)

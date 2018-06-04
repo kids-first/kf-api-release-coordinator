@@ -76,6 +76,27 @@ def test_new_service(client, db, fakes, mocker, token, response_code):
     assert resp.status_code == response_code
 
 
+def test_invalid_token(client, db, fakes, mocker):
+    """
+    Test that the api rejects permission when token cannot be validated by ego
+    """
+    mock_auth_requests = mocker.patch('coordinator.authentication.requests')
+    mock_auth_resp = Mock()
+    mock_auth_resp.status_code = 200
+    mock_auth_resp.json.return_value = False
+    mock_auth_requests.get.return_value = mock_auth_resp
+
+    resp = client.post(BASE_URL+'/task-services',
+                       data={'name': 'test',
+                             'description': 'my service',
+                             'author': 'daniel@d3b.center',
+                             'url': BASE_URL},
+                       headers={'Authorization': 'Bearer '+USER_TOKEN})
+
+    assert resp.status_code == 403
+    assert resp.json()['detail'] == 'Auth service unavailable'
+
+
 @pytest.mark.parametrize('token,response_code', [
         (ADMIN_TOKEN, 200),
         (DEV_TOKEN, 200),
