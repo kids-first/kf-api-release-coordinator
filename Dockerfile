@@ -4,9 +4,10 @@ ADD         requirements.txt /app/
 WORKDIR     /app
 ENV         WORKER false
 
-RUN apk update && apk add py3-psycopg2 musl-dev \
+RUN apk --update add py3-psycopg2 musl-dev \
     nginx supervisor git \
-    openssl ca-certificates \
+    ca-certificates \
+    libffi-dev libressl-dev \
     gcc postgresql-dev \
  && pip install --upgrade pip \
  && pip install virtualenv
