@@ -16,11 +16,15 @@ The Kids First Release Coordinator brings different services in the Kids First e
 
 ## Development Quick Start
 
-Getting up and running with a fully functional Release Coordinator is as easy as:
+### Developing against the coordinator
+
+To develop task services against the coordinator, use the included
+docker-compose.yml to get a fully functional Coordinator API:
+
 ```
 git clone https://github.com/kids-first/kf-api-release-coordinator
 cd kf-api-release-coordinator
-docker-compose up -d
+docker-compose up
 ```
 
 This will stand up a couple different services:
@@ -28,6 +32,62 @@ This will stand up a couple different services:
 - A task worker to process different release jobs
 - A redis instance to manage the work queue
 - A postgres database to store information about releases, tasks, and services
+
+To allow tasks to communicate with the Coordinator, they will need to be
+run in a container that is linked to the Coordinator's network.
+
+```
+docker run --name=task --net=kfapireleasecoordinator_default --rm --link kfapireleasecoordinator_coordinator_1:coordinator example-task:latest
+```
+
+This will allow the task running in the `task` container to communicate with
+the Coordinator API with the `coordinator` hostname and the Coordinator to
+communicate with the task using the `task` hostname.
+
+
+### Developing the Coordinator API
+
+To get started developing the Coordinator API itself, clone the repo,
+install dependencies, start a postgres database, and run the django app.
+
+#### Clone and install Python dependencies
+
+```
+git clone https://github.com/kids-first/kf-api-release-coordinator
+cd kf-api-release-coordinator
+virtualenv -p python3 venv
+source venv/bin/activate
+pip install -r dev-requirements.txt
+pip install -r requirements.txt
+```
+
+#### Start a Postgres Database
+
+Starting a Postgres Docker container:
+
+```
+docker run --name coordinator-pg -p 5432:5432 postgres:9.5
+docker exec coordinator-pg psql -U postgres -c "CREATE DATABASE dev;"
+```
+
+#### Run the Django app
+
+You may configure the Postgres connection settings by setting the following
+env variables:
+
+- `PG_NAME`
+- `PG_USER`
+- `PG_PASS`
+- `PG_HOST`
+- `PG_PORT`
+
+```
+# migrate the database first
+export PG_NAME=dev
+./manage.py migrate
+./manage.py runserver
+```
+
 
 ## Background
 There are several services which drive end user apps in the Kids First ecosystem. These services all consume Kids First data and must stay in sync with one and other in terms of the state of their data. One service cannot have more up to date data then another service. Additionally, there may be other services outside of the Kids First ecosystem that are interested in staying in sync with the latest Kids First data as new releases get published.
