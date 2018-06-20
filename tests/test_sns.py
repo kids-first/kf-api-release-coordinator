@@ -9,7 +9,7 @@ from coordinator.api.models import Release, Task, TaskService, Event
 BASE_URL = 'http://testserver'
 
 
-def test_new_release_event(client, transactional_db, mocker):
+def test_new_release_event(admin_client, transactional_db, mocker):
     """ Test that createing a new release publishes to sns """
     arn = 'arn:aws:sns:us-east-1:538745987955:kf-coord-api-us-east-1-dev'
     settings.SNS_ARN = arn
@@ -22,7 +22,7 @@ def test_new_release_event(client, transactional_db, mocker):
         'description': 'Testing events',
         'studies': ['SD_00000000']
     }
-    resp = client.post(BASE_URL+'/releases', data=release)
+    resp = admin_client.post(BASE_URL+'/releases', data=release)
     assert resp.status_code == 201
     assert Release.objects.count() == 1
     assert Event.objects.count() == 1

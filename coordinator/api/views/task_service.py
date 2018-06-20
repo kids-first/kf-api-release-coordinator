@@ -2,6 +2,8 @@ import django_rq
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from coordinator.authentication import EgoAuthentication
+from coordinator.permissions import DevPermission
 from coordinator.tasks import health_check
 from coordinator.api.models import TaskService
 from coordinator.api.serializers import TaskServiceSerializer
@@ -29,6 +31,8 @@ class TaskServiceViewSet(viewsets.ModelViewSet):
     destroy:
     Completely remove the task service from the coordinator.
     """
+    authentication_classes = (EgoAuthentication,)
+    permission_classes = (DevPermission,)
     lookup_field = 'kf_id'
     queryset = TaskService.objects.order_by('-created_at').all()
     serializer_class = TaskServiceSerializer

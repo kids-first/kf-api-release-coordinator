@@ -1,3 +1,4 @@
+import os
 import json
 import pytest
 import mock
@@ -6,6 +7,9 @@ from coordinator.api.models import Release, Task, TaskService, Event
 
 
 BASE_URL = 'http://testserver'
+
+with open(os.path.join(os.path.dirname(__file__), 'dev_token.txt')) as f:
+    DEV_TOKEN = f.read().strip()
 
 
 def test_full_release(client, transactional_db, mocker):
@@ -30,10 +34,13 @@ def test_full_release(client, transactional_db, mocker):
     service = {
         'name': 'test service',
         'url': 'http://ts.com',
+        'author': 'daniel@d3b.center',
         'description': 'lorem ipsum',
         'enabled': True
     }
-    resp = client.post(BASE_URL+'/task-services', data=service)
+    resp = client.post(BASE_URL+'/task-services',
+                       data=service,
+                       headers={'Authorization': 'Bearer '+DEV_TOKEN})
     assert resp.status_code == 201
     assert TaskService.objects.count() == 1
     task_service = resp.json()
@@ -60,7 +67,9 @@ def test_full_release(client, transactional_db, mocker):
         'studies': ['SD_00000000'],
         'tags': []
     }
-    resp = client.post(BASE_URL+'/releases', data=release)
+    resp = client.post(BASE_URL+'/releases',
+                       data=release,
+                       headers={'Authorization': 'Bearer '+DEV_TOKEN})
 
     assert resp.status_code == 201
     release_id = resp.json()['kf_id']
@@ -130,7 +139,8 @@ def test_full_release(client, transactional_db, mocker):
     # Send publish command
     mock_task_action.json.return_value = {'state': 'publishing'}
 
-    resp = client.post(BASE_URL+'/releases/'+release_id+'/publish')
+    resp = client.post(BASE_URL+'/releases/'+release_id+'/publish',
+                       headers={'Authorization': 'Bearer '+DEV_TOKEN})
     assert resp.status_code == 200
     res = resp.json()
     assert res['state'] == 'publishing'

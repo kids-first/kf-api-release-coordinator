@@ -4,6 +4,8 @@ from rest_framework import viewsets
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from coordinator.authentication import EgoAuthentication
+from coordinator.permissions import GroupPermission
 from coordinator.tasks import init_release, publish_release
 from coordinator.api.models import Release
 from coordinator.api.serializers import ReleaseSerializer
@@ -23,6 +25,8 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
     partial_update:
     Updates a release given a `kf_id` replacing only specified fields
     """
+    authentication_classes = (EgoAuthentication,)
+    permission_classes = (GroupPermission,)
     lookup_field = 'kf_id'
     queryset = Release.objects.order_by('-created_at').all()
     serializer_class = ReleaseSerializer
