@@ -43,17 +43,26 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_rq',
     'drf_yasg',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ORIGIN_WHITELIST = (
+    'kidsfirstdrc.org',
+    'kids-first.io',
+)
+
+CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?localhost:5\d{3}$', )
 
 ROOT_URLCONF = 'coordinator.urls'
 
