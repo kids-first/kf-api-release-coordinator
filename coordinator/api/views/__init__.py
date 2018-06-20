@@ -3,6 +3,7 @@ from coordinator.api.views.task import TaskViewSet
 from coordinator.api.views.release import ReleaseViewSet
 from coordinator.api.views.task_service import TaskServiceViewSet
 from coordinator.api.views.event import EventViewSet
+from coordinator.api.views.studies import StudiesViewSet
 
 
 class SwaggerSchema(OpenAPISchemaGenerator):
