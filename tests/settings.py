@@ -103,6 +103,8 @@ if DEBUG or TESTING:
 
 SNS_ARN = None
 
+DATASERVICE_URL = 'http://dataservice'
+
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 

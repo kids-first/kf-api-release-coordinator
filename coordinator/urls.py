@@ -28,6 +28,7 @@ router.register(r'tasks', views.TaskViewSet)
 router.register(r'task-services', views.TaskServiceViewSet)
 router.register(r'releases', views.ReleaseViewSet)
 router.register(r'events', views.EventViewSet, 'events-detail')
+router.register(r'studies', views.StudiesViewSet, 'studies')
 
 urlpatterns = [
     url(r'^', include(router.urls)),

@@ -62,7 +62,9 @@ CORS_ORIGIN_WHITELIST = (
     'kids-first.io',
 )
 
-CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?localhost:5\d{3}$', )
+CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?localhost:5\d{3}$',
+                               r'(https?://)?(\w+\.)?kidsfirstdrc.org$',
+                               r'(https?://)?(\w+\.)?.kids-first.io$')
 
 ROOT_URLCONF = 'coordinator.urls'
 
@@ -168,6 +170,8 @@ def get_queues():
 RQ_QUEUES = get_queues()
 
 SNS_ARN = os.environ.get('SNS_ARN', None)
+
+DATASERVICE_URL = os.environ.get('DATASERVICE_URL', None)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
