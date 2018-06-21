@@ -218,3 +218,28 @@ STATICFILES_DIRS = [
 # APIs
 EGO_API = os.environ.get('EGO_URL', None)
 DATASERVICE_API = os.environ.get('DATASERVICE_URL', None)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "rq_console": {
+            "format": "%(asctime)s %(message)s",
+            "datefmt": "%H:%M:%S",
+        },
+    },
+    "handlers": {
+        "rq_console": {
+            "level": "INFO",
+            "class": "rq.utils.ColorizingStreamHandler",
+            "formatter": "rq_console",
+            "exclude": ["%(asctime)s"],
+        }
+    },
+    'loggers': {
+        "rq.worker": {
+            "handlers": ["rq_console"],
+            "level": "INFO"
+        },
+    }
+}
