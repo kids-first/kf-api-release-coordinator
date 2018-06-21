@@ -29,6 +29,8 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 APPEND_SLASH = False
 
+RQ_API_TOKEN = os.environ.get('RQ_API_TOKEN', None)
+
 
 # Application definition
 
