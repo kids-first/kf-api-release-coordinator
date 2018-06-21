@@ -60,7 +60,7 @@ class GroupPermission(permissions.BasePermission):
                             for s in request.data.getlist('studies')])
             else:
                 return all([s in groups
-                            for s in request.data.getlist('studies')])
+                            for s in request.data['studies']])
         # If the user is trying to publish a release
         if request.method == 'POST' and request.path.endswith('publish'):
             # Continue on to check object permissions

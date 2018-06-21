@@ -39,7 +39,7 @@ class EgoAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed('Not a valid JWT')
 
         # Check that this is a valid JWT from ego
-        verify_url = settings.EGO_API + '/oauth/verify'
+        verify_url = settings.EGO_API + '/oauth/token/verify'
         resp = requests.get(verify_url, headers={'token': token})
         if resp.status_code != 200 or resp.json() is False:
             raise exceptions.AuthenticationFailed('Auth service unavailable')
