@@ -64,7 +64,7 @@ CORS_ORIGIN_WHITELIST = (
     'kids-first.io',
 )
 
-CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?localhost:5\d{3}$',
+CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?localhost:\d{4}$',
                                r'(https?://)?(\w+\.)?kidsfirstdrc.org$',
                                r'(https?://)?(\w+\.)?.kids-first.io$')
 
