@@ -24,10 +24,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = str(uuid.uuid4())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 APPEND_SLASH = False
+
+RQ_API_TOKEN = os.environ.get('RQ_API_TOKEN', None)
 
 
 # Application definition
@@ -62,9 +64,14 @@ CORS_ORIGIN_WHITELIST = (
     'kids-first.io',
 )
 
-CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?localhost:5\d{3}$',
-                               r'(https?://)?(\w+\.)?kidsfirstdrc.org$',
-                               r'(https?://)?(\w+\.)?.kids-first.io$')
+CORS_ORIGIN_REGEX_WHITELIST = (
+    r'^(https?:\/\/)?([a-z0-9-]+[.])*kidsfirstdrc\.org$',
+    r'^(https?:\/\/)?([a-z0-9-]+[.])*kids-first\.io$',
+)
+
+# Assume we're in local environment if there is no vault url
+if os.environ.get('VAULT_URL', None) is None:
+    CORS_ORIGIN_REGEX_WHITELIST += (r'^(https?:\/\/)?localhost.*$',)
 
 ROOT_URLCONF = 'coordinator.urls'
 
@@ -218,3 +225,28 @@ STATICFILES_DIRS = [
 # APIs
 EGO_API = os.environ.get('EGO_URL', None)
 DATASERVICE_API = os.environ.get('DATASERVICE_URL', None)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "rq_console": {
+            "format": "%(asctime)s %(message)s",
+            "datefmt": "%H:%M:%S",
+        },
+    },
+    "handlers": {
+        "rq_console": {
+            "level": "INFO",
+            "class": "rq.utils.ColorizingStreamHandler",
+            "formatter": "rq_console",
+            "exclude": ["%(asctime)s"],
+        }
+    },
+    'loggers': {
+        "rq.worker": {
+            "handlers": ["rq_console"],
+            "level": "INFO"
+        },
+    }
+}
