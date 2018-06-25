@@ -4,7 +4,8 @@ import json
 import uuid
 import requests
 
-from requests.exceptions import RequestException
+import django_rq
+from requests.exceptions import ConnectionError, RequestException, HTTPError
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -245,6 +246,41 @@ class Task(models.Model):
     @transition(field=state, source='*', target='canceled')
     def cancel(self):
         return
+
+    def status_check(self):
+        """
+        Update the task's status by pinging the Task Service for it status
+        """
+        body = {
+            'task_id': self.kf_id,
+            'release_id': self.release_id,
+            'action': 'get_status'
+        }
+        try:
+            resp = requests.post(self.task_service.url+'/tasks',
+                                 json=body,
+                                 timeout=15)
+            resp.raise_for_status()
+        except (ConnectionError, HTTPError):
+            # Don't do anything if the task cannot be found
+            return
+
+        resp = resp.json()
+
+        if 'state' in resp and resp['state'] != self.state:
+            if resp['state'] == 'canceled':
+                self.cancel()
+            elif resp['state'] == 'failed':
+                from coordinator.tasks import cancel_release
+                self.failed()
+                django_rq.enqueue(cancel_release, self.kf_id)
+
+        if 'progress' in resp and resp['progress'] != self.progress:
+            self.progress = resp['progress']
+        if not self.progress:
+            self.progress = 0
+
+        self.save()
 
 
 class Event(models.Model):

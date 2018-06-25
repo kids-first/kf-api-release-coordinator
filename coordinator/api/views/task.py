@@ -1,7 +1,9 @@
 import django_rq
 from rest_framework import viewsets
 import django_filters.rest_framework
-from coordinator.tasks import cancel_release
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from coordinator.tasks import status_check, cancel_release
 from coordinator.api.models import Task
 from coordinator.api.serializers import TaskSerializer
 
@@ -75,3 +77,15 @@ class TaskViewSet(viewsets.ModelViewSet):
                 release.complete()
                 release.save()
         return resp
+
+    @action(methods=['post'], detail=False)
+    def status_checks(self, request):
+        """
+        Trigger jobs to check each task's status
+        """
+        tasks = Task.objects.filter(state__in=['running', 'publishing'])
+        for task in tasks:
+            django_rq.enqueue(status_check, task.kf_id)
+
+        return Response({'status': 'ok',
+                         'message': f'{len(tasks)} task to check'}, 200)
