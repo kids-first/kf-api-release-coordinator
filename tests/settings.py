@@ -100,7 +100,7 @@ RQ_QUEUES = {
 }
 
 if DEBUG or TESTING:
-    RQ_QUEUES['default']['ASYNC'] = False
+    RQ_QUEUES['default']['ASYNC'] = True
 
 SNS_ARN = None
 

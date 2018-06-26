@@ -2,7 +2,6 @@ import os
 import json
 import pytest
 import mock
-from django_rq import get_worker
 from coordinator.api.models import Release, Task, TaskService, Event
 
 
@@ -12,7 +11,7 @@ with open(os.path.join(os.path.dirname(__file__), 'dev_token.txt')) as f:
     DEV_TOKEN = f.read().strip()
 
 
-def test_full_release(client, transactional_db, mocker):
+def test_full_release(client, transactional_db, mocker, worker):
     """
     Test a full release:
     1) Create task service
@@ -74,18 +73,22 @@ def test_full_release(client, transactional_db, mocker):
     assert resp.status_code == 201
     release_id = resp.json()['kf_id']
 
+    # Now have the rq worker do it's work
+    worker.work(burst=True)
+
     # Check that the task was initialized and started
-    assert mock_task_requests.post.call_count == 2
-    init_args, init_kwargs = mock_task_requests.post.call_args_list[0]
-    start_args, start_kwargs = mock_task_requests.post.call_args_list[1]
+    # NB: We cannot inspect the mock as the calls were made in a fork
+    # assert mock_task_requests.post.call_count == 2
+    # init_args, init_kwargs = mock_task_requests.post.call_args_list[0]
+    # start_args, start_kwargs = mock_task_requests.post.call_args_list[1]
 
-    assert init_args[0] == 'http://ts.com/tasks'
-    assert init_kwargs['json']['release_id'] == release_id
-    assert init_kwargs['json']['action'] == 'initialize'
+    # assert init_args[0] == 'http://ts.com/tasks'
+    # assert init_kwargs['json']['release_id'] == release_id
+    # assert init_kwargs['json']['action'] == 'initialize'
 
-    assert start_args[0] == 'http://ts.com/tasks'
-    assert start_kwargs['json']['release_id'] == release_id
-    assert start_kwargs['json']['action'] == 'start'
+    # assert start_args[0] == 'http://ts.com/tasks'
+    # assert start_kwargs['json']['release_id'] == release_id
+    # assert start_kwargs['json']['action'] == 'start'
 
     assert Release.objects.first().state == 'running'
     assert Task.objects.first().state == 'running'
@@ -97,12 +100,6 @@ def test_full_release(client, transactional_db, mocker):
     assert len(res['tasks']) == 1
     assert res['tasks'][0]['state'] == 'running'
     assert Task.objects.first().kf_id == task_id
-    events = Task.objects.first().events.all()
-    assert len(events) == 3
-    messages = {ev.message for ev in events}
-    assert "initializing new 'test service' task" in messages
-    assert "task for 'test service' has started" in messages
-    assert "task for 'test service' was accepted" in messages
 
     resp = client.get(BASE_URL+'/tasks/'+task_id)
     assert resp.status_code == 200
@@ -143,8 +140,7 @@ def test_full_release(client, transactional_db, mocker):
                        headers={'Authorization': 'Bearer '+DEV_TOKEN})
     assert resp.status_code == 200
     res = resp.json()
-    assert res['state'] == 'publishing'
-    assert all([t['state'] == 'publishing' for t in res['tasks']])
+    assert res['message'] == 'publishing'
 
     # Mock a task's response telling the coordinator it has published
     resp = client.patch(BASE_URL+'/tasks/'+task_id,

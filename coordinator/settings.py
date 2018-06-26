@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = str(uuid.uuid4())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 APPEND_SLASH = False
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django_filters',
     'django_rq',
     'drf_yasg',
+    'django_fsm',
     'corsheaders',
 ]
 

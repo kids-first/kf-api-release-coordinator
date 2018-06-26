@@ -1,6 +1,7 @@
 import os
 import pytest
 import random
+import django_rq
 from mock import Mock, patch
 from coordinator.api.models import Release, TaskService
 from rest_framework.test import APIClient
@@ -29,6 +30,12 @@ def admin_client():
     client = APIClient()
     client.credentials(headers={'Authorization': 'Bearer ' + ADMIN_TOKEN})
     yield client
+
+
+@pytest.yield_fixture
+def worker():
+    worker = django_rq.get_worker()
+    return worker
 
 
 @pytest.yield_fixture
