@@ -225,9 +225,23 @@ def send_sns(sender, instance, **kwargs):
     if settings.SNS_ARN is not None:
         client = boto3.client('sns')
         message = {
-            'event_type': instance.event_type,
-            'message': instance.message
+            'default': {
+                'event_type': instance.event_type,
+                'message': instance.message,
+                'task_service': None,
+                'task': None,
+                'release': None
+            }
         }
+        if instance.task_service:
+            message['default']['task_service'] = instance.task_service.kf_id
+        if instance.task:
+            message['default']['task'] = instance.task.kf_id
+        if instance.release:
+            message['default']['release'] = instance.release.kf_id
+
+        message['default'] = json.dumps(message['default'])
+
         client.publish(TopicArn=settings.SNS_ARN,
                        MessageStructure='json',
                        Message=json.dumps(message))
