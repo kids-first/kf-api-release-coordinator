@@ -164,6 +164,15 @@ def test_task_service_fields(client, db, task_service, field):
     assert field in task_service
 
 
+@pytest.mark.parametrize('field', [
+    'tasks',
+])
+def test_task_service_non_fields(client, db, task_service, field):
+    resp = client.get(BASE_URL+'/task-services')
+    task_service = resp.json()['results'][0]
+    assert field not in task_service
+
+
 def test_task_service_bad_status(client, db, task_service):
     """ Test that a non-200 response increases task's last_ok_status count """
     kf_id = task_service['kf_id']

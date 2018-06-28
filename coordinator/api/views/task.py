@@ -1,6 +1,14 @@
 from rest_framework import viewsets
+import django_filters.rest_framework
 from coordinator.api.models import Task,  Event
 from coordinator.api.serializers import TaskSerializer
+
+
+class TaskFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = Task
+        fields = ('release', 'task_service')
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -23,6 +31,8 @@ class TaskViewSet(viewsets.ModelViewSet):
     lookup_field = 'kf_id'
     queryset = Task.objects.order_by('-created_at').all()
     serializer_class = TaskSerializer
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_class = TaskFilter
 
     def partial_update(self, request, kf_id=None):
         """
