@@ -11,6 +11,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django_fsm import FSMField, transition
+from django_fsm.signals import post_transition
 
 from coordinator.utils import kf_id_generator
 from coordinator.api.validators import validate_endpoint
@@ -279,6 +280,28 @@ class Event(models.Model):
                              null=True,
                              blank=True,
                              related_name='events')
+
+
+@receiver(post_transition, sender=Release)
+def create_release_event(sender, instance, name, source, target, **kwargs):
+    ev_type = 'error' if target == 'failed' else 'info'
+    ev = Event(event_type=ev_type,
+               message='release {} changed from {} to {}'
+                       .format(instance.kf_id, source, target),
+               release=instance)
+    ev.save()
+
+
+@receiver(post_transition, sender=Task)
+def create_task_event(sender, instance, name, source, target, **kwargs):
+    ev_type = 'error' if target == 'failed' else 'info'
+    ev = Event(event_type=ev_type,
+               message='task {} changed from {} to {}'
+                       .format(instance.kf_id, source, target),
+               release=instance.release,
+               task=instance,
+               task_service=instance.task_service)
+    ev.save()
 
 
 @receiver(post_save, sender=Event)

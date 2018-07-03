@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 import django_filters.rest_framework
-from coordinator.api.models import Task,  Event
+from coordinator.api.models import Task
 from coordinator.api.serializers import TaskSerializer
 
 

@@ -83,7 +83,8 @@ def event(admin_client, transactional_db, release, task_service, task):
     """ Creates an event """
     event = {
         'event_type': 'info',
-        'message': 'New task started for release',
+        'message': 'task {} has changed from {} to {}'
+                   .format(task['kf_id'], 'waiting', 'initializing'),
         'release': BASE_URL+'/releases/'+release['kf_id'],
         'task_service': BASE_URL+'/task-services/'+task_service['kf_id'],
         'task': BASE_URL+'/tasks/'+task['kf_id']

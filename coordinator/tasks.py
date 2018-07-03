@@ -1,6 +1,6 @@
 import django_rq
 import requests
-from coordinator.api.models import Task, TaskService, Release, Event
+from coordinator.api.models import Task, TaskService, Release
 
 
 @django_rq.job
@@ -24,8 +24,6 @@ def init_release(release_id):
     """
     release = Release.objects.get(kf_id=release_id)
     task_services = TaskService.objects.all()
-
-    event = Event(message='release started', release=release)
 
     release.initialize()
     release.save()
