@@ -74,10 +74,10 @@ def test_cancel_release(admin_client, transactional_db, release):
     resp = admin_client.delete('http://testserver/releases/'+kf_id)
     assert Release.objects.count() == 1
     res = resp.json()
-    assert res['state'] == 'canceled'
+    assert res['state'] == 'canceling'
     resp = admin_client.get('http://testserver/releases/'+kf_id)
     res = resp.json()
-    assert res['state'] == 'canceled'
+    assert res['state'] == 'canceling'
 
 
 def test_cancel_release_404(admin_client, transactional_db, release):
@@ -90,7 +90,7 @@ def test_cancel_release_404(admin_client, transactional_db, release):
 
     resp = admin_client.get('http://testserver/releases/'+kf_id)
     res = resp.json()
-    assert res['state'] == 'pending'
+    assert res['state'] == 'waiting'
 
 
 def test_study_validator(admin_client, transactional_db):

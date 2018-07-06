@@ -10,22 +10,12 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from django_fsm import FSMField, transition
+from django_fsm.signals import post_transition
 
 from coordinator.utils import kf_id_generator
 from coordinator.api.validators import validate_endpoint
 
-
-STATES = [
-    ('pending', 'pending'),
-    ('waiting', 'waiting'),
-    ('running', 'running'),
-    ('staged', 'staged'),
-    ('publishing', 'publishing'),
-    ('published', 'published'),
-    ('failed', 'failed'),
-    ('canceled', 'canceled')
-]
 
 EVENTS = [
     ('info', 'info'),
@@ -137,8 +127,8 @@ class Release(models.Model):
                             help_text='Name of the release')
     description = models.CharField(max_length=500, blank=True,
                                    help_text='Release notes')
-    state = models.CharField(max_length=100, choices=STATES, default='waiting',
-                             help_text='The current state of the release')
+    state = FSMField(default='waiting',
+                     help_text='The current state of the release')
     tags = ArrayField(models.CharField(max_length=50, blank=True),
                       blank=True, default=[],
                       help_text='Tags to group the release by')
@@ -146,6 +136,46 @@ class Release(models.Model):
                          help_text='kf_ids of the studies in this release')
     created_at = models.DateTimeField(auto_now_add=True,
                                       help_text='Date created')
+
+    @transition(field=state, source='waiting', target='initializing')
+    def initialize(self):
+        """ Begin initializing tasks """
+        return
+
+    @transition(field=state, source='initializing', target='running')
+    def start(self):
+        """ Start the release """
+        return
+
+    @transition(field=state, source='running', target='staged')
+    def staged(self):
+        """ The release has been staged """
+        return
+
+    @transition(field=state, source='staged', target='publishing')
+    def publish(self):
+        """ Start publishing the release """
+        return
+
+    @transition(field=state, source='publishing', target='published')
+    def complete(self):
+        """ Complete publishing """
+        return
+
+    @transition(field=state, source='*', target='canceling')
+    def cancel(self):
+        """ Cancel the release """
+        return
+
+    @transition(field=state, source='canceling', target='canceled')
+    def canceled(self):
+        """ The release has finished canceling """
+        return
+
+    @transition(field=state, source='*', target='failed')
+    def failed(self):
+        """ The release failed """
+        return
 
 
 class Task(models.Model):
@@ -162,8 +192,8 @@ class Task(models.Model):
                              default=task_id)
     uuid = models.UUIDField(default=uuid.uuid4,
                             help_text='UUID used internally')
-    state = models.CharField(max_length=100, choices=STATES, default='waiting',
-                             help_text='The current state of the task')
+    state = FSMField(default='waiting',
+                     help_text='The current state of the task')
     progress = models.IntegerField(default=0, help_text='Optional field'
                                    ' representing what percentage of the task'
                                    ' has been completed')
@@ -179,6 +209,38 @@ class Task(models.Model):
                                      related_name='tasks')
     created_at = models.DateTimeField(auto_now_add=True,
                                       help_text='Time the task was created')
+
+    @transition(field=state, source='waiting', target='initialized')
+    def initialize(self):
+        return
+
+    @transition(field=state, source='initialized', target='running')
+    def start(self):
+        return
+
+    @transition(field=state, source='running', target='staged')
+    def stage(self):
+        return
+
+    @transition(field=state, source='staged', target='publishing')
+    def publish(self):
+        return
+
+    @transition(field=state, source='publishing', target='published')
+    def complete(self):
+        return
+
+    @transition(field=state, source='waiting', target='rejected')
+    def reject(self):
+        return
+
+    @transition(field=state, source='*', target='failed')
+    def failed(self):
+        return
+
+    @transition(field=state, source='*', target='canceled')
+    def cancel(self):
+        return
 
 
 class Event(models.Model):
@@ -218,6 +280,28 @@ class Event(models.Model):
                              null=True,
                              blank=True,
                              related_name='events')
+
+
+@receiver(post_transition, sender=Release)
+def create_release_event(sender, instance, name, source, target, **kwargs):
+    ev_type = 'error' if target == 'failed' else 'info'
+    ev = Event(event_type=ev_type,
+               message='release {} changed from {} to {}'
+                       .format(instance.kf_id, source, target),
+               release=instance)
+    ev.save()
+
+
+@receiver(post_transition, sender=Task)
+def create_task_event(sender, instance, name, source, target, **kwargs):
+    ev_type = 'error' if target == 'failed' else 'info'
+    ev = Event(event_type=ev_type,
+               message='task {} changed from {} to {}'
+                       .format(instance.kf_id, source, target),
+               release=instance.release,
+               task=instance,
+               task_service=instance.task_service)
+    ev.save()
 
 
 @receiver(post_save, sender=Event)

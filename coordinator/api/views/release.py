@@ -5,8 +5,8 @@ from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from coordinator.authentication import EgoAuthentication
-from coordinator.permissions import GroupPermission
 from coordinator.tasks import init_release, publish_release
+from coordinator.permissions import GroupPermission
 from coordinator.api.models import Release
 from coordinator.api.serializers import ReleaseSerializer
 
@@ -55,7 +55,7 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
         except ObjectDoesNotExist:
             return Response({}, status=404)
 
-        release.state = 'canceled'
+        release.cancel()
         release.save()
         # Do other cancel logic here
         return self.retrieve(request, kf_id)
@@ -67,9 +67,7 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
         Release must be in the `staged` state to begin publishing.
         """
         release = Release.objects.get(kf_id=kf_id)
-        if release.state != 'staged':
-            return self.retrieve(request, kf_id)
-        release.state = 'publishing'
+        release.publish()
         release.save()
         django_rq.enqueue(publish_release, release.kf_id)
-        return self.retrieve(request, kf_id)
+        return Response({'message': 'publishing'})

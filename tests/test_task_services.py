@@ -1,4 +1,5 @@
 import pytest
+import time
 from requests.exceptions import ConnectionError
 from mock import Mock, patch
 from coordinator.api.models import TaskService, Task
@@ -90,7 +91,7 @@ def test_no_author(admin_client, db, task_service, mocker):
     assert obj.author == 'daniel@d3b.center'
 
 
-def test_disabled_task(admin_client, db, task_service, mocker):
+def test_disabled_task(admin_client, db, task_service, mocker, worker):
     orig = TaskService.objects.count()
 
     mock_service_requests = mocker.patch('coordinator.api.validators.requests')
@@ -119,6 +120,8 @@ def test_disabled_task(admin_client, db, task_service, mocker):
     assert resp.status_code == 200
     assert not TaskService.objects.get(kf_id=new_task_service['kf_id']).enabled
 
+    worker.work(burst=True)
+
     # Run release
     mock_requests = mocker.patch('coordinator.api.models.requests')
     mock_resp = Mock()
@@ -136,15 +139,8 @@ def test_disabled_task(admin_client, db, task_service, mocker):
     }
     resp = admin_client.post(BASE_URL+'/releases', data=release)
     # Check that the disabled service was never called
-    ta = TaskService.objects.get(kf_id=task_service['kf_id'])
-    ta = TaskService.objects.get(kf_id=task_service['kf_id']).tasks.all()[0]
-    expected = {
-        'action': 'initialize',
-        'task_id': ta.kf_id,
-        'release_id': ta.release.kf_id
-    }
-    mock_tasks_requests.post.assert_any_call('http://ts.com/tasks',
-                                             json=expected)
+    ta = TaskService.objects.get(kf_id=task_service['kf_id']).tasks == []
+
     for call in mock_tasks_requests.post.call_args_list:
         assert 'http://task/' not in call[0]
 

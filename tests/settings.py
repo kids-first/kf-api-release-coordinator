@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -100,7 +101,7 @@ RQ_QUEUES = {
 }
 
 if DEBUG or TESTING:
-    RQ_QUEUES['default']['ASYNC'] = False
+    RQ_QUEUES['default']['ASYNC'] = True
 
 SNS_ARN = None
 

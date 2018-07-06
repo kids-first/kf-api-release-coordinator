@@ -1,6 +1,7 @@
 import os
 import pytest
 import random
+import django_rq
 from mock import Mock, patch
 from coordinator.api.models import Release, TaskService
 from rest_framework.test import APIClient
@@ -29,6 +30,12 @@ def admin_client():
     client = APIClient()
     client.credentials(headers={'Authorization': 'Bearer ' + ADMIN_TOKEN})
     yield client
+
+
+@pytest.yield_fixture
+def worker():
+    worker = django_rq.get_worker()
+    return worker
 
 
 @pytest.yield_fixture
@@ -76,7 +83,8 @@ def event(admin_client, transactional_db, release, task_service, task):
     """ Creates an event """
     event = {
         'event_type': 'info',
-        'message': 'New task started for release',
+        'message': 'task {} has changed from {} to {}'
+                   .format(task['kf_id'], 'waiting', 'initializing'),
         'release': BASE_URL+'/releases/'+release['kf_id'],
         'task_service': BASE_URL+'/task-services/'+task_service['kf_id'],
         'task': BASE_URL+'/tasks/'+task['kf_id']
