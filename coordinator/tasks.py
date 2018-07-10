@@ -55,13 +55,22 @@ def init_task(release_id, task_service_id, task_id):
         'task_id': task.kf_id,
         'release_id': release.kf_id
     }
-    resp = requests.post(service.url+'/tasks', json=body)
+    failed = False
+    resp = None
+    try:
+        resp = requests.post(service.url+'/tasks', json=body)
+    except requests.exceptions.RequestException:
+        failed = True
 
-    if resp.status_code != 200:
+    if resp and resp.status_code != 200:
+        failed = True
+
+    if failed:
         task.reject()
         task.save()
         release.cancel()
         release.save()
+        django_rq.enqueue(cancel_release, release.kf_id)
         return
     else:
         task.initialize()
@@ -89,6 +98,7 @@ def start_release(release_id):
             'release_id': release.kf_id
         }
         failed = False
+        resp = None
         try:
             resp = requests.post(task.task_service.url+'/tasks',
                                  json=body,
@@ -98,10 +108,11 @@ def start_release(release_id):
             failed = True
 
         # Check that command was accepted
-        if resp.status_code != 200:
+        if resp and resp.status_code != 200:
             failed = True
 
-        if 'state' in resp.json() and resp.json()['state'] != 'running':
+        if (resp and 'state' in resp.json() and
+           resp.json()['state'] != 'running'):
             failed = True
 
         if failed:
@@ -132,6 +143,7 @@ def publish_release(release_id):
             'release_id': release.kf_id
         }
         failed = False
+        resp = None
         try:
             resp = requests.post(task.task_service.url+'/tasks',
                                  json=body,
@@ -141,7 +153,11 @@ def publish_release(release_id):
             failed = True
 
         # Check that command was accepted
-        if resp.status_code != 200:
+        if resp and resp.status_code != 200:
+            failed = True
+
+        if (resp and 'state' in resp.json() and
+           resp.json()['state'] != 'publishing'):
             failed = True
 
         if failed:
@@ -151,9 +167,6 @@ def publish_release(release_id):
             release.save()
             django_rq.enqueue(cancel_release, release.kf_id)
             break
-
-        if 'state' in resp.json() and resp.json()['state'] != 'publishing':
-            failed = True
 
         task.publish()
         task.save()
@@ -171,11 +184,12 @@ def cancel_release(release_id):
             'task_id': task.kf_id,
             'release_id': release.kf_id
         }
-        resp = requests.post(task.task_service.url+'/tasks', json=body)
-        if task.state != 'failed':
-            task.canceled()
-            task.save()
-        event.save()
+        try:
+            resp = requests.post(task.task_service.url+'/tasks',
+                                 json=body,
+                                 timeout=15)
+        except requests.exceptions.RequestException:
+            failed = True
 
     release.canceled()
     release.save()
