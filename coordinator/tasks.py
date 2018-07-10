@@ -88,18 +88,32 @@ def start_release(release_id):
             'task_id': task.kf_id,
             'release_id': release.kf_id
         }
-        resp = requests.post(task.task_service.url+'/tasks', json=body)
+        failed = False
+        try:
+            resp = requests.post(task.task_service.url+'/tasks',
+                                 json=body,
+                                 timeout=15)
+            resp.raise_for_status()
+        except requests.exceptions.RequestException:
+            failed = True
+
         # Check that command was accepted
         if resp.status_code != 200:
-            release.state = 'failed'
+            failed = True
+
+        if 'state' in resp.json() and resp.json()['state'] != 'running':
+            failed = True
+
+        if failed:
+            release.failed()
             release.save()
-            task.state = 'failed'
+            task.failed()
             task.save()
             django_rq.enqueue(cancel_release, release_id)
-            return
-
-        task.state = resp.json()['state']
-        task.save()
+            break
+        else:
+            task.start()
+            task.save()
 
 
 @django_rq.job
@@ -117,14 +131,29 @@ def publish_release(release_id):
             'task_id': task.kf_id,
             'release_id': release.kf_id
         }
-        resp = requests.post(task.task_service.url+'/tasks', json=body)
+        failed = False
+        try:
+            resp = requests.post(task.task_service.url+'/tasks',
+                                 json=body,
+                                 timeout=15)
+            resp.raise_for_status()
+        except requests.exceptions.RequestException:
+            failed = True
+
         # Check that command was accepted
         if resp.status_code != 200:
+            failed = True
+
+        if failed:
             task.failed()
             task.save()
             release.cancel()
             release.save()
-            return
+            django_rq.enqueue(cancel_release, release.kf_id)
+            break
+
+        if 'state' in resp.json() and resp.json()['state'] != 'publishing':
+            failed = True
 
         task.publish()
         task.save()
