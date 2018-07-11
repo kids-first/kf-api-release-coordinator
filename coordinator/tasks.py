@@ -68,8 +68,6 @@ def init_task(release_id, task_service_id, task_id):
     if failed:
         task.reject()
         task.save()
-        release.cancel()
-        release.save()
         django_rq.enqueue(cancel_release, release.kf_id, True)
         return
     else:
@@ -163,8 +161,6 @@ def publish_release(release_id):
         if failed:
             task.failed()
             task.save()
-            release.cancel()
-            release.save()
             django_rq.enqueue(cancel_release, release.kf_id, True)
             break
 

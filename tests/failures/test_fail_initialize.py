@@ -55,6 +55,8 @@ def check_common(client):
     event = Event.objects.filter(task_id=task_id).get()
     assert event.event_type == 'error'
 
+    assert Event.objects.count() == 4
+
 
 def test_fail_initialize_500(client, transactional_db,
                              mocker, worker, task_service):
