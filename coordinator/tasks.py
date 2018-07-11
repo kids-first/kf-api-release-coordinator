@@ -70,7 +70,7 @@ def init_task(release_id, task_service_id, task_id):
         task.save()
         release.cancel()
         release.save()
-        django_rq.enqueue(cancel_release, release.kf_id)
+        django_rq.enqueue(cancel_release, release.kf_id, True)
         return
     else:
         task.initialize()
@@ -165,7 +165,7 @@ def publish_release(release_id):
             task.save()
             release.cancel()
             release.save()
-            django_rq.enqueue(cancel_release, release.kf_id)
+            django_rq.enqueue(cancel_release, release.kf_id, True)
             break
 
         task.publish()
@@ -173,12 +173,20 @@ def publish_release(release_id):
 
 
 @django_rq.job
-def cancel_release(release_id):
+def cancel_release(release_id, fail=False):
     """
     Cancels a release by sending 'cancel' action to all tasks
     """
     release = Release.objects.get(kf_id=release_id)
+    release.cancel()
+    release.save()
+
     for task in release.tasks.all():
+        # The task may have been the one to cause the cancel/fail
+        # Don't try to change its state if it's already canceled/failed
+        if task.state in ['canceled', 'failed', 'rejected']:
+            continue
+
         body = {
             'action': 'cancel',
             'task_id': task.kf_id,
@@ -191,5 +199,11 @@ def cancel_release(release_id):
         except requests.exceptions.RequestException:
             failed = True
 
-    release.canceled()
+        task.cancel()
+        task.save()
+
+    if fail:
+        release.failed()
+    else:
+        release.canceled()
     release.save()

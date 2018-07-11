@@ -1,5 +1,7 @@
+import django_rq
 from rest_framework import viewsets
 import django_filters.rest_framework
+from coordinator.tasks import cancel_release
 from coordinator.api.models import Task
 from coordinator.api.serializers import TaskSerializer
 
@@ -41,6 +43,14 @@ class TaskViewSet(viewsets.ModelViewSet):
         that it has reached a new state.
         """
         resp = super(TaskViewSet, self).partial_update(request, kf_id)
+        # If the task is failed
+        if resp.data['state'] == 'failed':
+            release = Task.objects.get(kf_id=kf_id).release
+            django_rq.enqueue(cancel_release, release.kf_id, True)
+        # If the task is canceled
+        if resp.data['state'] == 'canceled':
+            release = Task.objects.get(kf_id=kf_id).release
+            django_rq.enqueue(cancel_release, release.kf_id, False)
         # If the task is being updated to staged
         if resp.data['state'] == 'staged':
             kf_id = resp.data['kf_id']

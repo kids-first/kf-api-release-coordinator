@@ -73,11 +73,11 @@ def test_event_for_release(client, db, task, worker):
     """ Check that there is an event created for a new release """
     worker.work(burst=True)
     release = client.get(task['release']).json()
-    assert Event.objects.filter(release_id=release['kf_id']).count() == 4
+    assert Event.objects.filter(release_id=release['kf_id']).count() == 6
     event = (Event.objects.filter(task_id=release['tasks'][0]['kf_id'])
              .filter(release_id=release['kf_id']).get())
 
-    assert event.event_type == 'info'
+    assert event.event_type == 'error'
     assert ('task {} changed from waiting to rejected'
             .format(release['tasks'][0]['kf_id']) in event.message)
     assert event.task is not None

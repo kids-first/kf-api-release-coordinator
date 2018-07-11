@@ -288,7 +288,7 @@ class Event(models.Model):
 
 @receiver(post_transition, sender=Release)
 def create_release_event(sender, instance, name, source, target, **kwargs):
-    ev_type = 'error' if target == 'failed' else 'info'
+    ev_type = 'error' if target in ['failed', 'rejected'] else 'info'
     ev = Event(event_type=ev_type,
                message='release {} changed from {} to {}'
                        .format(instance.kf_id, source, target),
@@ -298,7 +298,7 @@ def create_release_event(sender, instance, name, source, target, **kwargs):
 
 @receiver(post_transition, sender=Task)
 def create_task_event(sender, instance, name, source, target, **kwargs):
-    ev_type = 'error' if target == 'failed' else 'info'
+    ev_type = 'error' if target in ['failed', 'rejected'] else 'info'
     ev = Event(event_type=ev_type,
                message='task {} changed from {} to {}'
                        .format(instance.kf_id, source, target),
