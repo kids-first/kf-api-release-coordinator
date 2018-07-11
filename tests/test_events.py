@@ -77,11 +77,11 @@ def test_event_for_release(client, db, task, worker):
     event = (Event.objects.filter(task_id=release['tasks'][0]['kf_id'])
              .filter(release_id=release['kf_id']).get())
 
-    assert event.event_type == 'error'
     assert ('task {} changed from waiting to rejected'
             .format(release['tasks'][0]['kf_id']) in event.message)
     assert event.task is not None
     assert event.task_service is not None
+    assert event.event_type == 'error'
 
 
 @pytest.mark.parametrize('field', [

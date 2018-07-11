@@ -58,7 +58,9 @@ def init_task(release_id, task_service_id, task_id):
     failed = False
     resp = None
     try:
-        resp = requests.post(service.url+'/tasks', json=body)
+        resp = requests.post(service.url+'/tasks',
+                             json=body,
+                             timeout=15)
     except requests.exceptions.RequestException:
         failed = True
 
@@ -191,11 +193,11 @@ def cancel_release(release_id, fail=False):
             'release_id': release.kf_id
         }
         try:
-            resp = requests.post(task.task_service.url+'/tasks',
-                                 json=body,
-                                 timeout=15)
+            requests.post(task.task_service.url+'/tasks',
+                          json=body,
+                          timeout=15)
         except requests.exceptions.RequestException:
-            failed = True
+            pass
 
         task.cancel()
         task.save()

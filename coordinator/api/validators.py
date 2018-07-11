@@ -1,5 +1,4 @@
 import requests
-from requests.exceptions import ConnectionError, HTTPError
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -23,11 +22,19 @@ def validate_endpoint(url):
         )
 
     try:
-        resp = requests.get(url+'/status')
+        resp = requests.get(url+'/status', timeout=15)
         resp.raise_for_status()
-        assert 'name' in resp.content.decode()
-    except (ConnectionError, HTTPError, AssertionError):
+        if resp.status_code != 200:
+            raise ValueError('response did not return with 200')
+        if 'name' not in resp.content.decode():
+            raise ValueError("no 'name' in body")
+    except requests.exceptions.RequestException as err:
         raise ValidationError(
-            _('%(value)s did not return the expected /status response'),
-            params={'value': url},
+            _('could not reach %(value)s: %(er)s'),
+            params={'value': url, 'er': str(err)},
+        )
+    except ValueError as err:
+        raise ValidationError(
+            _('%(val)s did not return the expected /status response: %(er)s'),
+            params={'val': url, 'er': str(err)},
         )

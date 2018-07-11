@@ -59,8 +59,6 @@ class TaskViewSet(viewsets.ModelViewSet):
         if resp.data['state'] == 'staged':
             kf_id = resp.data['kf_id']
             task = Task.objects.select_related().get(kf_id=kf_id)
-            task.stage()
-            task.save()
             # Check if all the release's tasks have been staged
             release = task.release
             if all([t.state == 'staged' for t in release.tasks.all()]):

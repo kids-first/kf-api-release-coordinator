@@ -27,12 +27,12 @@ def test_basic_task_service(client, transactional_db, task_service):
 def test_url_validation(admin_client, db, task_service):
     """ Test that urls are validated by pinging their status endpoint """
     orig = TaskService.objects.count()
-    with patch('coordinator.api.validators.requests') as mock_requests:
+    with patch('coordinator.api.validators.requests.get') as mock_requests:
         mock_requests.get = Mock()
         mock_resp = Mock()
         mock_resp.content = str.encode('')
-        mock_requests.get.return_value = mock_resp
-        mock_requests.get.status_code.return_value = 404
+        mock_requests.return_value = mock_resp
+        mock_requests.status_code.return_value = 404
 
         # Test basic url field validation
         service = {'url': 'not a url',
@@ -54,14 +54,14 @@ def test_url_validation(admin_client, db, task_service):
 
         mock_resp.status_code = 200
         mock_resp.content = str.encode('{}')
-        mock_requests.get.return_value = mock_resp
+        mock_requests.return_value = mock_resp
         resp = admin_client.post(BASE_URL+'/task-services', data=service)
         res = resp.json()
         assert 'validurl.com did not return the expected /st' in res['url'][0]
         assert TaskService.objects.count() == orig
 
         mock_resp.content = str.encode('{"name": "test"}')
-        mock_requests.get.return_value = mock_resp
+        mock_requests.return_value = mock_resp
         resp = admin_client.post(BASE_URL+'/task-services', data=service)
         res = resp.json()
         assert 'kf_id' in res
@@ -181,7 +181,8 @@ def test_task_service_bad_status(client, db, task_service):
         ts.health_check()
         assert mock_requests.get.call_count == 1
         assert ts.health_status == 'ok'
-        mock_requests.get.assert_called_with('http://ts.com/status')
+        mock_requests.get.assert_called_with('http://ts.com/status',
+                                             timeout=15)
         assert ts.last_ok_status == 1
         ts.health_check()
         ts.health_check()
