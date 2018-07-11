@@ -66,6 +66,8 @@ def init_task(release_id, task_service_id, task_id):
         failed = True
 
     if failed:
+        release.failed()
+        release.save()
         task.reject()
         task.save()
         django_rq.enqueue(cancel_release, release.kf_id, True)
@@ -118,7 +120,7 @@ def start_release(release_id):
             release.save()
             task.failed()
             task.save()
-            django_rq.enqueue(cancel_release, release_id)
+            django_rq.enqueue(cancel_release, release_id, True)
             break
         else:
             task.start()
@@ -159,6 +161,8 @@ def publish_release(release_id):
             failed = True
 
         if failed:
+            release.failed()
+            release.save()
             task.failed()
             task.save()
             django_rq.enqueue(cancel_release, release.kf_id, True)
@@ -174,8 +178,6 @@ def cancel_release(release_id, fail=False):
     Cancels a release by sending 'cancel' action to all tasks
     """
     release = Release.objects.get(kf_id=release_id)
-    release.cancel()
-    release.save()
 
     for task in release.tasks.all():
         # The task may have been the one to cause the cancel/fail

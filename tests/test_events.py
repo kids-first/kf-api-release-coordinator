@@ -73,7 +73,7 @@ def test_event_for_release(client, db, task, worker):
     """ Check that there is an event created for a new release """
     worker.work(burst=True)
     release = client.get(task['release']).json()
-    assert Event.objects.filter(release_id=release['kf_id']).count() == 6
+    assert Event.objects.filter(release_id=release['kf_id']).count() == 5
     event = (Event.objects.filter(task_id=release['tasks'][0]['kf_id'])
              .filter(release_id=release['kf_id']).get())
 

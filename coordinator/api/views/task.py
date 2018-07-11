@@ -46,10 +46,14 @@ class TaskViewSet(viewsets.ModelViewSet):
         # If the task is failed
         if resp.data['state'] == 'failed':
             release = Task.objects.get(kf_id=kf_id).release
+            release.failed()
+            release.save()
             django_rq.enqueue(cancel_release, release.kf_id, True)
         # If the task is canceled
         if resp.data['state'] == 'canceled':
             release = Task.objects.get(kf_id=kf_id).release
+            release.cancel()
+            release.save()
             django_rq.enqueue(cancel_release, release.kf_id, False)
         # If the task is being updated to staged
         if resp.data['state'] == 'staged':
