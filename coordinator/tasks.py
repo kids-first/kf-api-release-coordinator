@@ -11,6 +11,7 @@ def health_check(task_service_id):
     :param task_service_id: The kf_id of the service to check
     """
     task_service = TaskService.objects.get(kf_id=task_service_id)
+    task_service.refresh_from_db()
     task_service.health_check()
 
 
