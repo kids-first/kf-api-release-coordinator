@@ -1,6 +1,6 @@
 import json
 import pytest
-from coordinator.api.models import Release
+from coordinator.api.models import Release, Event
 
 
 def test_no_releases(client, transactional_db):
@@ -78,6 +78,11 @@ def test_cancel_release(admin_client, transactional_db, release):
     resp = admin_client.get('http://testserver/releases/'+kf_id)
     res = resp.json()
     assert res['state'] == 'canceling'
+
+    # Make sure that we don't re-cancel the release
+    assert Event.objects.count() == 1
+    resp = admin_client.delete('http://testserver/releases/'+kf_id)
+    assert Event.objects.count() == 1
 
 
 def test_cancel_release_404(admin_client, transactional_db, release):

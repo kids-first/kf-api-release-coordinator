@@ -29,6 +29,10 @@ STATUSES = [
     ('red', 'red')
 ]
 
+# Allowed source statse for release cancels and fails
+CANCEL_SOURCES = ['waiting', 'initializing', 'running', 'staged', 'publishing']
+FAIL_SOURCES = CANCEL_SOURCES+['canceling']
+
 
 def task_id():
     return kf_id_generator('TA')()
@@ -162,7 +166,7 @@ class Release(models.Model):
         """ Complete publishing """
         return
 
-    @transition(field=state, source='*', target='canceling')
+    @transition(field=state, source=CANCEL_SOURCES, target='canceling')
     def cancel(self):
         """ Cancel the release """
         return
@@ -172,7 +176,7 @@ class Release(models.Model):
         """ The release has finished canceling """
         return
 
-    @transition(field=state, source='*', target='failed')
+    @transition(field=state, source=FAIL_SOURCES, target='failed')
     def failed(self):
         """ The release failed """
         return
