@@ -1,4 +1,5 @@
 import django_rq
+import django_fsm
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
 from rest_framework.mixins import UpdateModelMixin
@@ -55,8 +56,13 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
         except ObjectDoesNotExist:
             return Response({}, status=404)
 
-        release.cancel()
-        release.save()
+        try:
+            release.cancel()
+            release.save()
+        except django_fsm.TransitionNotAllowed:
+            # Release must already be canceled or is canceling
+            pass
+
         # Do other cancel logic here
         return self.retrieve(request, kf_id)
 
