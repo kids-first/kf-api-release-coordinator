@@ -132,10 +132,41 @@ Publishing a release consists of 3 steps:
     * The coordinator service will begin polling each task service for status/health via a POST with `action=get_status`. Any non-200 response will result in a failed release publish. If this happens the task service will send a POST to all task services with `action=cancel`.
     * Once all task services have responded with `state=published`, the publish is complete.
 
-![Diagram](ReleaseCoordinatorFlow.png)
+![Diagram](docs/ReleaseCoordinatorFlow.png)
 
-Sequence of Operations (Failure Case 1)
+
+Modes of Failure and Cancelation
 ---------------------------------------------------
-The diagram below illustrates the sequence of operations between the Coordinator service and a Task service for an example
-failed release publish.
-TODO
+
+![States](docs/state_diagram.png)
+
+A task or release may fail or be canceled at any stage.
+The difference between the two is expected vs unexpected behavior.
+Aside from this difference, the outcome of both actions should be identical.
+The task or release that has been canceled or failed should result in all work to stop on the relevant release and all tasks related to it.
+
+### Failure by rejection
+
+The first action the coordinator requests from task services is to `initialize`.
+If a task service does not respond with a `200` code, it will be assumed that it is not ready for work and the task will be set as `rejected`.
+A `rejected` task will result with a `failed` release.
+
+### Unexpected failure
+
+A release will result in failure whenever one of its tasks reports itself as having failed, the coordinator finds the task in a `failed` state when polling for status, or when the coordinator is unable to get the status of the task from the task service.
+Once one of these failures have been identified, the coordinator will attempt to cancel all tasks and result in a `failed` state.
+
+### Cancelation by user
+
+When a user requests a release be canceled, the coordinator will issue `cancel` actions to all tasks in the release.
+The final state of the release and all tasks in it will be `canceled`
+
+### Cancelation on failure
+
+When the coordinator identifies one of its tasks as having failed, it will issue `cancel` actions to all other tasks in the release.
+The final state of the release will be `failed` as well as the task that caused the failure.
+All other tasks will end in a `canceled` state.
+
+### Cancelation by task
+
+Although not suggested, a task may cancel a release by reporting itself as `canceled`.
