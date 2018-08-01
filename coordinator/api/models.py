@@ -4,7 +4,7 @@ import json
 import uuid
 import requests
 
-from requests.exceptions import ConnectionError, HTTPError
+from requests.exceptions import RequestException
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -102,9 +102,9 @@ class TaskService(models.Model):
         healthy.
         """
         try:
-            resp = requests.get(self.url+'/status')
+            resp = requests.get(self.url+'/status', timeout=15)
             resp.raise_for_status()
-        except (ConnectionError, HTTPError):
+        except RequestException:
             self.last_ok_status += 1
             self.save()
             return
@@ -288,7 +288,7 @@ class Event(models.Model):
 
 @receiver(post_transition, sender=Release)
 def create_release_event(sender, instance, name, source, target, **kwargs):
-    ev_type = 'error' if target == 'failed' else 'info'
+    ev_type = 'error' if target in ['failed', 'rejected'] else 'info'
     ev = Event(event_type=ev_type,
                message='release {} changed from {} to {}'
                        .format(instance.kf_id, source, target),
@@ -298,7 +298,7 @@ def create_release_event(sender, instance, name, source, target, **kwargs):
 
 @receiver(post_transition, sender=Task)
 def create_task_event(sender, instance, name, source, target, **kwargs):
-    ev_type = 'error' if target == 'failed' else 'info'
+    ev_type = 'error' if target in ['failed', 'rejected'] else 'info'
     ev = Event(event_type=ev_type,
                message='task {} changed from {} to {}'
                        .format(instance.kf_id, source, target),

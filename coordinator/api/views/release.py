@@ -6,7 +6,7 @@ from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from coordinator.authentication import EgoAuthentication
-from coordinator.tasks import init_release, publish_release
+from coordinator.tasks import init_release, publish_release, cancel_release
 from coordinator.permissions import GroupPermission
 from coordinator.api.models import Release
 from coordinator.api.serializers import ReleaseSerializer
@@ -59,11 +59,11 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
         try:
             release.cancel()
             release.save()
+            django_rq.enqueue(cancel_release, release.kf_id)
         except django_fsm.TransitionNotAllowed:
             # Release must already be canceled or is canceling
             pass
 
-        # Do other cancel logic here
         return self.retrieve(request, kf_id)
 
     @action(methods=['post'], detail=True)
@@ -73,7 +73,5 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
         Release must be in the `staged` state to begin publishing.
         """
         release = Release.objects.get(kf_id=kf_id)
-        release.publish()
-        release.save()
         django_rq.enqueue(publish_release, release.kf_id)
         return Response({'message': 'publishing'})

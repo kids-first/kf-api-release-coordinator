@@ -73,14 +73,15 @@ def test_event_for_release(client, db, task, worker):
     """ Check that there is an event created for a new release """
     worker.work(burst=True)
     release = client.get(task['release']).json()
-    assert Event.objects.filter(release_id=release['kf_id']).count() == 1
-    event = Event.objects.filter(release_id=release['kf_id']).get()
+    assert Event.objects.filter(release_id=release['kf_id']).count() == 4
+    event = (Event.objects.filter(task_id=release['tasks'][0]['kf_id'])
+             .filter(release_id=release['kf_id']).get())
 
-    assert event.event_type == 'info'
-    assert ('release {} changed from waiting to initializing'
-            .format(release['kf_id']) in event.message)
-    assert event.task is None
-    assert event.task_service is None
+    assert ('task {} changed from waiting to rejected'
+            .format(release['tasks'][0]['kf_id']) in event.message)
+    assert event.task is not None
+    assert event.task_service is not None
+    assert event.event_type == 'error'
 
 
 @pytest.mark.parametrize('field', [

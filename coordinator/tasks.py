@@ -11,6 +11,7 @@ def health_check(task_service_id):
     :param task_service_id: The kf_id of the service to check
     """
     task_service = TaskService.objects.get(kf_id=task_service_id)
+    task_service.refresh_from_db()
     task_service.health_check()
 
 
@@ -55,13 +56,24 @@ def init_task(release_id, task_service_id, task_id):
         'task_id': task.kf_id,
         'release_id': release.kf_id
     }
-    resp = requests.post(service.url+'/tasks', json=body)
+    failed = False
+    resp = None
+    try:
+        resp = requests.post(service.url+'/tasks',
+                             json=body,
+                             timeout=15)
+    except requests.exceptions.RequestException:
+        failed = True
 
-    if resp.status_code != 200:
+    if resp and resp.status_code != 200:
+        failed = True
+
+    if failed:
+        release.failed()
+        release.save()
         task.reject()
         task.save()
-        release.cancel()
-        release.save()
+        django_rq.enqueue(cancel_release, release.kf_id, True)
         return
     else:
         task.initialize()
@@ -89,6 +101,7 @@ def start_release(release_id):
             'release_id': release.kf_id
         }
         failed = False
+        resp = None
         try:
             resp = requests.post(task.task_service.url+'/tasks',
                                  json=body,
@@ -98,10 +111,11 @@ def start_release(release_id):
             failed = True
 
         # Check that command was accepted
-        if resp.status_code != 200:
+        if resp and resp.status_code != 200:
             failed = True
 
-        if 'state' in resp.json() and resp.json()['state'] != 'running':
+        if (resp and 'state' in resp.json() and
+           resp.json()['state'] != 'running'):
             failed = True
 
         if failed:
@@ -109,7 +123,7 @@ def start_release(release_id):
             release.save()
             task.failed()
             task.save()
-            django_rq.enqueue(cancel_release, release_id)
+            django_rq.enqueue(cancel_release, release_id, True)
             break
         else:
             task.start()
@@ -132,6 +146,7 @@ def publish_release(release_id):
             'release_id': release.kf_id
         }
         failed = False
+        resp = None
         try:
             resp = requests.post(task.task_service.url+'/tasks',
                                  json=body,
@@ -141,41 +156,55 @@ def publish_release(release_id):
             failed = True
 
         # Check that command was accepted
-        if resp.status_code != 200:
+        if resp and resp.status_code != 200:
+            failed = True
+
+        if (resp and 'state' in resp.json() and
+           resp.json()['state'] != 'publishing'):
             failed = True
 
         if failed:
+            release.failed()
+            release.save()
             task.failed()
             task.save()
-            release.cancel()
-            release.save()
-            django_rq.enqueue(cancel_release, release.kf_id)
+            django_rq.enqueue(cancel_release, release.kf_id, True)
             break
-
-        if 'state' in resp.json() and resp.json()['state'] != 'publishing':
-            failed = True
 
         task.publish()
         task.save()
 
 
 @django_rq.job
-def cancel_release(release_id):
+def cancel_release(release_id, fail=False):
     """
     Cancels a release by sending 'cancel' action to all tasks
     """
     release = Release.objects.get(kf_id=release_id)
+
     for task in release.tasks.all():
+        # The task may have been the one to cause the cancel/fail
+        # Don't try to change its state if it's already canceled/failed
+        if task.state in ['canceled', 'failed', 'rejected']:
+            continue
+
         body = {
             'action': 'cancel',
             'task_id': task.kf_id,
             'release_id': release.kf_id
         }
-        resp = requests.post(task.task_service.url+'/tasks', json=body)
-        if task.state != 'failed':
-            task.canceled()
-            task.save()
-        event.save()
+        try:
+            requests.post(task.task_service.url+'/tasks',
+                          json=body,
+                          timeout=15)
+        except requests.exceptions.RequestException:
+            pass
 
-    release.canceled()
+        task.cancel()
+        task.save()
+
+    if fail:
+        release.failed()
+    else:
+        release.canceled()
     release.save()

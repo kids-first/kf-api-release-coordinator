@@ -67,22 +67,23 @@ def test_get_release_by_id(client, transactional_db, release):
     assert len(resp.json()['kf_id']) == 11
 
 
-def test_cancel_release(admin_client, transactional_db, release):
+def test_cancel_release(admin_client, transactional_db, release, worker):
     """ Test that a release is canceled and not deleted """
     kf_id = release['kf_id']
     assert Release.objects.count() == 1
     resp = admin_client.delete('http://testserver/releases/'+kf_id)
+    worker.work(burst=True)
     assert Release.objects.count() == 1
     res = resp.json()
     assert res['state'] == 'canceling'
     resp = admin_client.get('http://testserver/releases/'+kf_id)
     res = resp.json()
-    assert res['state'] == 'canceling'
+    assert res['state'] == 'canceled'
 
     # Make sure that we don't re-cancel the release
-    assert Event.objects.count() == 1
+    assert Event.objects.count() == 2
     resp = admin_client.delete('http://testserver/releases/'+kf_id)
-    assert Event.objects.count() == 1
+    assert Event.objects.count() == 2
 
 
 def test_cancel_release_404(admin_client, transactional_db, release):

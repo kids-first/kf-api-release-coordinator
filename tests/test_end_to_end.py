@@ -57,7 +57,7 @@ def test_full_release(client, transactional_db, mocker, worker):
     ts = TaskService.objects.first()
     ts.health_check()
     assert mock_requests.get.call_count == 1
-    mock_requests.get.assert_called_with('http://ts.com/status')
+    mock_requests.get.assert_called_with('http://ts.com/status', timeout=15)
 
     # Start release
     release = {
@@ -122,6 +122,7 @@ def test_full_release(client, transactional_db, mocker, worker):
     resp = client.patch(BASE_URL+'/tasks/'+task_id,
                         json.dumps({'state': 'staged', 'progress': 100}),
                         content_type='application/json')
+
     assert resp.status_code == 200
     res = resp.json()
     assert res['state'] == 'staged'
@@ -141,6 +142,8 @@ def test_full_release(client, transactional_db, mocker, worker):
     assert resp.status_code == 200
     res = resp.json()
     assert res['message'] == 'publishing'
+
+    worker.work(burst=True)
 
     # Mock a task's response telling the coordinator it has published
     resp = client.patch(BASE_URL+'/tasks/'+task_id,
