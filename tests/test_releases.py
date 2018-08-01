@@ -81,9 +81,9 @@ def test_cancel_release(admin_client, transactional_db, release, worker):
     assert res['state'] == 'canceled'
 
     # Make sure that we don't re-cancel the release
-    assert Event.objects.count() == 1
+    assert Event.objects.count() == 2
     resp = admin_client.delete('http://testserver/releases/'+kf_id)
-    assert Event.objects.count() == 1
+    assert Event.objects.count() == 2
 
 
 def test_cancel_release_404(admin_client, transactional_db, release):
