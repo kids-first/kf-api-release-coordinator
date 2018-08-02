@@ -228,6 +228,9 @@ STATICFILES_DIRS = [
 EGO_API = os.environ.get('EGO_URL', None)
 DATASERVICE_API = os.environ.get('DATASERVICE_URL', None)
 
+# Timeouts in seconds
+TASK_TIMEOUT = 600
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

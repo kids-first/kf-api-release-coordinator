@@ -249,8 +249,9 @@ class Task(models.Model):
 
     def status_check(self):
         """
-        Update the task's status by pinging the Task Service for it status
+        Update the task's status by pinging the Task Service for its status
         """
+        from coordinator.tasks import cancel_release
         body = {
             'task_id': self.kf_id,
             'release_id': self.release_id,
@@ -262,7 +263,10 @@ class Task(models.Model):
                                  timeout=15)
             resp.raise_for_status()
         except (ConnectionError, HTTPError):
-            # Don't do anything if the task cannot be found
+            # Cancel release if there is a problem
+            self.release.cancel()
+            self.release.save()
+            django_rq.enqueue(cancel_release, self.release.kf_id)
             return
 
         resp = resp.json()
@@ -273,6 +277,19 @@ class Task(models.Model):
             elif resp['state'] == 'failed':
                 from coordinator.tasks import cancel_release
                 self.failed()
+                django_rq.enqueue(cancel_release, self.release.kf_id)
+
+        # Check if the task has timed out
+        if self.state not in ['staged', 'published', 'canceled', 'failed']:
+            last_update = self.events.order_by('-created_at')\
+                                     .first().created_at
+            diff = datetime.datetime.utcnow() - last_update
+            diff = diff.replace(tzinfo=None)
+
+            print('its been', diff.total_seconds(), 'since last update')
+            if diff.total_seconds() > settings.TASK_TIMEOUT:
+                self.release.cancel()
+                self.release.save()
                 django_rq.enqueue(cancel_release, self.kf_id)
 
         if 'progress' in resp and resp['progress'] != self.progress:

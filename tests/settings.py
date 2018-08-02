@@ -152,3 +152,6 @@ STATICFILES_DIRS = [
 # APIs
 EGO_API = 'http://ego'
 DATASERVICE_API = os.environ.get('DATASERVICE_URL', None)
+
+# Timeouts in seconds
+TASK_TIMEOUT = 600
