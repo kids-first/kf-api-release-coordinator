@@ -107,4 +107,4 @@ def test_status_check(client, transactional_db, task, worker):
 
         worker.work(burst=True)
         release = t.release
-        assert release.state == 'waiting'
+        assert release.state == 'canceling'

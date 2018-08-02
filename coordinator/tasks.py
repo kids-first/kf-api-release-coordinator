@@ -27,6 +27,17 @@ def status_check(task_id):
 
 
 @django_rq.job
+def release_status_check(release_id):
+    """
+    Check the status of a release
+
+    :param release_id: The kf_id of the release to check
+    """
+    release = Release.objects.get(kf_id=release_id)
+    release.status_check()
+
+
+@django_rq.job
 def init_release(release_id):
     """
     Initilializes a release by creating new tasks for each service and
