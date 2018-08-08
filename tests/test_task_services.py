@@ -24,6 +24,20 @@ def test_basic_task_service(client, transactional_db, task_service):
     assert res['count'] == 1
 
 
+def test_filters(client, transactional_db, task_service):
+    """ Test query param filters """
+    assert TaskService.objects.count() == 1
+    resp = client.get(BASE_URL+'/task-services?enabled=True')
+    assert resp.status_code == 200
+    res = resp.json()
+    assert res['count'] == 1
+
+    resp = client.get(BASE_URL+'/task-services?enabled=False')
+    assert resp.status_code == 200
+    res = resp.json()
+    assert res['count'] == 0
+
+
 def test_url_validation(admin_client, db, task_service):
     """ Test that urls are validated by pinging their status endpoint """
     orig = TaskService.objects.count()

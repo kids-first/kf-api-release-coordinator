@@ -1,5 +1,6 @@
 import django_rq
 from rest_framework import viewsets
+import django_filters.rest_framework
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from coordinator.authentication import EgoAuthentication
@@ -7,6 +8,13 @@ from coordinator.permissions import DevPermission
 from coordinator.tasks import health_check
 from coordinator.api.models import TaskService
 from coordinator.api.serializers import TaskServiceSerializer
+
+
+class TaskServiceFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = TaskService
+        fields = ('enabled',)
 
 
 class TaskServiceViewSet(viewsets.ModelViewSet):
@@ -36,6 +44,8 @@ class TaskServiceViewSet(viewsets.ModelViewSet):
     lookup_field = 'kf_id'
     queryset = TaskService.objects.order_by('-created_at').all()
     serializer_class = TaskServiceSerializer
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_class = TaskServiceFilter
 
     @action(methods=['post'], detail=False)
     def health_checks(self, request):
