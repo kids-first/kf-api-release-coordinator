@@ -7,7 +7,7 @@ from coordinator.api.models import TaskService, Task
 BASE_URL = 'http://testserver'
 
 
-def test_get_studies(client, db):
+def test_sync_studies(client, db):
     """ Test that dataservice is called for studies """
     with patch('coordinator.api.views.studies.requests') as mock_requests:
         mock_resp = Mock()
