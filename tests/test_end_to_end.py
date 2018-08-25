@@ -48,7 +48,7 @@ def test_full_release(client, transactional_db, mocker, worker):
     resp = client.get('http://testserver/releases')
     assert resp.status_code == 200
 
-    mock_requests = mocker.patch('coordinator.api.models.requests')
+    mock_requests = mocker.patch('coordinator.api.models.taskservice.requests')
     mock_resp = mock.Mock()
     mock_resp.status_code = 200
     mock_requests.get.return_value = mock_resp

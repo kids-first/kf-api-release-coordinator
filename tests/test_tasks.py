@@ -84,7 +84,7 @@ def test_task_relations(client, transactional_db, task):
 def test_status_check(client, transactional_db, task, worker):
     """ Check that task status are updated correctly """
     t = Task.objects.get(kf_id=task['kf_id'])
-    with patch('coordinator.api.models.requests') as mock_requests:
+    with patch('coordinator.api.models.task.requests') as mock_requests:
         mock_resp = Mock()
         mock_resp.json.return_value = {
             'task_id': t.kf_id,

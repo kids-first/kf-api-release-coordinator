@@ -137,7 +137,7 @@ def test_disabled_task(admin_client, db, task_service, mocker, worker):
     worker.work(burst=True)
 
     # Run release
-    mock_requests = mocker.patch('coordinator.api.models.requests')
+    mock_requests = mocker.patch('coordinator.api.models.taskservice.requests')
     mock_resp = Mock()
     mock_resp.status_code = 200
     mock_requests.get.return_value = mock_resp
@@ -187,7 +187,7 @@ def test_task_service_bad_status(client, db, task_service):
     """ Test that a non-200 response increases task's last_ok_status count """
     kf_id = task_service['kf_id']
     ts = TaskService.objects.get(kf_id=kf_id)
-    with patch('coordinator.api.models.requests') as mock_requests:
+    with patch('coordinator.api.models.taskservice.requests') as mock_requests:
         mock_resp = Mock()
         mock_resp.raise_for_status.side_effect = ConnectionError()
         mock_requests.get.return_value = mock_resp
