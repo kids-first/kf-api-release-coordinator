@@ -7,6 +7,7 @@ from django.contrib.postgres.fields import ArrayField
 from django_fsm import FSMField, transition
 
 from coordinator.utils import kf_id_generator
+from coordinator.api.models.study import Study
 
 # Allowed source statse for release cancels and fails
 CANCEL_SOURCES = ['waiting', 'initializing', 'running', 'staged', 'publishing']
@@ -39,8 +40,9 @@ class Release(models.Model):
     tags = ArrayField(models.CharField(max_length=50, blank=True),
                       blank=True, default=[],
                       help_text='Tags to group the release by')
-    studies = ArrayField(models.CharField(max_length=11, blank=False),
-                         help_text='kf_ids of the studies in this release')
+    studies = models.ManyToManyField(Study,
+                                     help_text='kf_ids of the studies '
+                                     'in this release')
     created_at = models.DateTimeField(auto_now_add=True,
                                       help_text='Date created')
 

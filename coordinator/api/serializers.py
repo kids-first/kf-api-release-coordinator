@@ -1,6 +1,14 @@
-from coordinator.api.models import Task, TaskService, Release, Event
+from coordinator.api.models import Task, TaskService, Release, Event, Study
 from rest_framework import serializers
 from coordinator.api.validators import validate_study
+
+
+class StudySerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Study
+        fields = ('kf_id', 'name')
+        read_only_fields = ('kf_id', 'name', 'version', 'created_at')
 
 
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
@@ -32,10 +40,19 @@ class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
     tags = serializers.ListField(
                 child=serializers.CharField(max_length=50, allow_blank=False,
                                             validators=[]))
-    studies = serializers.ListField(
-                child=serializers.CharField(max_length=11, allow_blank=False,
-                                            validators=[validate_study]),
-                min_length=1)
+    # studies = serializers.ListField(
+    #             child=serializers.CharField(max_length=11, allow_blank=False,
+    #                                         validators=[validate_study]),
+    #             min_length=1)
+    # studies = StudySerializer(many=True)
+    studies = serializers.PrimaryKeyRelatedField(queryset=Study.objects.all(),
+                                                 many=True)
+
+    def validate_studies(self, studies):
+        if len(studies) == 0:
+            raise serializers.ValidationError('Must have at least one study')
+        return studies
+
     tasks = TaskSerializer(read_only=True, many=True)
 
     class Meta:
@@ -43,7 +60,7 @@ class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('kf_id', 'name', 'description', 'state', 'studies',
                   'tasks', 'created_at', 'tags', 'author')
         read_only_fields = ('kf_id', 'state', 'tasks', 'created_at')
-
+    
 
 class EventSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

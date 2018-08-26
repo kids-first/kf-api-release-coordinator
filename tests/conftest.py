@@ -3,7 +3,7 @@ import pytest
 import random
 import django_rq
 from mock import Mock, patch
-from coordinator.api.models import Release, TaskService
+from coordinator.api.models import Release, TaskService, Study
 from rest_framework.test import APIClient
 
 
@@ -39,7 +39,7 @@ def worker():
 
 
 @pytest.yield_fixture
-def release(admin_client, transactional_db):
+def release(admin_client, transactional_db, study):
     """ Creates a release """
     release = {
         'name': 'test release',
@@ -79,6 +79,18 @@ def task(admin_client, transactional_db, release, task_service):
 
 
 @pytest.yield_fixture
+def study(admin_client, transactional_db):
+    study = {
+        'kf_id': 'SD_00000001',
+        'name': 'Test Study',
+    }
+    # Study cannot be created through api, so it must be made with ORM
+    study = Study(**study)
+    study.save()
+    return study
+
+
+@pytest.yield_fixture
 def event(admin_client, transactional_db, release, task_service, task):
     """ Creates an event """
     event = {
@@ -94,7 +106,18 @@ def event(admin_client, transactional_db, release, task_service, task):
 
 
 @pytest.yield_fixture
-def releases(admin_client):
+def studies(transactional_db):
+    sd = {}
+    for i in range(5):
+        study = {'name': f'Study {i}',
+                 'kf_id': 'SD_{0:08d}'.format(i)}
+        sd[study['kf_id']] = Study(**study)
+        sd[study['kf_id']].save()
+    return sd
+
+
+@pytest.yield_fixture
+def releases(admin_client, studies):
     rel = {}
     for i in range(5):
         r = admin_client.post(BASE_URL+'/releases',

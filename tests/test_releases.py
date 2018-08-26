@@ -10,7 +10,7 @@ def test_no_releases(client, transactional_db):
     assert resp.status_code == 200
 
 
-def test_new_release(admin_client, transactional_db):
+def test_new_release(admin_client, transactional_db, studies):
     """ Test that new releases may be made """
     assert Release.objects.count() == 0
 
@@ -20,6 +20,7 @@ def test_new_release(admin_client, transactional_db):
         'author': 'bob'
     }
     resp = admin_client.post('http://testserver/releases', data=release)
+    print(resp.json())
 
     assert resp.status_code == 201
     assert Release.objects.count() == 1
@@ -31,7 +32,7 @@ def test_new_release(admin_client, transactional_db):
     assert res['studies'] == ['SD_00000001']
 
 
-def test_new_tag(admin_client, transactional_db):
+def test_new_tag(admin_client, transactional_db, study):
     """ Test that tags are updated correctly """
     assert Release.objects.count() == 0
 
@@ -56,6 +57,7 @@ def test_new_tag(admin_client, transactional_db):
 
 def test_get_release_by_id(client, transactional_db, release):
     """ Test that releases may be retrieved by id """
+    print(release)
     assert release['kf_id'].startswith('RE_')
     assert len(release['kf_id']) == 11
 
@@ -110,9 +112,10 @@ def test_study_validator(admin_client, transactional_db):
     res = resp.json()
     assert 'studies' in res
     assert len(res['studies']) == 1
-    assert res['studies']['0'] == ['SD_000 is not a valid study kf_id']
+    assert res['studies'][0] == 'Invalid pk "SD_000" - object does not exist.'
 
     release = {
+        'name': 'Release 1',
         'studies': [],
     }
     resp = admin_client.post('http://testserver/releases', data=release)
@@ -120,7 +123,7 @@ def test_study_validator(admin_client, transactional_db):
     res = resp.json()
     assert 'studies' in res
     assert len(res['studies']) == 1
-    assert 'Ensure this field has at least 1' in res['studies'][0]
+    assert 'Must have at least one study' in res['studies'][0]
 
 
 def test_release_relations(client, transactional_db, task):

@@ -20,7 +20,7 @@ def init_release(client, worker):
     release = {
         'name': 'First release',
         'description': 'Testing',
-        'studies': ['SD_00000000'],
+        'studies': ['SD_00000001'],
         'tags': []
     }
     resp = client.post(BASE_URL+'/releases',
@@ -33,7 +33,7 @@ def init_release(client, worker):
 
 
 def test_fail_running(admin_client, client, transactional_db, mocker,
-                      worker, task_service):
+                      worker, task_service, study):
     """
     Test when a release fails do to a task reporting itself as failed
 
@@ -95,7 +95,7 @@ def test_fail_running(admin_client, client, transactional_db, mocker,
 
 
 def test_cancel_running(admin_client, client, transactional_db, mocker,
-                        worker, task_service):
+                        worker, task_service, study):
     """
     Test when a release is canceled due to one of its tasks being canceled
     """

@@ -11,7 +11,7 @@ with open(os.path.join(os.path.dirname(__file__), 'dev_token.txt')) as f:
     DEV_TOKEN = f.read().strip()
 
 
-def test_full_release(client, transactional_db, mocker, worker):
+def test_full_release(client, transactional_db, mocker, worker, study):
     """
     Test a full release:
     1) Create task service
@@ -63,7 +63,7 @@ def test_full_release(client, transactional_db, mocker, worker):
     release = {
         'name': 'First release',
         'description': 'Testing',
-        'studies': ['SD_00000000'],
+        'studies': ['SD_00000001'],
         'tags': []
     }
     resp = client.post(BASE_URL+'/releases',

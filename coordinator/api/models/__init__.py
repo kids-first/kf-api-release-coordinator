@@ -10,6 +10,7 @@ from coordinator.api.models.task import Task, task_id
 from coordinator.api.models.taskservice import TaskService, task_service_id
 from coordinator.api.models.release import Release, release_id
 from coordinator.api.models.event import Event, event_id
+from coordinator.api.models.study import Study
 
 
 @receiver(post_transition, sender=Release)
