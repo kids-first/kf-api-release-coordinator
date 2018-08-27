@@ -1,13 +1,4 @@
-import datetime
-import uuid
-import requests
-from requests.exceptions import ConnectionError, HTTPError
-
-import django_rq
 from django.db import models
-from django_fsm import FSMField, transition
-
-from coordinator.utils import kf_id_generator
 
 
 class Study(models.Model):
@@ -22,8 +13,13 @@ class Study(models.Model):
     """
     kf_id = models.CharField(max_length=11, primary_key=True,
                              null=False)
-    name  = models.CharField(max_length=100)
-    version = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=False,
                                       null=True,
                                       help_text='Time the task was created')
+
+    def latest_version(self):
+        """
+        Gets the latest version from the last release this study was in.
+        """
+        return self.release_set.latest('created_at').version

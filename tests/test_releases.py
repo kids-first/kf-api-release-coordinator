@@ -1,6 +1,17 @@
 import json
 import pytest
 from coordinator.api.models import Release, Event
+from coordinator.api.models.release import next_version
+
+
+def test_version_bumping(db):
+    r = Release()
+    r.save()
+    assert str(r.version) == '0.0.0'
+    assert str(next_version()) == '0.0.1'
+    assert str(next_version(major=True)) == '1.0.0'
+    assert str(next_version(minor=True)) == '0.1.0'
+    assert str(next_version(patch=True)) == '0.0.1'
 
 
 def test_no_releases(client, transactional_db):
@@ -20,7 +31,6 @@ def test_new_release(admin_client, transactional_db, studies):
         'author': 'bob'
     }
     resp = admin_client.post('http://testserver/releases', data=release)
-    print(resp.json())
 
     assert resp.status_code == 201
     assert Release.objects.count() == 1
@@ -30,6 +40,106 @@ def test_new_release(admin_client, transactional_db, studies):
     assert res['author'] == 'bob'
     assert res['tags'] == []
     assert res['studies'] == ['SD_00000001']
+    assert res['version'] == '0.0.0'
+
+
+def test_patch_bump(admin_client, transactional_db, studies):
+    assert Release.objects.count() == 0
+
+    release = {
+        'name': 'First Release',
+        'studies': ['SD_00000001'],
+        'author': 'bob'
+    }
+    resp = admin_client.post('http://testserver/releases', data=release)
+    assert Release.objects.count() == 1
+    res = resp.json()
+    assert res['version'] == '0.0.0'
+
+    release = {
+        'name': 'Second Release',
+        'studies': ['SD_00000001'],
+        'author': 'bob'
+    }
+    resp = admin_client.post('http://testserver/releases', data=release)
+    assert Release.objects.count() == 2
+    res = resp.json()
+    assert res['version'] == '0.0.1'
+
+    resp = admin_client.get('http://testserver/releases')
+    res = resp.json()
+    assert len(res['results']) == 2
+    assert res['results'][0]['version'] == '0.0.1'
+    assert res['results'][1]['version'] == '0.0.0'
+
+
+def test_minor_bump(admin_client, transactional_db, studies, worker):
+    """ Test that the minor version number is bumped upon publish """
+    release = {
+        'name': 'First Release',
+        'studies': ['SD_00000001'],
+        'author': 'bob'
+    }
+    resp = admin_client.post('http://testserver/releases', data=release)
+    assert Release.objects.count() == 1
+    res = resp.json()
+    assert res['version'] == '0.0.0'
+
+    worker.work(burst=True)
+
+    resp = admin_client.get('http://testserver/releases/'+res['kf_id'])
+    res = resp.json()
+
+    resp = admin_client.post('http://testserver/releases/' +
+                             res['kf_id']+'/publish')
+    worker.work(burst=True)
+
+    resp = admin_client.get('http://testserver/releases/'+res['kf_id'])
+    res = resp.json()
+
+    assert res['version'] == '0.1.0'
+    assert str(Release.objects.first().version) == '0.1.0'
+
+
+def test_minor_bump(admin_client, transactional_db, studies, worker):
+    """ Test that the major version number is bumped upon publish """
+    release = {
+        'name': 'First Release',
+        'studies': ['SD_00000001'],
+        'author': 'bob',
+        'is_major': True,
+    }
+    resp = admin_client.post('http://testserver/releases', data=release)
+    assert Release.objects.count() == 1
+    res = resp.json()
+    assert res['version'] == '0.0.0'
+
+    worker.work(burst=True)
+
+    resp = admin_client.get('http://testserver/releases/'+res['kf_id'])
+    res = resp.json()
+
+    resp = admin_client.post('http://testserver/releases/' +
+                             res['kf_id']+'/publish')
+    worker.work(burst=True)
+
+    resp = admin_client.get('http://testserver/releases/'+res['kf_id'])
+    res = resp.json()
+
+    assert res['version'] == '1.0.0'
+    assert str(Release.objects.first().version) == '1.0.0'
+
+
+def test_version_readonly(admin_client, studies):
+    """ Test that the user may not assign the version """
+    release = {
+        'name': 'First Release',
+        'studies': ['SD_00000001'],
+        'version': '1.1.1',
+    }
+    resp = admin_client.post('http://testserver/releases', data=release)
+    res = resp.json()
+    assert res['version'] == '0.0.0'
 
 
 def test_new_tag(admin_client, transactional_db, study):
@@ -37,9 +147,9 @@ def test_new_tag(admin_client, transactional_db, study):
     assert Release.objects.count() == 0
 
     release = {
-        'name': 'My Release',
-        'studies': ['SD_00000001']
-    }
+            'name': 'My Release',
+            'studies': ['SD_00000001']
+            }
     resp = admin_client.post('http://testserver/releases', data=release)
 
     assert resp.status_code == 201
@@ -57,7 +167,6 @@ def test_new_tag(admin_client, transactional_db, study):
 
 def test_get_release_by_id(client, transactional_db, release):
     """ Test that releases may be retrieved by id """
-    print(release)
     assert release['kf_id'].startswith('RE_')
     assert len(release['kf_id']) == 11
 

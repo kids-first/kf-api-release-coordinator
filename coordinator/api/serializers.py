@@ -7,8 +7,7 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Study
-        fields = ('kf_id', 'name')
-        read_only_fields = ('kf_id', 'name', 'version', 'created_at')
+        fields = ('kf_id', 'name', 'created_at')
 
 
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
@@ -40,11 +39,7 @@ class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
     tags = serializers.ListField(
                 child=serializers.CharField(max_length=50, allow_blank=False,
                                             validators=[]))
-    # studies = serializers.ListField(
-    #             child=serializers.CharField(max_length=11, allow_blank=False,
-    #                                         validators=[validate_study]),
-    #             min_length=1)
-    # studies = StudySerializer(many=True)
+
     studies = serializers.PrimaryKeyRelatedField(queryset=Study.objects.all(),
                                                  many=True)
 
@@ -58,9 +53,11 @@ class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Release
         fields = ('kf_id', 'name', 'description', 'state', 'studies',
-                  'tasks', 'created_at', 'tags', 'author')
-        read_only_fields = ('kf_id', 'state', 'tasks', 'created_at')
-    
+                  'tasks', 'version', 'created_at', 'tags', 'author',
+                  'is_major')
+        read_only_fields = ('kf_id', 'state', 'tasks', 'version', 'created_at',
+                            'version')
+
 
 class EventSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

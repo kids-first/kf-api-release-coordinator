@@ -5,6 +5,8 @@ from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django_fsm import FSMField, transition
+from semantic_version import Version
+from semantic_version.django_fields import VersionField
 
 from coordinator.utils import kf_id_generator
 from coordinator.api.models.study import Study
@@ -18,11 +20,34 @@ def release_id():
     return kf_id_generator('RE')()
 
 
+def next_version(major=False, minor=False, patch=True):
+    """
+    Assign the next version by taking the version of the last release and
+    bumping the patch number by one
+    """
+    try:
+        r = Release.objects.latest()
+    except Release.DoesNotExist:
+        return Version('0.0.0')
+
+    v = r.version
+    if major:
+        v = v.next_major()
+    elif minor:
+        v = v.next_minor()
+    else:
+        v = v.next_patch()
+    return v
+
+
 class Release(models.Model):
     """
     A Release is composed of several tasks that run process that prepare and
     publish data for a release
     """
+    class Meta:
+        get_latest_by = 'created_at'
+
     kf_id = models.CharField(max_length=11, primary_key=True,
                              default=release_id,
                              help_text='Kids First ID assigned to the'
@@ -43,6 +68,12 @@ class Release(models.Model):
     studies = models.ManyToManyField(Study,
                                      help_text='kf_ids of the studies '
                                      'in this release')
+    version = VersionField(partial=False, coerce=False,
+                           default=next_version,
+                           help_text='Semantic version of the release')
+    is_major = models.BooleanField(default=False,
+                                   help_text='Whether the release is a major '
+                                   ' version change or not')
     created_at = models.DateTimeField(auto_now_add=True,
                                       help_text='Date created')
 
@@ -69,6 +100,11 @@ class Release(models.Model):
     @transition(field=state, source='publishing', target='published')
     def complete(self):
         """ Complete publishing """
+        if self.is_major:
+            self.version = self.version.next_major()
+        else:
+            self.version = self.version.next_minor()
+        self.save()
         return
 
     @transition(field=state, source=CANCEL_SOURCES, target='canceling')
