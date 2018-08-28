@@ -151,6 +151,39 @@ def test_no_delete_update(client, db, studies):
     assert Study.objects.count() == 5
 
 
+def test_latest_version(admin_client, db, studies):
+    """
+    Test that the latest version field is populated when a study
+    is included in a release
+    """
+    resp = admin_client.post(BASE_URL+'/releases',
+                             data={'name': 'test',
+                                   'studies': ['SD_00000000', 'SD_00000001']})
+    assert resp.status_code == 201
+    v1 = resp.json()['version']
+    assert v1 == '0.0.0'
+
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000000')
+    assert resp.json()['version'] == v1
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000002')
+    assert resp.json()['version'] is None
+
+    # Make another release
+    resp = admin_client.post(BASE_URL+'/releases',
+                             data={'name': 'test',
+                                   'studies': ['SD_00000001', 'SD_00000002']})
+    assert resp.status_code == 201
+    v2 = resp.json()['version']
+    assert v2 == '0.0.1'
+
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000000')
+    assert resp.json()['version'] == v1
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000001')
+    assert resp.json()['version'] == v2
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000002')
+    assert resp.json()['version'] == v2
+
+
 def test_new_study(client, db, studies):
     """ Test case that a new study has been added to the dataservice """
     with patch('coordinator.api.views.studies.requests') as mock_requests:

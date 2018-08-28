@@ -26,4 +26,8 @@ class Study(models.Model):
         """
         Gets the latest version from the last release this study was in.
         """
-        return self.release_set.latest('created_at').version
+        from coordinator.api.models.release import Release
+        try:
+            return self.release_set.latest('created_at').version
+        except Release.DoesNotExist:
+            return None

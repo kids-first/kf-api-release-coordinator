@@ -5,9 +5,12 @@ from coordinator.api.validators import validate_study
 
 class StudySerializer(serializers.HyperlinkedModelSerializer):
 
+    version = serializers.CharField(source='latest_version', allow_blank=True)
+
     class Meta:
         model = Study
-        fields = ('kf_id', 'name', 'visible', 'deleted', 'created_at')
+        fields = ('kf_id', 'name', 'version', 'visible',
+                  'deleted', 'created_at')
 
 
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
