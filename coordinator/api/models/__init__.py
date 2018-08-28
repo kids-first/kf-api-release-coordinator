@@ -17,8 +17,9 @@ from coordinator.api.models.study import Study
 def create_release_event(sender, instance, name, source, target, **kwargs):
     ev_type = 'error' if target in ['failed', 'rejected'] else 'info'
     ev = Event(event_type=ev_type,
-               message='release {} changed from {} to {}'
-                       .format(instance.kf_id, source, target),
+               message='release {}, version {} changed from {} to {}'
+                       .format(instance.kf_id, instance.version, 
+                               source, target),
                release=instance)
     ev.save()
 
