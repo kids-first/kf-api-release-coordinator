@@ -43,7 +43,6 @@ class StudiesViewSet(viewsets.ReadOnlyModelViewSet):
 
         studies = Study.objects.all()
         new = 0
-        updated = 0
         deleted = 0
 
         for study in resp.json()['results']:
@@ -53,16 +52,29 @@ class StudiesViewSet(viewsets.ReadOnlyModelViewSet):
             except Study.DoesNotExist:
                 s = Study(kf_id=study['kf_id'],
                           name=study['name'],
+                          visible=study['visible'],
                           created_at=study['created_at'])
                 s.save()
                 new += 1
                 continue
 
             # Check for updated fields
-            for field in ['name']:
+            for field in ['name', 'visible']:
                 if getattr(s, field) != study[field]:
                     setattr(s, field, study[field])
             s.save()
 
+        # Check if any studies were deleted from the dataservice
+        coord_studies = set(s.kf_id for s in studies)
+        ds_studies = set(s['kf_id'] for s in resp.json()['results'])
+        missing_studies = coord_studies - ds_studies
+        deleted = len(missing_studies)
+        for study in missing_studies:
+            s = Study.objects.get(kf_id=study)
+            s.deleted = True
+            s.save()
+
         return Response({'status': 'ok',
-                         'message': f''}, 200)
+                         'new': new,
+                         'deleted': deleted,
+                         'message': f'Synchronized with dataservice'}, 200)

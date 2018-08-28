@@ -84,7 +84,7 @@ def test_sync_studies_fail(client):
         mock_requests.get.assert_called_with(expected)
 
 
-def test_sync_studies_fail(client, db, studies):
+def test_sync_studies_updated(client, db, studies):
     """ Test that fields are updated on change in dataservice """
     with patch('coordinator.api.views.studies.requests') as mock_requests:
         mock_resp = Mock()
@@ -109,6 +109,49 @@ def test_sync_studies_fail(client, db, studies):
         assert Study.objects.get(kf_id='SD_00000004').name == 'Updated Name'
 
 
+def test_sync_studies_deleted(client, db, studies):
+    """ Test that studies are set as deleted when removed from dataservice """
+    with patch('coordinator.api.views.studies.requests') as mock_requests:
+        mock_resp = Mock()
+        mock_resp.json.return_value  = {
+            'results': [StudySerializer(v).data for v in studies.values()]
+        }
+        mock_resp.json.return_value['results'][-1]['name'] = 'Updated Name'
+        mock_requests.get.return_value = mock_resp
+        mock_requests.get.return_value.status_code = 200
+
+        assert Study.objects.count() == 5
+
+        resp = client.post(BASE_URL+'/studies/sync')
+        assert resp.status_code == 200
+        res = resp.json()
+
+        # Remove a study
+        mock_resp.json.return_value  = {
+            'results': mock_resp.json.return_value['results'][:-1]
+        }
+
+        resp = client.post(BASE_URL+'/studies/sync')
+        assert resp.status_code == 200
+        assert resp.json()['new'] == 0
+        assert resp.json()['deleted'] == 1
+        assert Study.objects.count() == 5
+
+        assert Study.objects.get(kf_id='SD_00000004').deleted == True
+
+
+def test_no_delete_update(client, db, studies):
+    """ Test that studies may not be deleted or updated from api """
+    resp = client.post(BASE_URL+'/studies', data={'name': 'test'})
+    assert resp.status_code == 405
+    assert resp.json() == {'detail': 'Method "POST" not allowed.'}
+
+    resp = client.delete(BASE_URL+'/studies/SD_00000001')
+    assert resp.status_code == 405
+    assert resp.json() == {'detail': 'Method "DELETE" not allowed.'}
+    assert Study.objects.count() == 5
+
+
 def test_new_study(client, db, studies):
     """ Test case that a new study has been added to the dataservice """
     with patch('coordinator.api.views.studies.requests') as mock_requests:
@@ -120,6 +163,7 @@ def test_new_study(client, db, studies):
             'kf_id': 'SD_XXXXXXXX',
             'name': 'New Study',
             'external_id': 'New',
+            'visible': True,
             'created_at': datetime(year=2019, month=6, day=6,
                                    tzinfo=timezone.utc),
         })
@@ -131,6 +175,8 @@ def test_new_study(client, db, studies):
         resp = client.post(BASE_URL+'/studies/sync')
         assert resp.status_code == 200
         res = resp.json()
+        assert res['new'] == 1
+        assert res['deleted'] == 0
 
         assert mock_requests.get.call_count == 1
         expected = 'http://dataservice/studies?limit=100'

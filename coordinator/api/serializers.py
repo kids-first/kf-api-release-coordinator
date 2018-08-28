@@ -7,7 +7,7 @@ class StudySerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Study
-        fields = ('kf_id', 'name', 'created_at')
+        fields = ('kf_id', 'name', 'visible', 'deleted', 'created_at')
 
 
 class TaskSerializer(serializers.HyperlinkedModelSerializer):

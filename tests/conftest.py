@@ -84,6 +84,7 @@ def study(admin_client, transactional_db):
     study = {
         'kf_id': 'SD_00000001',
         'name': 'Test Study',
+        'visible': True,
     }
     # Study cannot be created through api, so it must be made with ORM
     study = Study(**study)
@@ -112,6 +113,7 @@ def studies(transactional_db):
     for i in range(5):
         study = {'name': f'Study {i}',
                  'kf_id': 'SD_{0:08d}'.format(i),
+                 'visible': True,
                  'created_at': datetime(year=2000, month=1, day=5,
                                         tzinfo=timezone.utc)}
         sd[study['kf_id']] = Study(**study)
