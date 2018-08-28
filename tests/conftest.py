@@ -2,6 +2,7 @@ import os
 import pytest
 import random
 import django_rq
+from datetime import datetime, timezone
 from mock import Mock, patch
 from coordinator.api.models import Release, TaskService, Study
 from rest_framework.test import APIClient
@@ -110,7 +111,9 @@ def studies(transactional_db):
     sd = {}
     for i in range(5):
         study = {'name': f'Study {i}',
-                 'kf_id': 'SD_{0:08d}'.format(i)}
+                 'kf_id': 'SD_{0:08d}'.format(i),
+                 'created_at': datetime(year=2000, month=1, day=5,
+                                        tzinfo=timezone.utc)}
         sd[study['kf_id']] = Study(**study)
         sd[study['kf_id']].save()
     return sd

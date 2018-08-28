@@ -1,7 +1,9 @@
 import pytest
+from datetime import datetime, timezone
 from requests.exceptions import ConnectionError
 from mock import Mock, patch
 from coordinator.api.models import Release, Study
+from coordinator.api.serializers import StudySerializer
 
 
 BASE_URL = 'http://testserver'
@@ -50,22 +52,92 @@ def test_many_to_many_endpoint(client, transactional_db, release, studies):
     # print(resp.json())
 
 
-def test_sync_studies(client, db):
-    """ Test that dataservice is called for studies """
-    return
+def test_sync_studies_fail(client):
+    """ Test that dataservice errors are returned when there is a problem  """
     with patch('coordinator.api.views.studies.requests') as mock_requests:
         mock_resp = Mock()
-        mock_resp.raise_for_status.side_effect = ConnectionError()
-        mock_resp.json.return_value = {'results': []}
+        mock_resp.json.return_value  = {'message': 'server error'}
         mock_requests.get.return_value = mock_resp
-        mock_requests.get.status_code.return_value = 404
+        mock_requests.get.return_value.status_code = 500
 
-        client.get(BASE_URL+'/studies')
+        resp = client.post(BASE_URL+'/studies/sync')
+        assert resp.status_code == 500
+        res = resp.json()
+        assert res['message'] == 'server error'
 
-        # assert mock_requests.get.call_count == 1
+        assert mock_requests.get.call_count == 1
         expected = 'http://dataservice/studies?limit=100'
-        # mock_requests.get.assert_called_with(expected)
+        mock_requests.get.assert_called_with(expected)
 
+
+        mock_resp.json.return_value  = {'<html>Server error</html>'}
+        mock_requests.get.return_value = mock_resp
+        mock_requests.get.return_value.status_code = 500
+
+        resp = client.post(BASE_URL+'/studies/sync')
+        assert resp.status_code == 500
+        res = resp.json()
+        assert res['message'].endswith('getting studies from the dataservice')
+
+        assert mock_requests.get.call_count == 2
+        expected = 'http://dataservice/studies?limit=100'
+        mock_requests.get.assert_called_with(expected)
+
+
+def test_sync_studies_fail(client, db, studies):
+    """ Test that fields are updated on change in dataservice """
+    with patch('coordinator.api.views.studies.requests') as mock_requests:
+        mock_resp = Mock()
+        mock_resp.json.return_value  = {
+            'results': [StudySerializer(v).data for v in studies.values()]
+        }
+        mock_resp.json.return_value['results'][-1]['name'] = 'Updated Name'
+        mock_requests.get.return_value = mock_resp
+        mock_requests.get.return_value.status_code = 200
+
+        assert Study.objects.count() == 5
+
+        resp = client.post(BASE_URL+'/studies/sync')
+        assert resp.status_code == 200
+        res = resp.json()
+
+        assert mock_requests.get.call_count == 1
+        expected = 'http://dataservice/studies?limit=100'
+        mock_requests.get.assert_called_with(expected)
+
+        assert Study.objects.count() == 5
+        assert Study.objects.get(kf_id='SD_00000004').name == 'Updated Name'
+
+
+def test_new_study(client, db, studies):
+    """ Test case that a new study has been added to the dataservice """
+    with patch('coordinator.api.views.studies.requests') as mock_requests:
+        mock_resp = Mock()
+        mock_resp.json.return_value  = {
+            'results': [StudySerializer(v).data for v in studies.values()]
+        }
+        mock_resp.json.return_value['results'].append({
+            'kf_id': 'SD_XXXXXXXX',
+            'name': 'New Study',
+            'external_id': 'New',
+            'created_at': datetime(year=2019, month=6, day=6,
+                                   tzinfo=timezone.utc),
+        })
+        mock_requests.get.return_value = mock_resp
+        mock_requests.get.return_value.status_code = 200
+
+        assert Study.objects.count() == 5
+
+        resp = client.post(BASE_URL+'/studies/sync')
+        assert resp.status_code == 200
+        res = resp.json()
+
+        assert mock_requests.get.call_count == 1
+        expected = 'http://dataservice/studies?limit=100'
+        mock_requests.get.assert_called_with(expected)
+
+        assert Study.objects.count() == 6
+        assert Study.objects.get(kf_id='SD_XXXXXXXX').name == 'New Study'
 
 def test_get_study(client, db):
     """ Test that dataservice is called for studies """
