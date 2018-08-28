@@ -40,16 +40,22 @@ def test_many_to_many_model(transactional_db, studies):
     assert Study.objects.get(kf_id='SD_00000002').release_set.count() == 1
 
 
-def test_many_to_many_endpoint(client, transactional_db, release, studies):
-    resp = client.get(BASE_URL+'/releases')
+def test_nested_releases(admin_client, transactional_db, release, studies):
+    """ Test that nested release resource is returned correctly """
+    resp = admin_client.get(BASE_URL+'/releases')
     assert len(resp.json()['results']) == 1
     assert resp.json()['results'][0]['studies'] == ['SD_00000001']
 
-    resp = client.get(BASE_URL+'/studies/SD_00000001')
-    # TODO Add some way of looking up a study's release history
-    # assert resp.json()['kf_id'] == 'SD_00000001'
-    # assert resp.json()['releases']
-    # print(resp.json())
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000001/releases')
+    assert resp.json()['count'] == 1
+
+    resp = admin_client.post(BASE_URL+'/releases',
+                             data={'name': 'test',
+                                   'studies': ['SD_00000000', 'SD_00000001']})
+
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000001/releases')
+    assert resp.json()['count'] == 2
+    assert resp.json()['results'][-1]['kf_id'] == release['kf_id']
 
 
 def test_sync_studies_fail(client):

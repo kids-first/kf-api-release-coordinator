@@ -10,6 +10,7 @@ URLS = [
     '/releases',
     '/task-services',
     '/tasks',
+    '/studies',
 ]
 
 

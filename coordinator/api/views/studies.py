@@ -4,8 +4,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from coordinator.api.models import Study
-from coordinator.api.serializers import StudySerializer
+from coordinator.api.models import Study, Release
+from coordinator.api.serializers import StudySerializer, ReleaseSerializer
 
 
 class StudiesViewSet(viewsets.ReadOnlyModelViewSet):
@@ -78,3 +78,16 @@ class StudiesViewSet(viewsets.ReadOnlyModelViewSet):
                          'new': new,
                          'deleted': deleted,
                          'message': f'Synchronized with dataservice'}, 200)
+
+
+class StudyReleasesViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    list:
+    Returns a page of releases related to a given study
+    """
+    lookup_field = 'kf_id'
+    serializer_class = ReleaseSerializer
+
+    def get_queryset(self):
+        return Study.objects.get(kf_id=self.kwargs['study_kf_id']) \
+                            .release_set.order_by('-created_at')
