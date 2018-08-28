@@ -56,7 +56,7 @@ def test_sync_studies_fail(client):
     """ Test that dataservice errors are returned when there is a problem  """
     with patch('coordinator.api.views.studies.requests') as mock_requests:
         mock_resp = Mock()
-        mock_resp.json.return_value  = {'message': 'server error'}
+        mock_resp.json.return_value = {'message': 'server error'}
         mock_requests.get.return_value = mock_resp
         mock_requests.get.return_value.status_code = 500
 
@@ -69,8 +69,7 @@ def test_sync_studies_fail(client):
         expected = 'http://dataservice/studies?limit=100'
         mock_requests.get.assert_called_with(expected)
 
-
-        mock_resp.json.return_value  = {'<html>Server error</html>'}
+        mock_resp.json.return_value = {'<html>Server error</html>'}
         mock_requests.get.return_value = mock_resp
         mock_requests.get.return_value.status_code = 500
 
@@ -88,7 +87,7 @@ def test_sync_studies_updated(client, db, studies):
     """ Test that fields are updated on change in dataservice """
     with patch('coordinator.api.views.studies.requests') as mock_requests:
         mock_resp = Mock()
-        mock_resp.json.return_value  = {
+        mock_resp.json.return_value = {
             'results': [StudySerializer(v).data for v in studies.values()]
         }
         mock_resp.json.return_value['results'][-1]['name'] = 'Updated Name'
@@ -113,7 +112,7 @@ def test_sync_studies_deleted(client, db, studies):
     """ Test that studies are set as deleted when removed from dataservice """
     with patch('coordinator.api.views.studies.requests') as mock_requests:
         mock_resp = Mock()
-        mock_resp.json.return_value  = {
+        mock_resp.json.return_value = {
             'results': [StudySerializer(v).data for v in studies.values()]
         }
         mock_resp.json.return_value['results'][-1]['name'] = 'Updated Name'
@@ -127,7 +126,7 @@ def test_sync_studies_deleted(client, db, studies):
         res = resp.json()
 
         # Remove a study
-        mock_resp.json.return_value  = {
+        mock_resp.json.return_value = {
             'results': mock_resp.json.return_value['results'][:-1]
         }
 
@@ -137,7 +136,7 @@ def test_sync_studies_deleted(client, db, studies):
         assert resp.json()['deleted'] == 1
         assert Study.objects.count() == 5
 
-        assert Study.objects.get(kf_id='SD_00000004').deleted == True
+        assert Study.objects.get(kf_id='SD_00000004').deleted
 
 
 def test_no_delete_update(client, db, studies):
@@ -156,7 +155,7 @@ def test_new_study(client, db, studies):
     """ Test case that a new study has been added to the dataservice """
     with patch('coordinator.api.views.studies.requests') as mock_requests:
         mock_resp = Mock()
-        mock_resp.json.return_value  = {
+        mock_resp.json.return_value = {
             'results': [StudySerializer(v).data for v in studies.values()]
         }
         mock_resp.json.return_value['results'].append({
@@ -184,6 +183,7 @@ def test_new_study(client, db, studies):
 
         assert Study.objects.count() == 6
         assert Study.objects.get(kf_id='SD_XXXXXXXX').name == 'New Study'
+
 
 def test_get_study(client, db):
     """ Test that dataservice is called for studies """
