@@ -2,6 +2,7 @@ import datetime
 import uuid
 import django_rq
 from django.db import models
+from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django_fsm import FSMField, transition
 
