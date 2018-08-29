@@ -229,7 +229,7 @@ EGO_API = os.environ.get('EGO_URL', None)
 DATASERVICE_API = os.environ.get('DATASERVICE_URL', None)
 
 # Timeouts in seconds
-TASK_TIMEOUT = 600
+TASK_TIMEOUT = 1600
 RELEASE_TIMEOUT = 3600
 
 LOGGING = {

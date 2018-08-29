@@ -5,6 +5,7 @@ from requests.exceptions import ConnectionError, HTTPError
 
 import django_rq
 from django.db import models
+from django.conf import settings
 from django_fsm import FSMField, transition
 
 from coordinator.utils import kf_id_generator
