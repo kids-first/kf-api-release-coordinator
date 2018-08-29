@@ -70,6 +70,24 @@ docker run --name coordinator-pg -p 5432:5432 postgres:9.5
 docker exec coordinator-pg psql -U postgres -c "CREATE DATABASE dev;"
 ```
 
+#### Start redis and workers
+
+Redis is used for queueing messages for workers. If you are developing a
+feature that requires task services to run, you will need to have a running
+redis instance and a worker to process the queue:
+
+```
+docker run -d --name coordinator-redis -p 6379:6379 redis:latest
+```
+
+And start a worker (only necessary if you need to process tasks):
+
+```
+python manage.py rqworker default
+```
+
+Note that you will have to restart the worker if your task code changes.
+
 #### Run the Django app
 
 You may configure the Postgres connection settings by setting the following
@@ -80,6 +98,11 @@ env variables:
 - `PG_PASS`
 - `PG_HOST`
 - `PG_PORT`
+
+And the Redis connection settings with:
+
+- `REDIS_HOST`
+- `REDIS_PORT`
 
 ```
 # migrate the database first
@@ -166,6 +189,15 @@ The final state of the release and all tasks in it will be `canceled`
 When the coordinator identifies one of its tasks as having failed, it will issue `cancel` actions to all other tasks in the release.
 The final state of the release will be `failed` as well as the task that caused the failure.
 All other tasks will end in a `canceled` state.
+
+### Cancelation on timeout
+
+Releases and tasks may timeout if they remain in the same state for too long.
+`TASK_TIMEOUT` and `RELEASE_TIMEOUT` in the `settings.py` set these timeouts.
+The coordinator will periodically poll task services for tasks that are in the release process.
+If a task has been in the `waiting`, `running`, or `publishing` state longer than `TASK_TIMEOUT` allows, the release the task belongs to will be canceled.
+If a release has been in the `initializing`, `running`, `publishing`, or `canceling` state for longer than `RELEASE_TIMEOUT` allows, the release will be canceled.
+
 
 ### Cancelation by task
 
