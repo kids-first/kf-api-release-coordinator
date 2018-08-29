@@ -70,6 +70,24 @@ docker run --name coordinator-pg -p 5432:5432 postgres:9.5
 docker exec coordinator-pg psql -U postgres -c "CREATE DATABASE dev;"
 ```
 
+#### Start redis and workers
+
+Redis is used for queueing messages for workers. If you are developing a
+feature that requires task services to run, you will need to have a running
+redis instance and a worker to process the queue:
+
+```
+docker run -d --name coordinator-redis -p 6379:6379 redis:latest
+```
+
+And start a worker (only necessary if you need to process tasks):
+
+```
+python manage.py rqworker default
+```
+
+Note that you will have to restart the worker if your task code changes.
+
 #### Run the Django app
 
 You may configure the Postgres connection settings by setting the following
@@ -80,6 +98,11 @@ env variables:
 - `PG_PASS`
 - `PG_HOST`
 - `PG_PORT`
+
+And the Redis connection settings with:
+
+- `REDIS_HOST`
+- `REDIS_PORT`
 
 ```
 # migrate the database first
