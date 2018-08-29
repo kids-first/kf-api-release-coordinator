@@ -190,6 +190,15 @@ When the coordinator identifies one of its tasks as having failed, it will issue
 The final state of the release will be `failed` as well as the task that caused the failure.
 All other tasks will end in a `canceled` state.
 
+### Cancelation on timeout
+
+Releases and tasks may timeout if they remain in the same state for too long.
+`TASK_TIMEOUT` and `RELEASE_TIMEOUT` in the `settings.py` set these timeouts.
+The coordinator will periodically poll task services for tasks that are in the release process.
+If a task has been in the `waiting`, `running`, or `publishing` state longer than `TASK_TIMEOUT` allows, the release the task belongs to will be canceled.
+If a release has been in the `initializing`, `running`, `publishing`, or `canceling` state for longer than `RELEASE_TIMEOUT` allows, the release will be canceled.
+
+
 ### Cancelation by task
 
 Although not suggested, a task may cancel a release by reporting itself as `canceled`.
