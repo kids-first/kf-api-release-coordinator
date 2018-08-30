@@ -15,7 +15,7 @@ class Study(models.Model):
     """
     kf_id = models.CharField(max_length=11, primary_key=True,
                              null=False)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=256)
     visible = models.BooleanField(default=True)
     deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=False,
