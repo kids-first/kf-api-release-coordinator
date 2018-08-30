@@ -56,9 +56,9 @@ class Release(models.Model):
                             help_text='UUID used internally')
     author = models.CharField(max_length=100, blank=False, default='admin',
                               help_text='The user who created the release')
-    name = models.CharField(max_length=100,
+    name = models.CharField(max_length=256,
                             help_text='Name of the release')
-    description = models.CharField(max_length=500, blank=True,
+    description = models.CharField(max_length=5000, blank=True,
                                    help_text='Release notes')
     state = FSMField(default='waiting',
                      help_text='The current state of the release')
