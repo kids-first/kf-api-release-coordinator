@@ -10,14 +10,16 @@ from coordinator.api.models.task import Task, task_id
 from coordinator.api.models.taskservice import TaskService, task_service_id
 from coordinator.api.models.release import Release, release_id
 from coordinator.api.models.event import Event, event_id
+from coordinator.api.models.study import Study
 
 
 @receiver(post_transition, sender=Release)
 def create_release_event(sender, instance, name, source, target, **kwargs):
     ev_type = 'error' if target in ['failed', 'rejected'] else 'info'
     ev = Event(event_type=ev_type,
-               message='release {} changed from {} to {}'
-                       .format(instance.kf_id, source, target),
+               message='release {}, version {} changed from {} to {}'
+                       .format(instance.kf_id, instance.version,
+                               source, target),
                release=instance)
     ev.save()
 

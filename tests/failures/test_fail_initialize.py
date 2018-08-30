@@ -20,7 +20,7 @@ def init_release(client, worker):
     release = {
         'name': 'First release',
         'description': 'Testing',
-        'studies': ['SD_00000000'],
+        'studies': ['SD_00000001'],
         'tags': []
     }
     resp = client.post(BASE_URL+'/releases',
@@ -59,7 +59,7 @@ def check_common(client):
 
 
 def test_fail_initialize_500(client, transactional_db,
-                             mocker, worker, task_service):
+                             mocker, worker, task_service, study):
     """
     Test case when a task is rejected from returning a non-200 repsonse
     when an `initialize` action is sent to it.
@@ -75,7 +75,7 @@ def test_fail_initialize_500(client, transactional_db,
 
 
 def test_fail_initialize_connection_err(client, transactional_db,
-                                        mocker, worker, task_service):
+                                        mocker, worker, task_service, study):
     """
     Test case when a task is rejected from returning a non-200 repsonse
     when an `initialize` action is sent to it.
@@ -91,7 +91,7 @@ def test_fail_initialize_connection_err(client, transactional_db,
 
 
 def test_fail_initialize_timeout(client, transactional_db,
-                                 mocker, worker, task_service):
+                                 mocker, worker, task_service, study):
     """
     Test case when a task is rejected from a timed-out request
     """

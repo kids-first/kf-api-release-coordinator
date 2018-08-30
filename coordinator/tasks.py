@@ -51,6 +51,14 @@ def init_release(release_id):
     release.initialize()
     release.save()
 
+    # There should always be services in a release, but if not, immediately
+    # stage the release
+    if not task_services:
+        release.start()
+        release.staged()
+        release.save()
+        return
+
     for service in task_services:
         if not service.enabled:
             continue
@@ -159,9 +167,16 @@ def publish_release(release_id):
     """
     release = Release.objects.select_related().get(kf_id=release_id)
     release.publish()
+    tasks = release.tasks.all()
+
+    # Should always have at least one task service for a release, but if there
+    # are none, publish skip to published
+    if not tasks:
+        release.complete()
+
     release.save()
 
-    for task in release.tasks.all():
+    for task in tasks:
         body = {
             'action': 'publish',
             'task_id': task.kf_id,

@@ -1,6 +1,16 @@
-from coordinator.api.models import Task, TaskService, Release, Event
+from coordinator.api.models import Task, TaskService, Release, Event, Study
 from rest_framework import serializers
 from coordinator.api.validators import validate_study
+
+
+class StudySerializer(serializers.HyperlinkedModelSerializer):
+
+    version = serializers.CharField(source='latest_version', allow_blank=True)
+
+    class Meta:
+        model = Study
+        fields = ('kf_id', 'name', 'version', 'visible',
+                  'deleted', 'created_at')
 
 
 class TaskSerializer(serializers.HyperlinkedModelSerializer):
@@ -32,17 +42,24 @@ class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
     tags = serializers.ListField(
                 child=serializers.CharField(max_length=50, allow_blank=False,
                                             validators=[]))
-    studies = serializers.ListField(
-                child=serializers.CharField(max_length=11, allow_blank=False,
-                                            validators=[validate_study]),
-                min_length=1)
+
+    studies = serializers.PrimaryKeyRelatedField(queryset=Study.objects.all(),
+                                                 many=True)
+
+    def validate_studies(self, studies):
+        if len(studies) == 0:
+            raise serializers.ValidationError('Must have at least one study')
+        return studies
+
     tasks = TaskSerializer(read_only=True, many=True)
 
     class Meta:
         model = Release
         fields = ('kf_id', 'name', 'description', 'state', 'studies',
-                  'tasks', 'created_at', 'tags', 'author')
-        read_only_fields = ('kf_id', 'state', 'tasks', 'created_at')
+                  'tasks', 'version', 'created_at', 'tags', 'author',
+                  'is_major')
+        read_only_fields = ('kf_id', 'state', 'tasks', 'version', 'created_at',
+                            'version')
 
 
 class EventSerializer(serializers.HyperlinkedModelSerializer):
