@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
@@ -21,7 +22,7 @@ def validate_endpoint(url):
         )
 
     try:
-        resp = requests.get(url+'/status', timeout=15)
+        resp = requests.get(url+'/status', timeout=settings.REQUEST_TIMEOUT)
         resp.raise_for_status()
         if resp.status_code != 200:
             raise ValueError('response did not return with 200')

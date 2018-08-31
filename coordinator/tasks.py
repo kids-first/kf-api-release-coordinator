@@ -1,5 +1,6 @@
 import django_rq
 import requests
+from django.conf import settings
 from coordinator.api.models import Task, TaskService, Release
 
 
@@ -91,7 +92,7 @@ def init_task(release_id, task_service_id, task_id):
     try:
         resp = requests.post(service.url+'/tasks',
                              json=body,
-                             timeout=15)
+                             timeout=settings.REQUEST_TIMEOUT)
     except requests.exceptions.RequestException:
         failed = True
 
@@ -135,7 +136,7 @@ def start_release(release_id):
         try:
             resp = requests.post(task.task_service.url+'/tasks',
                                  json=body,
-                                 timeout=15)
+                                 timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
         except requests.exceptions.RequestException:
             failed = True
@@ -187,7 +188,7 @@ def publish_release(release_id):
         try:
             resp = requests.post(task.task_service.url+'/tasks',
                                  json=body,
-                                 timeout=15)
+                                 timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
         except requests.exceptions.RequestException:
             failed = True
@@ -233,7 +234,7 @@ def cancel_release(release_id, fail=False):
         try:
             requests.post(task.task_service.url+'/tasks',
                           json=body,
-                          timeout=15)
+                          timeout=settings.REQUEST_TIMEOUT)
         except requests.exceptions.RequestException:
             pass
 

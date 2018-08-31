@@ -94,7 +94,7 @@ class Task(models.Model):
         try:
             resp = requests.post(self.task_service.url+'/tasks',
                                  json=body,
-                                 timeout=15)
+                                 timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
         except (ConnectionError, HTTPError):
             # Cancel release if there is a problem

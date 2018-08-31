@@ -4,7 +4,7 @@ import random
 import django_rq
 from datetime import datetime, timezone
 from mock import Mock, patch
-from coordinator.api.models import Release, TaskService, Study
+from coordinator.api.models import Release, TaskService, Study, Task
 from rest_framework.test import APIClient
 
 
@@ -35,6 +35,10 @@ def admin_client():
 
 @pytest.yield_fixture
 def worker():
+    # Clear queue
+    q = django_rq.get_queue()
+    q.empty()
+
     worker = django_rq.get_worker()
     return worker
 
@@ -125,10 +129,11 @@ def studies(transactional_db):
 def releases(admin_client, studies):
     rel = {}
     for i in range(5):
-        r = admin_client.post(BASE_URL+'/releases',
-                              {'name': 'TEST',
-                               'studies': 'SD_{0:08d}'.format(i)})
-        rel[r.json()['kf_id']] = r.json()
+        r = Release(name='TEST')
+        r.save()
+        r.studies.set([list(studies.values())[i]])
+        rel[r.kf_id] = r
+        r.save()
     return rel
 
 
@@ -142,12 +147,13 @@ def task_services(admin_client):
         mock_requests.get.return_value = mock_resp
 
         for i in range(10):
-            r = admin_client.post(BASE_URL+'/task-services',
-                                  {'name': 'TASK SERVICE {}'.format(i),
-                                   'url': 'http://localhost',
-                                   'author': 'daniel@d3b.center',
-                                   'description': 'test'})
-            ts[r.json()['kf_id']] = r.json()
+            t = {'name': 'TASK SERVICE {}'.format(i),
+                 'url': 'http://localhost',
+                 'author': 'daniel@d3b.center',
+                 'description': 'test'}
+            t = TaskService(**t)
+            ts[t.kf_id] = t
+    TaskService.objects.bulk_create(ts.values())
     return ts
 
 
@@ -155,13 +161,11 @@ def task_services(admin_client):
 def tasks(admin_client, releases, task_services):
     ta = {}
     for i in range(50):
-        rel = releases[random.choice(list(releases.keys()))]['kf_id']
-        ts = task_services[random.choice(list(task_services.keys()))]['kf_id']
-        r = admin_client.post(BASE_URL+'/tasks',
-                              {'name': 'TASK {}'.format(i),
-                               'release': BASE_URL+'/releases/'+rel,
-                               'task_service': BASE_URL+'/task-services/'+ts})
-        ta[r.json()['kf_id']] = r.json()
+        rel = releases[random.choice(list(releases.keys()))]
+        ts = task_services[random.choice(list(task_services.keys()))]
+        t = Task(release=rel, task_service=ts)
+        ta[t.kf_id] = t
+    Task.objects.bulk_create(ta.values())
     return ta
 
 

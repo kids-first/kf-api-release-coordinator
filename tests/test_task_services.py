@@ -196,7 +196,7 @@ def test_task_service_bad_status(client, db, task_service):
         assert mock_requests.get.call_count == 1
         assert ts.health_status == 'ok'
         mock_requests.get.assert_called_with('http://ts.com/status',
-                                             timeout=15)
+                                             timeout=0.1)
         assert ts.last_ok_status == 1
         ts.health_check()
         ts.health_check()

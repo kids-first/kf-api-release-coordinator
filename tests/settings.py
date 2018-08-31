@@ -20,12 +20,8 @@ APPEND_SLASH = False
 
 INSTALLED_APPS = [
     'coordinator.api.apps.ApiConfig',
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
     'rest_framework',
     'drf_yasg'
 ]
@@ -34,10 +30,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'coordinator.urls'
@@ -156,3 +149,4 @@ DATASERVICE_API = os.environ.get('DATASERVICE_URL', None)
 # Timeouts in seconds
 TASK_TIMEOUT = 600
 RELEASE_TIMEOUT = 3600
+REQUEST_TIMEOUT = 0.1
