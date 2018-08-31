@@ -11,6 +11,8 @@
 Kids First Release Coordinator
 ==============================
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/91f1b8d6a77b466fa593861cdadc2f5e)](https://app.codacy.com/app/kids-first/kf-api-release-coordinator?utm_source=github.com&utm_medium=referral&utm_content=kids-first/kf-api-release-coordinator&utm_campaign=Badge_Grade_Dashboard)
+
 The Kids First Release Coordinator brings different services in the Kids First ecosystem together to release data in a synchronized manner.
 
 
