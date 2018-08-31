@@ -63,7 +63,7 @@ class Release(models.Model):
     state = FSMField(default='waiting',
                      help_text='The current state of the release')
     tags = ArrayField(models.CharField(max_length=50, blank=True),
-                      blank=True, default=[],
+                      blank=True, default=list,
                       help_text='Tags to group the release by')
     studies = models.ManyToManyField(Study,
                                      help_text='kf_ids of the studies '

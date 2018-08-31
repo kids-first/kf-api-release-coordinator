@@ -3,6 +3,7 @@ import requests
 from requests.exceptions import RequestException
 
 from django.db import models
+from django.conf import settings
 from coordinator.utils import kf_id_generator
 from coordinator.api.validators import validate_endpoint
 
@@ -63,7 +64,8 @@ class TaskService(models.Model):
         healthy.
         """
         try:
-            resp = requests.get(self.url+'/status', timeout=15)
+            resp = requests.get(self.url+'/status',
+                                timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
         except RequestException:
             self.last_ok_status += 1
