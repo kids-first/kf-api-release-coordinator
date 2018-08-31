@@ -98,9 +98,11 @@ class Task(models.Model):
             resp.raise_for_status()
         except (ConnectionError, HTTPError):
             # Cancel release if there is a problem
-            self.release.cancel()
-            self.release.save()
+            if self.release.state not in ['canceling', 'canceled']:
+                self.release.cancel()
+                self.release.save()
             self.failed()
+            self.save()
             django_rq.enqueue(cancel_release, self.release.kf_id, fail=True)
             return
 
