@@ -101,9 +101,10 @@ class Task(models.Model):
             if self.release.state not in ['canceling', 'canceled']:
                 self.release.cancel()
                 self.release.save()
+                django_rq.enqueue(cancel_release, self.release.kf_id,
+                                  fail=True)
             self.failed()
             self.save()
-            django_rq.enqueue(cancel_release, self.release.kf_id, fail=True)
             return
 
         resp = resp.json()

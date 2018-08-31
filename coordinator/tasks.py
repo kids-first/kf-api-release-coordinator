@@ -100,7 +100,7 @@ def init_task(release_id, task_service_id, task_id):
         failed = True
 
     if failed:
-        release.failed()
+        release.cancel()
         release.save()
         task.reject()
         task.save()
@@ -150,7 +150,7 @@ def start_release(release_id):
             failed = True
 
         if failed:
-            release.failed()
+            release.cancel()
             release.save()
             task.failed()
             task.save()
@@ -202,7 +202,7 @@ def publish_release(release_id):
             failed = True
 
         if failed:
-            release.failed()
+            release.cancel()
             release.save()
             task.failed()
             task.save()
