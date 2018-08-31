@@ -35,6 +35,10 @@ def admin_client():
 
 @pytest.yield_fixture
 def worker():
+    # Clear queue
+    q = django_rq.get_queue()
+    q.empty()
+
     worker = django_rq.get_worker()
     return worker
 

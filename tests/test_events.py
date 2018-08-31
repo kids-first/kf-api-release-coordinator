@@ -69,19 +69,17 @@ def test_filters(client, transactional_db, event):
     assert len(resp.json()['results']) == 1
 
 
-def test_event_for_release(client, db, task, worker):
+def test_event_for_release(client, db, worker, release):
     """ Check that there is an event created for a new release """
     worker.work(burst=True)
-    release = client.get(task['release']).json()
-    assert Event.objects.filter(release_id=release['kf_id']).count() == 4
-    event = (Event.objects.filter(task_id=release['tasks'][0]['kf_id'])
-             .filter(release_id=release['kf_id']).get())
-
-    assert ('task {} changed from waiting to rejected'
-            .format(release['tasks'][0]['kf_id']) in event.message)
-    assert event.task is not None
-    assert event.task_service is not None
-    assert event.event_type == 'error'
+    assert Event.objects.filter(release_id=release['kf_id']).count() == 3
+    events = [ev for ev in Event.objects.all()]
+    assert ('release {}, version 0.0.0 changed from waiting to initializing'
+            .format(release['kf_id']) in events[0].message)
+    assert ('release {}, version 0.0.0 changed from initializing to running'
+            .format(release['kf_id']) in events[1].message)
+    assert ('release {}, version 0.0.0 changed from running to staged'
+            .format(release['kf_id']) in events[2].message)
 
 
 @pytest.mark.parametrize('field', [
