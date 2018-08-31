@@ -120,6 +120,23 @@ class Task(models.Model):
                 self.release.save()
                 django_rq.enqueue(cancel_release, self.release.kf_id)
                 return
+            elif resp['state'] == 'staged' and self.state != 'staged':
+                self.stage()
+                self.save()
+                # Check all tasks in release
+                release = self.release
+                if all([t.state == 'staged' for t in release.tasks.all()]):
+                    release.staged()
+                    release.save()
+            elif resp['state'] == 'published' and self.state != 'published':
+                self.published()
+                self.save()
+                # Check all tasks in release
+                release = self.release
+                if all([t.state == 'published' for t in release.tasks.all()]):
+                    release.complete()
+                    release.save()
+                return
 
         # Check if the task has timed out
         if self.state not in ['staged', 'published', 'canceled', 'failed']:
