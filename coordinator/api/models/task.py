@@ -132,7 +132,7 @@ class Task(models.Model):
                     release.staged()
                     release.save()
             elif resp['state'] == 'published' and self.state != 'published':
-                self.published()
+                self.complete()
                 self.save()
                 # Check all tasks in release
                 release = self.release
