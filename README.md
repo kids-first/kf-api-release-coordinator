@@ -4,7 +4,7 @@
 <p align="center">
   <a href="https://github.com/kids-first/kf-api-release-coordinator/blob/master/LICENSE"><img src="https://img.shields.io/github/license/kids-first/kf-api-release-coordinator.svg?style=for-the-badge"></a>
   <a href="https://kids-first.github.io/kf-api-release-coordinator/docs/coordinator.html"><img src="https://img.shields.io/readthedocs/pip.svg?style=for-the-badge"></a>
-  <a href="https://circleci.com/gh/kids-first/kf-api-release-coordinator"><img src="https://img.shields.io/circleci/project/kids-first/kf-api-release-coordinator.svg?style=for-the-badge"></a>
+  <a href="https://circleci.com/gh/kids-first/kf-api-release-coordinator"><img src="https://img.shields.io/circleci/project/github/kids-first/kf-api-release-coordinator.svg?style=for-the-badge"></a>
   <a href="https://app.codacy.com/app/kids-first/kf-api-release-coordinator/dashboard"><img src="https://img.shields.io/codacy/grade/7500ec3e7b81489dbe0ff0cee8c3d76d.svg?style=for-the-badge"></a>
 </p>
 
