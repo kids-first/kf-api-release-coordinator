@@ -12,7 +12,7 @@ class TaskFilter(django_filters.FilterSet):
 
     class Meta:
         model = Task
-        fields = ('release', 'task_service')
+        fields = ('release', 'task_service', 'state')
 
 
 class TaskViewSet(viewsets.ModelViewSet):
