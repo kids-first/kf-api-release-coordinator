@@ -43,6 +43,32 @@ def test_new_release(admin_client, transactional_db, studies):
     assert res['version'] == '0.0.0'
 
 
+def test_release_filters(client, db, releases):
+    """ Test that releases can be filtered by state """
+    resp = client.get('http://testserver/releases?state=waiting')
+    assert resp.json()['count'] == 5
+
+    r = list(releases.values())
+    r[0].state = 'staged'
+    r[0].save()
+    r[1].state = 'published'
+    r[1].save()
+    r[2].state = 'published'
+    r[2].save()
+    r[3].state = 'running'
+    r[3].save()
+
+    resp = client.get('http://testserver/releases?state=published')
+    assert resp.json()['count'] == 2
+
+    resp = client.get('http://testserver/releases?state=staged')
+    assert resp.json()['count'] == 1
+    assert resp.json()['results'][0]['kf_id'] == r[0].kf_id
+
+    resp = client.get('http://testserver/releases?state=None')
+    assert resp.json()['count'] == 0
+
+
 def test_patch_bump(admin_client, transactional_db, studies):
     assert Release.objects.count() == 0
 
