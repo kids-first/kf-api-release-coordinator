@@ -5,6 +5,7 @@ from rest_framework import viewsets
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
+import django_filters.rest_framework
 from coordinator.authentication import EgoAuthentication
 from coordinator.tasks import (
     init_release,
@@ -15,6 +16,13 @@ from coordinator.tasks import (
 from coordinator.permissions import GroupPermission
 from coordinator.api.models import Release
 from coordinator.api.serializers import ReleaseSerializer
+
+
+class ReleaseFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = Release
+        fields = ('state',)
 
 
 class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
@@ -36,6 +44,8 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
     lookup_field = 'kf_id'
     queryset = Release.objects.order_by('-created_at').all()
     serializer_class = ReleaseSerializer
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_class = ReleaseFilter
 
     def create(self, *args, **kwargs):
         """

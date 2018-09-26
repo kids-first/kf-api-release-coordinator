@@ -67,6 +67,13 @@ def test_task_filters(client, db, task):
     count = resp.json()['count']
     assert count == 1
 
+    # State filter
+    resp = client.get(BASE_URL+'/tasks?state=blah')
+    assert resp.json()['count'] == 0
+
+    resp = client.get(BASE_URL+'/tasks?state=pending')
+    assert resp.json()['count'] == 1
+
 
 def test_task_relations(client, transactional_db, task):
     """ Test basic response """
