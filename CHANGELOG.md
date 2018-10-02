@@ -1,3 +1,21 @@
+# Kids First Release Coordinator Release 1.2.0
+
+## Features
+
+Minor Bug fixes and updates.
+
+### Summary
+
+Feature Emojis: 🐛x2 👷x1 ✨x1
+Feature Labels: [bug](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/bug) x2 [feature](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/feature) x1 [documentation](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/documentation) x1
+
+### New features and changes
+
+- (#106) 🐛 Add missing return statement - @dankolbman
+- (#103) 👷 Use module in Jenkinsfile - @dankolbman
+- (#105) ✨ Filter by state - @dankolbman
+- (#104) 🐛 Fix CircleCI badge in README - @dankolbman
+
 # Kids First Release Coordinator Release 1.1.0
 
 ## Features
