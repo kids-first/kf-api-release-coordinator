@@ -1,3 +1,18 @@
+# Kids First Release Coordinator Release 1.2.1
+
+## Features
+
+Upgrade django to patch security vulnrability.
+
+### Summary
+
+Feature Emojis: ⬆️x1
+Feature Labels: [refactor](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/refactor) x1
+
+### New features and changes
+
+- (#109) ⬆️ Upgrade django version - @dankolbman
+
 # Kids First Release Coordinator Release 1.2.0
 
 ## Features
