@@ -134,7 +134,7 @@ necessary tasks to execute and sync operations needed for a data release.
 [View the spec](https://kids-first.github.io/kf-api-release-coordinator/docs/coordinator.html)
 
 
-Sequence of Operations (Success Case)
+Task Service Operations
 ---------------------------------------------------
 The diagram below illustrates the sequence of operations between the Coordinator service and a Task service for a
 successful release publish.
@@ -202,3 +202,29 @@ If a release has been in the `initializing`, `running`, `publishing`, or `cancel
 ### Cancelation by task
 
 Although not suggested, a task may cancel a release by reporting itself as `canceled`.
+
+
+## Integrating other services with the Coordinator
+
+The above specification outlines a service that is essential to a release.
+Often, there may be services which are interested in the state of new releases, but are non-vital to its success.
+Such services may be developed with far fewer contstraints than a task service.
+Outlined below are two designs for services that utilize information from the coordinator about releases.
+
+### Passive polling
+
+![Polling](docs/PollService.png)
+
+The easiest way to sync with the coordinator is to poll the `/releases/<kf_id>` endpoint of the coordinator to retrieve the current state of a release.
+This is sufficient for an application simply wishing for a snapshot of the current system infrequently, but will be heavy in operations for both coordinator and the service if high-resolution into state changes are needed.
+Furthermore, it is easy to miss state changes if a state completes quickly and should thus not be used for any service interested in the transition events.
+
+
+### Event Listener
+
+![SNS](docs/SNSService.png)
+
+The coordinator sends events to an SNS topic whenever a release or task changes its state.
+This makes it easy for a service to react to particular changes of interest.
+In addition, this ensures that communication only happens when an event occurs, resulting in less overhead.
+If needed, the service should still be able to refresh its internal state from the coordinator using its API in the case that an event is missed, or the service goes offline for some time.
