@@ -1,6 +1,7 @@
 import datetime
 import uuid
 import django_rq
+import logging
 from django.db import models
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -14,6 +15,10 @@ from coordinator.api.models.study import Study
 # Allowed source statse for release cancels and fails
 CANCEL_SOURCES = ['waiting', 'initializing', 'running', 'staged', 'publishing']
 FAIL_SOURCES = CANCEL_SOURCES+['canceling']
+
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def release_id():
@@ -136,6 +141,7 @@ class Release(models.Model):
         if diff.total_seconds() > settings.RELEASE_TIMEOUT:
             if self.state == 'canceling':
                 return
+            logger.error(f'canceling release {self.kf_id} for time out.')
             self.cancel()
             self.save()
             django_rq.enqueue(cancel_release, self.kf_id)
@@ -146,6 +152,8 @@ class Release(models.Model):
             if task.state in ['failed', 'canceled', 'rejected']:
                 if self.state == 'canceling':
                     return
+                logger.error(f'canceling release: {self.kf_id} task is ' +
+                             f'{task.state}')
                 self.cancel()
                 self.save()
                 django_rq.enqueue(cancel_release, self.kf_id)
