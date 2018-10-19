@@ -1,7 +1,12 @@
 import django_rq
 import requests
+import logging
 from django.conf import settings
 from coordinator.api.models import Task, TaskService, Release
+
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 @django_rq.job
@@ -95,8 +100,10 @@ def init_task(release_id, task_service_id, task_id):
                              timeout=settings.REQUEST_TIMEOUT)
     except requests.exceptions.RequestException:
         failed = True
+        logger.error(f'problem requesting task for init: {resp.json()}')
 
     if resp and resp.status_code != 200:
+        logger.error(f' invalid code from task for init: {resp.status_code}')
         failed = True
 
     if failed:
@@ -139,14 +146,19 @@ def start_release(release_id):
                                  timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
         except requests.exceptions.RequestException:
+            logger.error(f'problem requesting task for start: {resp.json()}')
             failed = True
 
         # Check that command was accepted
         if resp and resp.status_code != 200:
+            logger.error(f'invalid code from task for start: ' +
+                         '{resp.status_code}')
             failed = True
 
         if (resp and 'state' in resp.json() and
            resp.json()['state'] != 'running'):
+            logger.error(f'invalid state returned from task for start: ' +
+                         '{resp.json()}')
             failed = True
 
         if failed:
@@ -191,14 +203,19 @@ def publish_release(release_id):
                                  timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
         except requests.exceptions.RequestException:
+            logger.error(f'problem requesting task for publish: {resp.json()}')
             failed = True
 
         # Check that command was accepted
         if resp and resp.status_code != 200:
+            logger.error(f'invalid code from task for publish: ' +
+                         '{resp.status_code}')
             failed = True
 
         if (resp and 'state' in resp.json() and
            resp.json()['state'] != 'publishing'):
+            logger.error(f'invalid state returned from task for publish: ' +
+                         '{resp.json()}')
             failed = True
 
         if failed:
