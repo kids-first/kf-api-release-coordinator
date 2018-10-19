@@ -155,6 +155,8 @@ class Task(models.Model):
                 return
 
         if 'progress' in resp and resp['progress'] != self.progress:
+            if isinstance(resp['progress'], str):
+                resp['progress'] = int(resp['progress'].replace('%', ''))
             self.progress = resp['progress']
         if not self.progress:
             self.progress = 0
