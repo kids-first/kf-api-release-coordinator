@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from coordinator.api.models import Release,  Study
+from coordinator.api.models import Release, Study
 from .task import TaskSerializer
 from .release_note import ReleaseNoteSerializer
 
@@ -26,4 +26,4 @@ class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
                   'tasks', 'version', 'created_at', 'tags', 'author',
                   'is_major')
         read_only_fields = ('kf_id', 'state', 'tasks', 'version', 'created_at',
-                            'version')
+                            'version', 'notes')
