@@ -1,3 +1,21 @@
+# Kids First Release Coordinator Release 1.3.0
+
+## Features
+
+### Summary
+
+Feature Emojis: ✨x1 ✏️x1 ♻️x1 🔊x1 📝x1
+Feature Labels: [refactor](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/refactor) x2 [data model](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/data%20model) x1 [feature](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/feature) x1 [devops](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/devops) x1 [documentation](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/documentation) x1
+
+### New features and changes
+
+- (#116) ✨ Release notes - @dankolbman
+- (#115) ✏️ Coerce progress status from percent to int - @dankolbman
+- (#114) ♻️ Use response content instead of json for log dumps - @dankolbman
+- (#113) 🔊 Add failure logging - @dankolbman
+- (#111) 📝 Add information on integrating services with the coordinator - @dankolbman
+
+
 # Kids First Release Coordinator Release 1.2.1
 
 ## Features
