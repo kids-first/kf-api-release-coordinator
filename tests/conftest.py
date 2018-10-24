@@ -97,6 +97,18 @@ def study(admin_client, transactional_db):
 
 
 @pytest.yield_fixture
+def release_note(admin_client, transactional_db, release, study):
+    note = {
+        'kf_id': 'RN_00000001',
+        'description': 'Lorem ipsum',
+        'release': BASE_URL+'/releases/'+release['kf_id'],
+        'study': BASE_URL+'/studies/'+study.kf_id
+    }
+    resp = admin_client.post(BASE_URL+'/release-notes', data=note)
+    return resp.json()
+
+
+@pytest.yield_fixture
 def event(admin_client, transactional_db, release, task_service, task):
     """ Creates an event """
     event = {
