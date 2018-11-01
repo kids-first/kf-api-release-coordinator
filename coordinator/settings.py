@@ -138,6 +138,7 @@ def get_databases():
 
     return db
 
+
 DATABASES = get_databases()
 
 
@@ -177,6 +178,37 @@ def get_queues():
 
 
 RQ_QUEUES = get_queues()
+
+
+# EGO oauth creds
+def get_ego_secrets():
+    """ Load the application client_id and secret to exchange for ego jwts """
+    ego = {
+        'default': {
+            'CLIENT_ID': os.environ.get('EGO_CLIENT_ID', None),
+            'SECRET': os.environ.get('EGO_SECRET', None),
+        }
+    }
+    vault_url = os.environ.get('VAULT_URL', None)
+    vault_role = os.environ.get('VAULT_ROLE', None)
+    ego_secret = os.environ.get('EGO_SECRET', None)
+    # Default to the above config if the required vault vars are not present
+    if not vault_url or not vault_role or not ego_secret:
+        return ego
+
+    import hvac
+    client = hvac.Client(url=vault_url)
+    client.auth_iam(vault_role)
+    ego_secrets = client.read(ego_secret)
+    client.logout()
+
+    ego['default']['CLIENT_ID'] = ego_secrets['data']['client_id']
+    ego['default']['SECRET'] = ego_secrets['data']['client_secret']
+
+    return ego
+
+
+EGO = get_ego_secrets()
 
 SNS_ARN = os.environ.get('SNS_ARN', None)
 
