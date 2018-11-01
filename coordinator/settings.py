@@ -209,6 +209,8 @@ def get_ego_secrets():
 
 
 EGO = get_ego_secrets()
+from coordinator.authentication import EgoJWTStore
+EGO_JWT = EgoJWTStore()
 
 SNS_ARN = os.environ.get('SNS_ARN', None)
 

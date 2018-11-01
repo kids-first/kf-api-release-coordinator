@@ -102,6 +102,8 @@ EGO = {
         'SECRET': os.environ.get('EGO_SECRET', 'test-secret'),
     }
 }
+from coordinator.authentication import EgoJWTStore
+EGO_JWT = EgoJWTStore()
 
 SNS_ARN = None
 
