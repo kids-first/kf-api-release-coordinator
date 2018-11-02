@@ -18,11 +18,29 @@ with open(os.path.join(os.path.dirname(__file__), 'user_token.txt')) as f:
 
 @pytest.yield_fixture(autouse=True)
 def mock_ego(mocker):
+    """
+    Mocks requests to ego
+
+    GET requests are assumed to go to /oauth/token/verify and will respond
+      'true' indicating the token is valid
+
+    POST requests are assumed to go to /oauth/token and will respond
+      with a new access_token
+    """
     mock_auth_requests = mocker.patch('coordinator.authentication.requests')
-    mock_auth_resp = Mock()
-    mock_auth_resp.status_code = 200
-    mock_auth_resp.json.return_value = True
-    mock_auth_requests.get.return_value = mock_auth_resp
+    mock_get_resp = Mock()
+    mock_get_resp.status_code = 200
+    mock_get_resp.json.return_value = True
+
+    mock_post_resp = Mock()
+    mock_post_resp.status_code = 200
+    mock_post_resp.json.return_value = {
+        'access_token': 'abc',
+        'expires_in': 1000
+    }
+
+    mock_auth_requests.get.return_value = mock_get_resp
+    mock_auth_requests.post.return_value = mock_post_resp
 
 
 @pytest.yield_fixture
