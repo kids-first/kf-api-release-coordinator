@@ -106,8 +106,7 @@ class EgoJWTStore():
             logger.error(f'Ego token response malformed: {resp.content}')
             return
 
-
         self._token = content['access_token']
-        self.expiration = (datetime.datetime.utcnow().timestamp()
-                           + content['expires_in'])
+        self.expiration = (datetime.datetime.utcnow().timestamp() +
+                           content['expires_in'])
         return self._token

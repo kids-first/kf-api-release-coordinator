@@ -1,10 +1,6 @@
-import datetime
-import os
 import json
 import jwt
-import pytest
 from mock import MagicMock, patch
-from django.conf import settings
 from coordinator.authentication import EgoJWTStore
 
 
@@ -16,8 +12,6 @@ def test_store_token(mocker):
     mock_resp.status_code = 200
     with open('tests/ego_token.json') as f:
         resp = json.loads(f.read())
-        resp['exp'] = datetime.datetime.utcnow() + datetime.timedelta(days=1)
-        resp['exp'] = resp['exp'].timestamp()
         mock_resp.json.return_value = resp
 
     mock_ego.post.return_value = mock_resp
@@ -27,7 +21,6 @@ def test_store_token(mocker):
 
     assert 'aud' in token
     assert token['aud'][0] == 'release-coordinator'
-    assert token['exp'] > datetime.datetime.utcnow().timestamp()
 
     assert mock_ego.post.call_count == 1
     url = 'http://ego/oauth/token'
