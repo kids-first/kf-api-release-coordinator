@@ -29,6 +29,12 @@ info:
     6) Recieve `publish` from coordinator and run final actions to make data public
 
 
+    ## Authentication
+
+    To ensure that a request to the task service originates from the coordinator, all requests to the task services will be made with a `Authorization` header containing a bearer jwt for ego.
+    This token may be used to verify the coordinator's identity against ego using the `/oauth/token/verify` endpoint.
+
+
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
