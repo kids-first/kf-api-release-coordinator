@@ -81,7 +81,12 @@ class EgoJWTStore():
 
     @property
     def header(self):
-        """ Automatically formats an authorization header for a request """
+        """
+        Automatically formats an authorization header for a request
+        If we are unable to retrieve a token from ego, return an empty dict.
+        """
+        if not self.token:
+            return {}
         return {
             'Authorization': f'Bearer {self.token}'
         }
