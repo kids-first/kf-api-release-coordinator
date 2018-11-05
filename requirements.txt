@@ -4,7 +4,7 @@ django-filter==1.1.0
 djangorestframework==3.8.2
 gunicorn==19.7.1
 psycopg2==2.7.4
-requests==2.18.4
+requests==2.20.0
 urllib3==1.22
 base32-crockford==0.3.0
 django-rq==1.0.1
