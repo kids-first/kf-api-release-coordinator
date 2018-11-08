@@ -96,6 +96,7 @@ def init_task(release_id, task_service_id, task_id):
     resp = None
     try:
         resp = requests.post(service.url+'/tasks',
+                             headers=settings.EGO_JWT.header,
                              json=body,
                              timeout=settings.REQUEST_TIMEOUT)
     except requests.exceptions.RequestException:
@@ -142,6 +143,7 @@ def start_release(release_id):
         resp = None
         try:
             resp = requests.post(task.task_service.url+'/tasks',
+                                 headers=settings.EGO_JWT.header,
                                  json=body,
                                  timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
@@ -199,6 +201,7 @@ def publish_release(release_id):
         resp = None
         try:
             resp = requests.post(task.task_service.url+'/tasks',
+                                 headers=settings.EGO_JWT.header,
                                  json=body,
                                  timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
@@ -251,6 +254,7 @@ def cancel_release(release_id, fail=False):
         }
         try:
             requests.post(task.task_service.url+'/tasks',
+                          headers=settings.EGO_JWT.header,
                           json=body,
                           timeout=settings.REQUEST_TIMEOUT)
         except requests.exceptions.RequestException:

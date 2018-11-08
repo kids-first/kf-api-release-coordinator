@@ -96,6 +96,15 @@ RQ_QUEUES = {
 if DEBUG or TESTING:
     RQ_QUEUES['default']['ASYNC'] = True
 
+EGO = {
+    'default': {
+        'CLIENT_ID': os.environ.get('EGO_CLIENT_ID', 'test-client'),
+        'SECRET': os.environ.get('EGO_SECRET', 'test-secret'),
+    }
+}
+from coordinator.authentication import EgoJWTStore
+EGO_JWT = EgoJWTStore()
+
 SNS_ARN = None
 
 DATASERVICE_URL = 'http://dataservice'

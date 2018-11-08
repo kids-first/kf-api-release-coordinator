@@ -1,8 +1,14 @@
+import datetime
 import jwt
 import requests
+import logging
 from django.conf import settings
 from rest_framework import authentication
 from rest_framework import exceptions
+
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 class EgoAuthentication(authentication.BaseAuthentication):
@@ -48,3 +54,64 @@ class EgoAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed('Auth service unavailable')
 
         return (user, None)
+
+
+class EgoJWTStore():
+    """
+    Stores the coordinator's application JWT to be sent to verify the
+    coordinator's identity.
+    """
+
+    def __init__(self):
+        self.expiration = 0
+        self._token = None
+
+    @property
+    def token(self):
+
+        # Check if we've fetched a token yet
+        if self._token is None:
+            self.get_new_token()
+
+        # Check if we need to get a fresh token
+        if datetime.datetime.utcnow().timestamp() > self.expiration - 60:
+            self.get_new_token()
+
+        return self._token
+
+    @property
+    def header(self):
+        """
+        Automatically formats an authorization header for a request
+        If we are unable to retrieve a token from ego, return an empty dict.
+        """
+        if not self.token:
+            return {}
+        return {
+            'Authorization': f'Bearer {self.token}'
+        }
+
+    def get_new_token(self):
+        """ Get a new token from ego """
+        url = f'{settings.EGO_API}/oauth/token'
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        data = (f"grant_type=client_credentials&" +
+                f"client_id={settings.EGO['default']['CLIENT_ID']}&" +
+                f"client_secret={settings.EGO['default']['SECRET']}")
+        resp = requests.post(url, headers=headers, data=data)
+
+        if resp.status_code != 200:
+            logger.error(f'Problem retrieving JWT from ego: {resp.content}')
+            return
+
+        content = resp.json()
+        if 'access_token' not in content or 'expires_in' not in content:
+            logger.error(f'Ego token response malformed: {resp.content}')
+            return
+
+        self._token = content['access_token']
+        self.expiration = (datetime.datetime.utcnow().timestamp() +
+                           content['expires_in'])
+        return self._token

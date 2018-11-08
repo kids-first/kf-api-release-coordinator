@@ -88,7 +88,7 @@ def test_task_relations(client, transactional_db, task):
     assert task['task_service'].endswith(TaskService.objects.first().kf_id)
 
 
-def test_status_check(client, transactional_db, task, worker):
+def test_status_check(client, transactional_db, task, worker, mock_ego):
     """ Check that task status are updated correctly """
     t = Task.objects.get(kf_id=task['kf_id'])
     with patch('coordinator.api.models.task.requests') as mock_requests:
@@ -108,8 +108,10 @@ def test_status_check(client, transactional_db, task, worker):
             'release_id': t.release.kf_id,
             'action': 'get_status'
         }
+        headers = {'Authorization': 'Bearer abc'}
         mock_requests.post.assert_called_with('http://ts.com/tasks',
                                               timeout=0.1,
+                                              headers=headers,
                                               json=expected)
 
         # worker.work(burst=True)

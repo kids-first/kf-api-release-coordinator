@@ -93,6 +93,7 @@ class Task(models.Model):
         }
         try:
             resp = requests.post(self.task_service.url+'/tasks',
+                                 headers=settings.EGO_JWT.header,
                                  json=body,
                                  timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
