@@ -1,3 +1,19 @@
+# Kids First Release Coordinator Release 1.4.0
+
+## Features
+
+Sends an Ego application JWT to task services so they may verify that the request originated from the coordinator
+
+### Summary
+
+Feature Emojis: ✨x1 ⬆️x1
+Feature Labels: [feature](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/feature) x1 [refactor](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/refactor) x1
+
+### New features and changes
+
+- (#119) ✨ Add ego jwt - @dankolbman
+- (#118) ⬆️ Upgrade requests dependency for vuln warning - @dankolbman
+
 # Kids First Release Coordinator Release 1.3.0
 
 ## Features
