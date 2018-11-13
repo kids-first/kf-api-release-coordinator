@@ -190,6 +190,77 @@ def test_latest_version(admin_client, db, studies):
     assert resp.json()['version'] == v2
 
 
+def test_last_published_fields(admin_client, db, studies, worker):
+    """
+    Test that the `last_pub_version` and `last_pub_date` are populated.
+
+    Make release 0.0.0 with studies A, B
+    Publish release 0.0.0
+    Make release 0.1.1 with studies B, C
+    Publish release 0.1.1
+    """
+    # First release
+    resp = admin_client.post(BASE_URL+'/releases',
+                             data={'name': 'test',
+                                   'studies': ['SD_00000000', 'SD_00000001']})
+    assert resp.status_code == 201
+    release_id_1 = resp.json()['kf_id']
+    v1 = resp.json()['version']
+    created_at_1 = resp.json()['created_at']
+    assert v1 == '0.0.0'
+    worker.work(burst=True)
+
+    # Publish
+    resp = admin_client.post(BASE_URL+'/releases/'+release_id_1+'/publish')
+    worker.work(burst=True)
+
+    # Check all three releases
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000000')
+    assert resp.json()['last_pub_version'] == '0.1.0'
+    assert resp.json()['last_pub_date'] == created_at_1
+
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000001')
+    assert resp.json()['last_pub_version'] == '0.1.0'
+    assert resp.json()['last_pub_date'] == created_at_1
+
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000002')
+    assert resp.json()['last_pub_version'] is None
+    assert resp.json()['last_pub_date'] is None
+
+    # Second release
+    resp = admin_client.post(BASE_URL+'/releases',
+                             data={'name': 'test',
+                                   'studies': ['SD_00000001', 'SD_00000002']})
+    assert resp.status_code == 201
+    release_id_2 = resp.json()['kf_id']
+    v2 = resp.json()['version']
+    created_at_2 = resp.json()['created_at']
+    assert v2 == '0.1.1'
+    worker.work(burst=True)
+
+    # Check that fields are still for first release before second is published
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000000')
+    assert resp.json()['last_pub_version'] == '0.1.0'
+    assert resp.json()['last_pub_date'] == created_at_1
+
+    # Publish
+    resp = admin_client.post(BASE_URL+'/releases/'+release_id_2+'/publish')
+    worker.work(burst=True)
+
+    # Check all three releases
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000000')
+    assert resp.json()['last_pub_version'] == '0.1.0'
+    assert resp.json()['last_pub_date'] == created_at_1
+
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000001')
+    assert resp.json()['last_pub_version'] == '0.2.0'
+    assert resp.json()['last_pub_date'] == created_at_2
+
+    resp = admin_client.get(BASE_URL+'/studies/SD_00000002')
+    assert resp.json()['last_pub_version'] == '0.2.0'
+    assert resp.json()['last_pub_date'] == created_at_2
+
+
 def test_new_study(client, db, studies):
     """ Test case that a new study has been added to the dataservice """
     with patch('coordinator.api.views.studies.requests') as mock_requests:
