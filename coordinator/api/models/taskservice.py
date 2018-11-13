@@ -65,6 +65,7 @@ class TaskService(models.Model):
         """
         try:
             resp = requests.get(self.url+'/status',
+                                headers=settings.EGO_JWT.header,
                                 timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
         except RequestException:
