@@ -31,3 +31,39 @@ class Study(models.Model):
             return self.release_set.latest('created_at').version
         except Release.DoesNotExist:
             return None
+
+    @property
+    def last_published_release(self):
+        """
+        Gets the last published release this study was in and stores it
+        on the object for retrieval by other last_published_ functions.
+        """
+        from coordinator.api.models.release import Release
+        if getattr(self, '_last_published_release', None):
+            if self._last_published_release == 'no_releases':
+                return None
+            return self._last_published_release
+
+        try:
+            self._last_published_release = (self.release_set
+                                                .filter(state='published')
+                                                .latest('created_at'))
+            return self._last_published_release
+        except Release.DoesNotExist:
+            # If there were no release, we will mark it as a special value
+            # so as to prevent returning to the db for the same results
+            self._last_published_release = 'no_releases'
+            return None
+
+    def last_published_version(self):
+        """
+        Gets the version number of the last published release that this
+        study was in.
+        """
+        return getattr(self.last_published_release, 'version', None)
+
+    def last_published_date(self):
+        """
+        Gets the date of the last published release that this study was in.
+        """
+        return getattr(self.last_published_release, 'created_at', None)
