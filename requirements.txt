@@ -7,8 +7,9 @@ psycopg2==2.7.4
 requests==2.20.0
 urllib3==1.22
 base32-crockford==0.3.0
-django-rq==1.0.1
-rq==0.10.0
+django-rq==1.2.0
+rq==0.12.0
+redis==2.10.6
 -e git+https://github.com/dankolbman/hvac#egg=hvac
 drf-yasg==1.6.1
 boto==2.48.0
