@@ -10,7 +10,7 @@ services:
   coordinator:
     build: .
     image: coordinator:latest
-    command: ["./bin/wait-for-pg.sh", "pg", "./manage.py runserver"]
+    command: ['./bin/wait-for-pg.sh', 'pg', './manage.py runserver']
     volumes:
       - ./:/app/
     external_links:
@@ -30,7 +30,7 @@ services:
   worker:
     build: .
     image: coordinator:latest
-    command: ["./bin/wait-for-pg.sh", "pg", "./bin/run.sh"]
+    command: ['./bin/wait-for-pg.sh', 'pg', './bin/run.sh']
     volumes:
       - ./:/app/
     environment:
@@ -49,3 +49,8 @@ services:
     command: /bin/bash -c "while true; do sleep 10; curl -s -XPOST coordinator/task-services/health_checks; done"
     depends_on:
       - coordinator
+
+networks:
+  default:
+    external:
+      name: kf-data-stack
