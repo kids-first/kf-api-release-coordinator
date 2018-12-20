@@ -23,6 +23,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - WORKER=false
+      - DJANGO_SETTINGS_MODULE=settings.development
     depends_on:
       - pg
       - redis
@@ -38,6 +39,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - WORKER=true
+      - DJANGO_SETTINGS_MODULE=settings.development
     depends_on:
       - pg
       - redis

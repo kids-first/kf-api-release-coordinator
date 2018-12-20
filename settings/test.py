@@ -56,9 +56,11 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination' +
+                                '.LimitOffsetPagination',
     'PAGE_SIZE': 10,
-    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework'
+                                '.DjangoFilterBackend',)
 }
 
 WSGI_APPLICATION = 'coordinator.wsgi.application'
@@ -71,7 +73,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('PG_NAME', 'test'),
-        'USER': os.environ.get('PG_USER','postgres'),
+        'USER': os.environ.get('PG_USER', 'postgres'),
         'PASSWORD': os.environ.get('PG_PASS', None),
         'HOST': os.environ.get('PG_HOST', '127.0.0.1'),
         'PORT': os.environ.get('PG_PORT', '5432'),
@@ -102,7 +104,8 @@ EGO = {
         'SECRET': os.environ.get('EGO_SECRET', 'test-secret'),
     }
 }
-from coordinator.authentication import EgoJWTStore
+
+from coordinator.authentication import EgoJWTStore  # nopep8
 EGO_JWT = EgoJWTStore()
 
 SNS_ARN = None
@@ -114,16 +117,20 @@ DATASERVICE_URL = 'http://dataservice'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation' +
+                '.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation' +
+                '.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation' +
+                '.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation' +
+                '.NumericPasswordValidator',
     },
 ]
 
