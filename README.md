@@ -16,79 +16,32 @@ The Kids First Release Coordinator brings different services in the Kids First e
 
 ## Development Quick Start
 
-### Developing against the coordinator
-
-To develop task services against the coordinator, use the included
-docker-compose.yml to get a fully functional Coordinator API:
-
+If you do not already have a `kf-data-stack` docker network, create one:
 ```
-git clone https://github.com/kids-first/kf-api-release-coordinator
-cd kf-api-release-coordinator
-docker-compose up
+docker network create kf-data-stack
 ```
 
-This will stand up a couple different services:
-- The Coordinator API on port `5000`
-- A task worker to process different release jobs
-- A redis instance to manage the work queue
-- A postgres database to store information about releases, tasks, and services
-
-To allow tasks to communicate with the Coordinator, they will need to be
-run in a container that is linked to the Coordinator's network.
-
+Start the coordinator with docker-compose:
 ```
-docker run --name=task --net=kfapireleasecoordinator_default --rm --link kfapireleasecoordinator_coordinator_1:coordinator example-task:latest
+docker-compose up -d
 ```
 
-This will allow the task running in the `task` container to communicate with
-the Coordinator API with the `coordinator` hostname and the Coordinator to
-communicate with the task using the `task` hostname.
+This will start a number of different services and the coordinator api in development mode.
+Code changes will be immediately available on the api, although any changes that affect tasks may require the `worker` container to be restarted.
+
+The following services are started as dependencies:
+- `coordinator` The Coordinator API on port `5000`
+- `worker` A task worker to process different release jobs
+- `redis` A redis instance to manage the work queue
+- `pg` A postgres database to store information about releases, tasks, and services
+- `scheduler` A simple curl that repeatedly polls the status checks
 
 
-### Developing the Coordinator API
+### Networking
+To allow tasks to communicate with the Coordinator, they will need to be run within containers on the `kf-data-stack` network.
 
-To get started developing the Coordinator API itself, clone the repo,
-install dependencies, start a postgres database, and run the django app.
 
-#### Clone and install Python dependencies
-
-```
-git clone https://github.com/kids-first/kf-api-release-coordinator
-cd kf-api-release-coordinator
-virtualenv -p python3 venv
-source venv/bin/activate
-pip install -r dev-requirements.txt
-pip install -r requirements.txt
-```
-
-#### Start a Postgres Database
-
-Starting a Postgres Docker container:
-
-```
-docker run --name coordinator-pg -p 5432:5432 postgres:9.5
-docker exec coordinator-pg psql -U postgres -c "CREATE DATABASE dev;"
-```
-
-#### Start redis and workers
-
-Redis is used for queueing messages for workers. If you are developing a
-feature that requires task services to run, you will need to have a running
-redis instance and a worker to process the queue:
-
-```
-docker run -d --name coordinator-redis -p 6379:6379 redis:latest
-```
-
-And start a worker (only necessary if you need to process tasks):
-
-```
-python manage.py rqworker default
-```
-
-Note that you will have to restart the worker if your task code changes.
-
-#### Run the Django app
+### Configuration
 
 You may configure the Postgres connection settings by setting the following
 env variables:
@@ -103,13 +56,6 @@ And the Redis connection settings with:
 
 - `REDIS_HOST`
 - `REDIS_PORT`
-
-```
-# migrate the database first
-export PG_NAME=dev
-./manage.py migrate
-./manage.py runserver
-```
 
 
 ## Background
