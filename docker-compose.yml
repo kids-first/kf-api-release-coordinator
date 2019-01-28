@@ -4,46 +4,53 @@ services:
   pg:
     image: postgres:9.5
     environment:
-      POSTGRES_DB: "coordinator"
+      - POSTGRES_DB=coordinator
   redis:
     image: redis:latest
   coordinator:
     build: .
     image: coordinator:latest
-    command: /bin/ash -c "sleep 5; ./bin/run.sh"
+    command: ['./bin/wait-for-pg.sh', 'pg', './manage.py runserver']
     volumes:
-      - .:/app
+      - ./:/app/
     external_links:
       - task
     ports:
-      - "8000:80"
+      - '8000:80'
     environment:
       - PG_NAME=coordinator
       - PG_HOST=pg
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - WORKER=false
+      - DJANGO_SETTINGS_MODULE=settings.development
     depends_on:
       - pg
-      - redis 
+      - redis
   worker:
     build: .
     image: coordinator:latest
-    command: /bin/ash -c "sleep 6; ./bin/run.sh"
+    command: ['./bin/wait-for-pg.sh', 'pg', './bin/run.sh']
     volumes:
-      - .:/app
+      - ./:/app/
     environment:
       - PG_NAME=coordinator
       - PG_HOST=pg
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - WORKER=true
+      - DJANGO_SETTINGS_MODULE=settings.development
     depends_on:
       - pg
-      - redis 
+      - redis
       - coordinator
   scheduler:
     image: tutum/curl:latest
-    command: /bin/bash -c "while true; do sleep 10; curl -XPOST coordinator/task-services/health_checks; done"
+    command: /bin/bash -c "while true; do sleep 10; curl -s -XPOST coordinator/task-services/health_checks; done"
     depends_on:
       - coordinator
+
+networks:
+  default:
+    external:
+      name: kf-data-stack

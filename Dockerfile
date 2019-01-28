@@ -9,6 +9,7 @@ RUN apk --update add py3-psycopg2 musl-dev \
     ca-certificates \
     libffi-dev libressl-dev \
     gcc postgresql-dev \
+    postgresql-client \
  && pip install --upgrade pip
 
 # Python deps
