@@ -1,3 +1,21 @@
+# Kids First Release Coordinator Release 1.5.0
+
+## Features
+
+### Summary
+
+Feature Emojis: 📌x2 ✨x1 ⬆️x1 🔧x1
+Feature Labels: [bug](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/bug) x3 [feature](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/feature) x2 [refactor](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/refactor) x1
+
+### New features and changes
+
+- (#122) ✨ Adds last_published fields to study model - @dankolbman
+- (#126) ⬆️ Bump urllib3 dependency - @dankolbman
+- (#125) 📌 Pin redis requirements - @dankolbman
+- (#123) 📌 Set python to version 3.6 in Dockerfile - @dankolbman
+- (#121) 🔧 Include jwt in Authorization header in requests to task's /status - @dankolbman
+
+
 # Kids First Release Coordinator Release 1.4.0
 
 ## Features
