@@ -1,3 +1,16 @@
+# Kids First Release Coordinator Release 1.5.1
+
+## Features
+
+### Summary
+
+Feature Emojis: 🐳x1
+Feature Labels: [refactor](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/refactor) x1
+
+### New features and changes
+
+- (#127) 🐳 Docker refactor - @dankolbman
+
 # Kids First Release Coordinator Release 1.5.0
 
 ## Features
