@@ -10,13 +10,11 @@ services:
   coordinator:
     build: .
     image: coordinator:latest
-    command: ['./bin/wait-for-pg.sh', 'pg', './manage.py runserver']
+    command: ['./bin/wait-for-pg.sh', 'pg', './bin/run_dev.sh']
     volumes:
       - ./:/app/
-    external_links:
-      - task
     ports:
-      - '8000:80'
+      - '5000:5000'
     environment:
       - PG_NAME=coordinator
       - PG_HOST=pg
