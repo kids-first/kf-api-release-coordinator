@@ -1,3 +1,17 @@
+# Kids First Release Coordinator Release 1.5.2
+
+## Features
+
+### Summary
+
+Feature Emojis: 🖼x1 🐛x1
+Feature Labels: [documentation](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/documentation) x1
+
+### New features and changes
+
+- (#131) 🖼 Update logo - @dankolbman
+- (#130) 🐛 Set default settings module for wsgi entry - @dankolbman
+
 # Kids First Release Coordinator Release 1.5.1
 
 ## Features
