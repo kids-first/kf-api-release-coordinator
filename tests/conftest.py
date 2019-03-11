@@ -73,7 +73,8 @@ def release(admin_client, transactional_db, study):
     """ Creates a release """
     release = {
         'name': 'test release',
-        'studies': ['SD_00000001']
+        'studies': ['SD_00000001'],
+        'tags': [],
     }
     resp = admin_client.post('http://testserver/releases', data=release)
     return resp.json()

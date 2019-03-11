@@ -33,7 +33,9 @@ def test_my_studies(client, db, fakes):
     Test that the user may create a release involving their studies
     """
     resp = client.post(BASE_URL+'/releases',
-                       data={'name': 'test', 'studies': ['SD_00000000']},
+                       data={'name': 'test',
+                             'studies': ['SD_00000000'],
+                             'tags': []},
                        headers={'Authorization': 'Bearer '+USER_TOKEN})
 
     assert resp.status_code == 201
