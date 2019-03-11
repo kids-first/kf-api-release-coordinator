@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 
 services:
   pg:
@@ -8,7 +8,9 @@ services:
   redis:
     image: redis:latest
   coordinator:
-    build: .
+    build:
+      context: .
+      target: dev
     image: coordinator:latest
     command: ['./bin/wait-for-pg.sh', 'pg', './bin/run_dev.sh']
     volumes:
@@ -26,7 +28,9 @@ services:
       - pg
       - redis
   worker:
-    build: .
+    build:
+      context: .
+      target: dev
     image: coordinator:latest
     command: ['./bin/wait-for-pg.sh', 'pg', './bin/run.sh']
     volumes:
