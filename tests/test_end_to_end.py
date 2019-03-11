@@ -67,7 +67,7 @@ def test_full_release(client, transactional_db, mocker, worker, study):
         'name': 'First release',
         'description': 'Testing',
         'studies': ['SD_00000001'],
-        'tags': []
+        'tags': [],
     }
     resp = client.post(BASE_URL+'/releases',
                        data=release,

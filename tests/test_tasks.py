@@ -43,8 +43,8 @@ def test_task_filters(client, db, task):
     # Task service filter
     ts = TaskService.objects.first()
     resp = client.get(BASE_URL+'/tasks?task_service=blah')
-    count = resp.json()['count']
-    assert count == 0
+    assert resp.status_code == 400
+    assert 'task_service' in resp.json()
     resp = client.get(BASE_URL+'/tasks?task_service='+ts.kf_id)
     count = resp.json()['count']
     assert count == 1
@@ -52,16 +52,14 @@ def test_task_filters(client, db, task):
     # Release filter
     r = Release.objects.first()
     resp = client.get(BASE_URL+'/tasks?release=blah')
-    count = resp.json()['count']
-    assert count == 0
     resp = client.get(BASE_URL+'/tasks?release='+r.kf_id)
     count = resp.json()['count']
     assert count == 1
 
     # Release and service filter
     resp = client.get(BASE_URL+'/tasks?release=blah&task_service=blah')
-    count = resp.json()['count']
-    assert count == 0
+    assert resp.status_code == 400
+    assert 'release' in resp.json()
     url = BASE_URL+f'/tasks?release={r.kf_id}&task_service={ts.kf_id}'
     resp = client.get(url)
     count = resp.json()['count']

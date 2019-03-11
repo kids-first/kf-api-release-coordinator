@@ -6,8 +6,11 @@ from .release_note import ReleaseNoteSerializer
 
 class ReleaseSerializer(serializers.HyperlinkedModelSerializer):
     tags = serializers.ListField(
-                child=serializers.CharField(max_length=50, allow_blank=False,
-                                            validators=[]))
+                child=serializers.CharField(max_length=50,
+                                            allow_blank=False,
+                                            validators=[]),
+                allow_empty=True,
+                required=False)
 
     studies = serializers.PrimaryKeyRelatedField(queryset=Study.objects.all(),
                                                  many=True)

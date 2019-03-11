@@ -44,9 +44,16 @@ def mock_ego(mocker):
 
 
 @pytest.yield_fixture
+def client():
+    """ Sets client to use json requests """
+    client = APIClient(content_type='json')
+    yield client
+
+
+@pytest.yield_fixture
 def admin_client():
     """ Injects admin JWT into each request """
-    client = APIClient()
+    client = APIClient(content_type='json')
     client.credentials(headers={'Authorization': 'Bearer ' + ADMIN_TOKEN})
     yield client
 
@@ -66,7 +73,8 @@ def release(admin_client, transactional_db, study):
     """ Creates a release """
     release = {
         'name': 'test release',
-        'studies': ['SD_00000001']
+        'studies': ['SD_00000001'],
+        'tags': [],
     }
     resp = admin_client.post('http://testserver/releases', data=release)
     return resp.json()
