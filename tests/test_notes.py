@@ -56,8 +56,8 @@ def test_update_note(admin_client, db, release, study, release_note):
 def test_filter_study(client, db, release, study, release_note):
     """ Test that notes may be filtered by study """
     resp = client.get('http://testserver/release-notes?study=SD_00000000')
-    assert resp.status_code == 200
-    assert resp.json()['count'] == 0
+    assert resp.status_code == 400
+    assert 'Select a valid choice' in resp.json()['study'][0]
 
     resp = client.get('http://testserver/release-notes?study='+study.kf_id)
     assert resp.status_code == 200
@@ -67,9 +67,10 @@ def test_filter_study(client, db, release, study, release_note):
 def test_filter_release(client, db, release, study,
                         release_note):
     """ Test that notes may be filtered by study """
-    resp = client.get('http://testserver/release-notes?release=RE_00000000')
+    release_id = release['kf_id']
+    resp = client.get(f'http://testserver/release-notes?release={release_id}')
     assert resp.status_code == 200
-    assert resp.json()['count'] == 0
+    assert resp.json()['count'] == 1
 
     resp = client.get('http://testserver/release-notes?release' +
                       release['kf_id'])
@@ -83,12 +84,16 @@ def test_complex_filter(client, db, release, study,
     url = (f"http://testserver/release-notes" +
            f"?release={release['kf_id']}&study=SD_00000000")
     resp = client.get(url)
-    assert resp.json()['count'] == 0
+    assert resp.status_code == 400
+    assert 'release' not in resp.json()
+    assert 'study' in resp.json()
 
     url = (f"http://testserver/release-notes" +
            f"?release=RE_00000000&study={study.kf_id}")
     resp = client.get(url)
-    assert resp.json()['count'] == 0
+    assert resp.status_code == 400
+    assert 'release' in resp.json()
+    assert 'stody' not in resp.json()
 
     url = (f"http://testserver/release-notes" +
            f"?release={release['kf_id']}&study={study.kf_id}")
