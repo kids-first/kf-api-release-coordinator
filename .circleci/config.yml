@@ -40,7 +40,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pytest --ds=settings.test --cov=coordinator --pep8
+            pytest --cov=coordinator
             coverage xml
             python-codacy-coverage -r coverage.xml
           environment:
