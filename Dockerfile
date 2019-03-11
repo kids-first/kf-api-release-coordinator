@@ -1,4 +1,4 @@
-FROM        python:3.6-alpine3.7
+FROM        python:3.6-alpine3.7 as base
 
 ADD         requirements.txt /app/
 WORKDIR     /app
@@ -38,3 +38,8 @@ COPY        bin/api.conf /etc/supervisor/conf.d/api.conf
 
 # Start processes
 CMD ["/app/bin/run.sh"]
+
+
+FROM base as dev
+COPY        dev-requirements.txt /app/
+RUN         pip install -r /app/dev-requirements.txt
