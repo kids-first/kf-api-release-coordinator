@@ -2,18 +2,27 @@ import os
 import pytest
 import random
 import django_rq
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from mock import Mock, patch
 from coordinator.api.models import Release, TaskService, Study, Task
 from rest_framework.test import APIClient
+from unittest import mock
+import jwt
 
 
 BASE_URL = 'http://testserver'
 
-with open(os.path.join(os.path.dirname(__file__), 'admin_token.txt')) as f:
-    ADMIN_TOKEN = f.read().strip()
-with open(os.path.join(os.path.dirname(__file__), 'user_token.txt')) as f:
-    USER_TOKEN = f.read().strip()
+
+@pytest.yield_fixture(scope='session', autouse=True)
+def ego_key_mock():
+    """
+    Mocks out the response from the /oauth/token/public_key endpoint
+    """
+    auth = 'coordinator.authentication.EgoAuthentication'
+    with mock.patch(f'{auth}._get_new_key') as get_key:
+        with open('tests/keys/public_key.pem', 'rb') as f:
+            get_key.return_value = f.read()
+            yield get_key
 
 
 @pytest.yield_fixture(autouse=True)
@@ -21,26 +30,19 @@ def mock_ego(mocker):
     """
     Mocks requests to ego
 
-    GET requests are assumed to go to /oauth/token/verify and will respond
-      'true' indicating the token is valid
-
     POST requests are assumed to go to /oauth/token and will respond
       with a new access_token
     """
-    mock_auth_requests = mocker.patch('coordinator.authentication.requests')
-    mock_get_resp = Mock()
-    mock_get_resp.status_code = 200
-    mock_get_resp.json.return_value = True
-
+    mock_auth_requests = mocker.patch(
+        'coordinator.authentication.requests.post'
+    )
     mock_post_resp = Mock()
     mock_post_resp.status_code = 200
     mock_post_resp.json.return_value = {
         'access_token': 'abc',
         'expires_in': 1000
     }
-
-    mock_auth_requests.get.return_value = mock_get_resp
-    mock_auth_requests.post.return_value = mock_post_resp
+    mock_auth_requests.return_value = mock_post_resp
 
 
 @pytest.yield_fixture
@@ -51,10 +53,33 @@ def client():
 
 
 @pytest.yield_fixture
-def admin_client():
+def admin_client(token):
     """ Injects admin JWT into each request """
     client = APIClient(content_type='json')
-    client.credentials(headers={'Authorization': 'Bearer ' + ADMIN_TOKEN})
+    client.credentials(
+        headers={'Authorization': 'Bearer '+token(roles=['ADMIN'])}
+    )
+    yield client
+
+
+@pytest.yield_fixture
+def dev_client(token):
+    """ Injects dev JWT into each request """
+    client = APIClient(content_type='json')
+    client.credentials(
+        headers={'Authorization': 'Bearer '+token(roles=['DEV'],
+                 groups=['SD_00000001'])}
+    )
+    yield client
+
+
+@pytest.yield_fixture
+def user_client(token):
+    """ Injects user JWT into each request """
+    client = APIClient(content_type='json')
+    client.credentials(
+        headers={'Authorization': 'Bearer '+token(groups=['SD_00000001'])}
+    )
     yield client
 
 
@@ -212,3 +237,66 @@ def fakes(releases, task_services, tasks):
     return {'releases': releases,
             'task-services': task_services,
             'tasks': tasks}
+
+
+@pytest.yield_fixture
+def token():
+    """
+    Returns a function that will generate a token for a user in given groups
+    with given roles.
+    """
+    with open('tests/keys/private_key.pem', 'rb') as f:
+        ego_key = f.read()
+
+    def make_token(groups=None, roles=None):
+        """
+        Returns an ego JWT for a user with given roles and groups
+        """
+        if groups is None:
+            groups = []
+        if roles is None:
+            roles = ['USER']
+
+        now = datetime.now()
+        tomorrow = now + timedelta(days=1)
+        token = {
+          "iat": now.timestamp(),
+          "exp": tomorrow.timestamp(),
+          "sub": "cfa211bc-6fa8-4a03-bb81-cf377f99da47",
+          "iss": "ego",
+          "aud": "creator",
+          "jti": "7b42a89d-85e3-4954-81a0-beccb12f32d5",
+          "context": {
+            "user": {
+              "name": "user@d3b.center",
+              "email": "user@d3b.center",
+              "status": "Approved",
+              "firstName": "Bobby",
+              "lastName": "TABLES;",
+              "createdAt": 1531440000000,
+              "lastLogin": 1551293729279,
+              "preferredLanguage": None,
+              "groups": groups,
+              "roles": roles,
+              "permissions": []
+            }
+          }
+        }
+
+        return jwt.encode(token, ego_key, algorithm='RS256').decode('utf8')
+    return make_token
+
+
+@pytest.yield_fixture
+def user_headers(token):
+    """
+    Returning headers for given user type
+    """
+    def get_header(user_type):
+        return {
+            'admin_user': {'Authorization': 'Bearer '+token(roles=['ADMIN'])},
+            'dev_user': {'Authorization': 'Bearer '+token(roles=['DEV'])},
+            'user': {'Authorization': 'Bearer '+token()},
+            'unauthed_user': {}
+        }[user_type]
+    return get_header
