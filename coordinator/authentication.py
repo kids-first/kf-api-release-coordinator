@@ -1,8 +1,11 @@
 import datetime
 import jwt
+import re
+import textwrap
 import requests
 import logging
 from django.conf import settings
+from django.core.cache import cache
 from rest_framework import authentication
 from rest_framework import exceptions
 
@@ -12,6 +15,40 @@ logger.setLevel(logging.INFO)
 
 
 class EgoAuthentication(authentication.BaseAuthentication):
+
+    @staticmethod
+    def _get_ego_key():
+        """
+        Attempts to retrieve the ego public key from the cache. If it's not
+        there or is expired, fetch a new one from ego and store it back in the
+        cache.
+        """
+        key = cache.get(settings.CACHE_EGO_KEY, None)
+        # If key is not set in cache (or has timed out), get a new one
+        if key is None:
+            key = EgoAuthentication._get_new_key()
+            cache.set(settings.CACHE_EGO_KEY, key, settings.CACHE_EGO_TIMEOUT)
+        return key
+
+    @staticmethod
+    def _get_new_key():
+        """
+        Get a public key from ego
+        We reformat the keystring as the whitespace is not always consistent
+        with the pem format
+        """
+        resp = requests.get(f'{settings.EGO_API}/oauth/token/public_key',
+                            timeout=10)
+        key = resp.content
+        key = key.replace(b'\n', b'')
+        key = key.replace(b'\r', b'')
+        key_re = r'-----BEGIN PUBLIC KEY-----(.*)-----END PUBLIC KEY-----'
+        contents = re.match(key_re, key.decode('utf-8')).group(1)
+        contents = '\n'.join(textwrap.wrap(contents, width=65))
+        contents = f'\n{contents}\n'
+        key = f'-----BEGIN PUBLIC KEY-----{contents}-----END PUBLIC KEY-----'
+        key = key.encode()
+        return key
 
     def authenticate(self, request):
         """
@@ -39,19 +76,23 @@ class EgoAuthentication(authentication.BaseAuthentication):
         if 'Bearer ' not in token:
             return ({}, None)
 
-        try:
-            token = token.split('Bearer ')[-1]
-            decoded = jwt.decode(token, verify=False)
-            context = decoded['context']
-            user = context['user']
-        except (KeyError, jwt.exceptions.DecodeError):
-            raise exceptions.AuthenticationFailed('Not a valid JWT')
+        token = token.split('Bearer ')[-1]
 
-        # Check that this is a valid JWT from ego
-        verify_url = settings.EGO_API + '/oauth/token/verify'
-        resp = requests.get(verify_url, headers={'token': token})
-        if resp.status_code != 200 or resp.json() is False:
-            raise exceptions.AuthenticationFailed('Auth service unavailable')
+        try:
+            # Validate JWT using Ego's public key
+            public_key = EgoAuthentication._get_ego_key()
+            token = jwt.decode(token, public_key, algorithms='RS256',
+                               options={'verify_aud': False})
+        except jwt.exceptions.DecodeError as err:
+            raise exceptions.AuthenticationFailed(
+                f'Problem authenticating request: {err}'
+            )
+        except jwt.exceptions.InvalidTokenError as err:
+            raise exceptions.AuthenticationFailed(
+                f'Token provided is not valid: {err}'
+            )
+
+        user = token['context']['user']
 
         return (user, None)
 
