@@ -12,7 +12,7 @@ services:
       context: .
       target: dev
     image: coordinator:latest
-    command: ['./bin/wait-for-pg.sh', 'pg', './bin/run_dev.sh']
+    command: '/app/bin/dev_entrypoint.sh'
     volumes:
       - ./:/app/
     ports:
@@ -22,7 +22,6 @@ services:
       - PG_HOST=pg
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - WORKER=false
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-coordinator.settings.testing}
     depends_on:
       - pg
@@ -32,7 +31,7 @@ services:
       context: .
       target: dev
     image: coordinator:latest
-    command: ['./bin/wait-for-pg.sh', 'pg', './bin/run.sh']
+    command: '/app/bin/dev_worker.sh'
     volumes:
       - ./:/app/
     environment:
@@ -40,7 +39,6 @@ services:
       - PG_HOST=pg
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - WORKER=true
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-coordinator.settings.testing}
     depends_on:
       - pg
