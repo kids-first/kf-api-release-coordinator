@@ -20,10 +20,18 @@ APPEND_SLASH = False
 
 INSTALLED_APPS = [
     'coordinator.api.apps.ApiConfig',
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
     'rest_framework',
-    'drf_yasg'
+    'django_filters',
+    'django_rq',
+    'drf_yasg',
+    'django_fsm',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
