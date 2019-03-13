@@ -37,7 +37,7 @@ COPY        bin/api.conf /etc/supervisor/conf.d/api.conf
 
 
 # Start processes
-CMD ["/app/bin/run.sh"]
+CMD ["/app/bin/entrypoint.sh"]
 
 
 FROM base as dev
@@ -54,4 +54,4 @@ RUN wget -q -O vault.zip https://releases.hashicorp.com/vault/1.0.3/vault_1.0.3_
     && unzip vault.zip \
     && mv vault /usr/local/bin
 
-CMD /app/bin/run.sh
+CMD ["/app/bin/entrypoint.sh"]
