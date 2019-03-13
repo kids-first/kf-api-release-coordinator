@@ -143,7 +143,7 @@ if redis_pass:
 
 
 # EGO oauth creds
-ego = {
+EGO = {
     'default': {
         'CLIENT_ID': os.environ.get('EGO_CLIENT_ID', None),
         'SECRET': os.environ.get('EGO_SECRET', None),
