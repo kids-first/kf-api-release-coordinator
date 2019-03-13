@@ -93,18 +93,24 @@ RQ_QUEUES = {
         'HOST': os.environ.get('REDIS_HOST', 'localhost'),
         'PORT': os.environ.get('REDIS_PORT', 6379),
         'DB': 0,
-        'DEFAULT_TIMEOUT': 360,
+        'DEFAULT_TIMEOUT': 30,
     },
     'health_checks': {
         'HOST': os.environ.get('REDIS_HOST', 'localhost'),
         'PORT': os.environ.get('REDIS_PORT', 6379),
         'DB': 0,
         'DEFAULT_TIMEOUT': 30,
-    },
+    }
 }
+
+redis_pass = os.environ.get('REDIS_PASS', False)
+if redis_pass:
+    RQ_QUEUES['default']['PASSWORD'] = redis_pass
+    RQ_QUEUES['health_checks']['PASSWORD'] = redis_pass
 
 if DEBUG or TESTING:
     RQ_QUEUES['default']['ASYNC'] = True
+
 
 EGO = {
     'default': {

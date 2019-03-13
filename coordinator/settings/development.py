@@ -108,108 +108,48 @@ WSGI_APPLICATION = 'coordinator.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-
-def get_databases():
-    """ Will try to load from vault or default to environmet """
-    db = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('PG_NAME', 'dev'),
-            'USER': os.environ.get('PG_USER', 'postgres'),
-            'PASSWORD': os.environ.get('PG_PASS', None),
-            'HOST': os.environ.get('PG_HOST', '127.0.0.1'),
-            'PORT': os.environ.get('PG_PORT', '5432'),
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('PG_NAME', 'dev'),
+        'USER': os.environ.get('PG_USER', 'postgres'),
+        'PASSWORD': os.environ.get('PG_PASS', None),
+        'HOST': os.environ.get('PG_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('PG_PORT', '5432'),
     }
-    vault_url = os.environ.get('VAULT_URL', None)
-    vault_role = os.environ.get('VAULT_ROLE', None)
-    pg_secret = os.environ.get('PG_SECRET', None)
-    # Default to the above config if the required vault vars are not present
-    if not vault_url or not vault_role or not pg_secret:
-        return db
-
-    import hvac
-    client = hvac.Client(url=vault_url)
-    client.auth_iam(vault_role)
-    pg_secrets = client.read(pg_secret)
-    client.logout()
-
-    db['default']['USER'] = pg_secrets['data']['user']
-    db['default']['PASSWORD'] = pg_secrets['data']['password']
-
-    return db
-
-
-DATABASES = get_databases()
+}
 
 
 # Redis
-def get_queues():
-    """ Will try to load from vault or default to environmet """
-    rq = {
-        'default': {
-            'HOST': os.environ.get('REDIS_HOST', 'localhost'),
-            'PORT': os.environ.get('REDIS_PORT', 6379),
-            'DB': 0,
-            'DEFAULT_TIMEOUT': 30,
-        },
-        'health_checks': {
-            'HOST': os.environ.get('REDIS_HOST', 'localhost'),
-            'PORT': os.environ.get('REDIS_PORT', 6379),
-            'DB': 0,
-            'DEFAULT_TIMEOUT': 30,
-        },
+RQ_QUEUES = {
+    'default': {
+        'HOST': os.environ.get('REDIS_HOST', 'localhost'),
+        'PORT': os.environ.get('REDIS_PORT', 6379),
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 30,
+    },
+    'health_checks': {
+        'HOST': os.environ.get('REDIS_HOST', 'localhost'),
+        'PORT': os.environ.get('REDIS_PORT', 6379),
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 30,
     }
-    vault_url = os.environ.get('VAULT_URL', None)
-    vault_role = os.environ.get('VAULT_ROLE', None)
-    redis_secret = os.environ.get('REDIS_SECRET', None)
-    # Default to the above config if the required vault vars are not present
-    if not vault_url or not vault_role or not redis_secret:
-        return rq
+}
 
-    import hvac
-    client = hvac.Client(url=vault_url)
-    client.auth_iam(vault_role)
-    redis_secrets = client.read(redis_secret)
-    client.logout()
-
-    rq['default']['PASSWORD'] = redis_secrets['data']['password']
-
-    return rq
-
-
-RQ_QUEUES = get_queues()
+redis_pass = os.environ.get('REDIS_PASS', False)
+if redis_pass:
+    RQ_QUEUES['default']['PASSWORD'] = redis_pass
+    RQ_QUEUES['health_checks']['PASSWORD'] = redis_pass
 
 
 # EGO oauth creds
-def get_ego_secrets():
-    """ Load the application client_id and secret to exchange for ego jwts """
-    ego = {
-        'default': {
-            'CLIENT_ID': os.environ.get('EGO_CLIENT_ID', None),
-            'SECRET': os.environ.get('EGO_SECRET', None),
-        }
+ego = {
+    'default': {
+        'CLIENT_ID': os.environ.get('EGO_CLIENT_ID', None),
+        'SECRET': os.environ.get('EGO_SECRET', None),
     }
-    vault_url = os.environ.get('VAULT_URL', None)
-    vault_role = os.environ.get('VAULT_ROLE', None)
-    ego_secret = os.environ.get('EGO_SECRET', None)
-    # Default to the above config if the required vault vars are not present
-    if not vault_url or not vault_role or not ego_secret:
-        return ego
+}
 
-    import hvac
-    client = hvac.Client(url=vault_url)
-    client.auth_iam(vault_role)
-    ego_secrets = client.read(ego_secret)
-    client.logout()
-
-    ego['default']['CLIENT_ID'] = ego_secrets['data']['client_id']
-    ego['default']['SECRET'] = ego_secrets['data']['client_secret']
-
-    return ego
-
-
-EGO = get_ego_secrets()
 from coordinator.authentication import EgoJWTStore  # nopep8
 EGO_JWT = EgoJWTStore()
 
