@@ -12,9 +12,15 @@ from semantic_version.django_fields import VersionField
 from coordinator.utils import kf_id_generator
 from coordinator.api.models.study import Study
 
-# Allowed source statse for release cancels and fails
-CANCEL_SOURCES = ['waiting', 'initializing', 'running', 'staged', 'publishing']
-FAIL_SOURCES = CANCEL_SOURCES+['canceling']
+# Allowed source states for failuer
+FAIL_SOURCES = [
+    'waiting',
+    'initializing',
+    'running',
+    'staged',
+    'publishing',
+    'canceling',
+]
 
 
 logger = logging.getLogger()
@@ -112,7 +118,7 @@ class Release(models.Model):
         self.save()
         return
 
-    @transition(field=state, source=CANCEL_SOURCES, target='canceling')
+    @transition(field=state, source=FAIL_SOURCES, target='canceling')
     def cancel(self):
         """ Cancel the release """
         return

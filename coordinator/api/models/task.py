@@ -126,7 +126,9 @@ class Task(models.Model):
                 self.failed()
                 self.release.cancel()
                 self.release.save()
-                django_rq.enqueue(cancel_release, self.release.kf_id)
+                django_rq.enqueue(cancel_release,
+                                  self.release.kf_id,
+                                  fail=True)
                 return
             elif resp['state'] == 'staged' and self.state != 'staged':
                 self.stage()
