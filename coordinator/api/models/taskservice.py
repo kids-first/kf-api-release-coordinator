@@ -6,6 +6,8 @@ from django.db import models
 from django.conf import settings
 from coordinator.utils import kf_id_generator
 from coordinator.api.validators import validate_endpoint
+from django.core.cache import cache
+from coordinator.authentication import get_service_token
 
 
 def task_service_id():
@@ -65,7 +67,10 @@ class TaskService(models.Model):
         """
         try:
             resp = requests.get(self.url+'/status',
-                                headers=settings.EGO_JWT.header,
+                                headers=cache.get_or_set(
+                                   settings.CACHE_EGO_TOKEN,
+                                   get_service_token
+                                ),
                                 timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
         except RequestException:
