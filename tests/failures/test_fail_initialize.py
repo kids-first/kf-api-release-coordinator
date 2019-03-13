@@ -9,10 +9,6 @@ from coordinator.api.models import Release, Task, TaskService, Event
 BASE_URL = 'http://testserver'
 
 
-with open(os.path.join(os.path.dirname(__file__), '../dev_token.txt')) as f:
-    DEV_TOKEN = f.read().strip()
-
-
 def init_release(client, worker):
     """
     Initialize a release
@@ -23,9 +19,7 @@ def init_release(client, worker):
         'studies': ['SD_00000001'],
         'tags': []
     }
-    resp = client.post(BASE_URL+'/releases',
-                       data=release,
-                       headers={'Authorization': 'Bearer '+DEV_TOKEN})
+    resp = client.post(BASE_URL+'/releases', data=release)
 
     # Do work
     worker.work(burst=True)
@@ -58,7 +52,7 @@ def check_common(client):
     assert Event.objects.count() == 4
 
 
-def test_fail_initialize_500(client, transactional_db,
+def test_fail_initialize_500(client, dev_client, transactional_db,
                              mocker, worker, task_service, study):
     """
     Test case when a task is rejected from returning a non-200 repsonse
@@ -70,11 +64,11 @@ def test_fail_initialize_500(client, transactional_db,
     mock_task_action.json.return_value = {'message': 'internal server error'}
     mock_task_requests.post.return_value = mock_task_action
 
-    release = init_release(client, worker)
+    release = init_release(dev_client, worker)
     check_common(client)
 
 
-def test_fail_initialize_connection_err(client, transactional_db,
+def test_fail_initialize_connection_err(client, dev_client, transactional_db,
                                         mocker, worker, task_service, study):
     """
     Test case when a task is rejected from returning a non-200 repsonse
@@ -86,11 +80,11 @@ def test_fail_initialize_connection_err(client, transactional_db,
     exc = mock_task_requests.exceptions.ConnectionError()
     mock_task_requests.post.side_effect = exc
 
-    release = init_release(client, worker)
+    release = init_release(dev_client, worker)
     check_common(client)
 
 
-def test_fail_initialize_timeout(client, transactional_db,
+def test_fail_initialize_timeout(client, dev_client, transactional_db,
                                  mocker, worker, task_service, study):
     """
     Test case when a task is rejected from a timed-out request
@@ -101,5 +95,5 @@ def test_fail_initialize_timeout(client, transactional_db,
     exc = mock_task_requests.exceptions.TimeoutError()
     mock_task_requests.post.side_effect = exc
 
-    release = init_release(client, worker)
+    release = init_release(dev_client, worker)
     check_common(client)

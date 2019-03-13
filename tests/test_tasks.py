@@ -18,8 +18,7 @@ def test_basic_task(client, transactional_db, task):
     assert Task.objects.count() == 1
     resp = client.get(BASE_URL+'/tasks')
     assert resp.status_code == 200
-    res = resp.json()
-    assert res['count'] == 1
+    assert resp.json()['count'] == 1
 
 
 @pytest.mark.parametrize('field', [
@@ -46,15 +45,13 @@ def test_task_filters(client, db, task):
     assert resp.status_code == 400
     assert 'task_service' in resp.json()
     resp = client.get(BASE_URL+'/tasks?task_service='+ts.kf_id)
-    count = resp.json()['count']
-    assert count == 1
+    assert resp.json()['count'] == 1
 
     # Release filter
     r = Release.objects.first()
     resp = client.get(BASE_URL+'/tasks?release=blah')
     resp = client.get(BASE_URL+'/tasks?release='+r.kf_id)
-    count = resp.json()['count']
-    assert count == 1
+    assert resp.json()['count'] == 1
 
     # Release and service filter
     resp = client.get(BASE_URL+'/tasks?release=blah&task_service=blah')
@@ -62,8 +59,7 @@ def test_task_filters(client, db, task):
     assert 'release' in resp.json()
     url = BASE_URL+f'/tasks?release={r.kf_id}&task_service={ts.kf_id}'
     resp = client.get(url)
-    count = resp.json()['count']
-    assert count == 1
+    assert resp.json()['count'] == 1
 
     # State filter
     resp = client.get(BASE_URL+'/tasks?state=blah')

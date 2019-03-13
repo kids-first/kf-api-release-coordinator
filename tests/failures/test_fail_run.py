@@ -9,10 +9,6 @@ from coordinator.api.models import Release, Task, TaskService, Event
 BASE_URL = 'http://testserver'
 
 
-with open(os.path.join(os.path.dirname(__file__), '../dev_token.txt')) as f:
-    DEV_TOKEN = f.read().strip()
-
-
 def init_release(client, worker):
     """
     Initialize a release
@@ -23,17 +19,15 @@ def init_release(client, worker):
         'studies': ['SD_00000001'],
         'tags': []
     }
-    resp = client.post(BASE_URL+'/releases',
-                       data=release,
-                       headers={'Authorization': 'Bearer '+DEV_TOKEN})
+    resp = client.post(BASE_URL+'/releases', data=release)
 
     # Do work
     worker.work(burst=True)
     return resp
 
 
-def test_fail_running(admin_client, client, transactional_db, mocker,
-                      worker, task_service, study):
+def test_fail_running(admin_client, dev_client, client, transactional_db,
+                      mocker, worker, task_service, study):
     """
     Test when a release fails do to a task reporting itself as failed
 
@@ -65,7 +59,7 @@ def test_fail_running(admin_client, client, transactional_db, mocker,
     resp = client.get(BASE_URL+'/task-services')
     assert len(resp.json()['results']) == 2
 
-    init_release(client, worker)
+    init_release(dev_client, worker)
 
     resp = client.get(BASE_URL+'/releases')
     assert len(resp.json()['results'][0]['tasks']) == 2
@@ -94,8 +88,8 @@ def test_fail_running(admin_client, client, transactional_db, mocker,
     assert task['state'] == 'canceled'
 
 
-def test_cancel_running(admin_client, client, transactional_db, mocker,
-                        worker, task_service, study):
+def test_cancel_running(admin_client, dev_client, client, transactional_db,
+                        mocker, worker, task_service, study):
     """
     Test when a release is canceled due to one of its tasks being canceled
     """
@@ -123,7 +117,7 @@ def test_cancel_running(admin_client, client, transactional_db, mocker,
     resp = client.get(BASE_URL+'/task-services')
     assert len(resp.json()['results']) == 2
 
-    init_release(client, worker)
+    init_release(dev_client, worker)
 
     resp = client.get(BASE_URL+'/releases')
     assert len(resp.json()['results'][0]['tasks']) == 2

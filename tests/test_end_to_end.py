@@ -7,16 +7,15 @@ from coordinator.api.models import Release, Task, TaskService, Event
 
 BASE_URL = 'http://testserver'
 
-with open(os.path.join(os.path.dirname(__file__), 'dev_token.txt')) as f:
-    DEV_TOKEN = f.read().strip()
 
-
-def test_full_release(client, transactional_db, mocker, worker, study):
+def test_full_release(client, dev_client, transactional_db, mocker, worker,
+                      study):
     """
     Test a full release:
     1) Create task service
     2) Create release
     """
+
     mock_task_requests = mocker.patch('coordinator.tasks.requests')
     mock_task_action = mock.Mock()
     mock_task_action.status_code = 200
@@ -37,9 +36,7 @@ def test_full_release(client, transactional_db, mocker, worker, study):
         'description': 'lorem ipsum',
         'enabled': True
     }
-    resp = client.post(BASE_URL+'/task-services',
-                       data=service,
-                       headers={'Authorization': 'Bearer '+DEV_TOKEN})
+    resp = dev_client.post(BASE_URL+'/task-services', data=service)
     assert resp.status_code == 201
     assert TaskService.objects.count() == 1
     task_service = resp.json()
@@ -69,9 +66,7 @@ def test_full_release(client, transactional_db, mocker, worker, study):
         'studies': ['SD_00000001'],
         'tags': [],
     }
-    resp = client.post(BASE_URL+'/releases',
-                       data=release,
-                       headers={'Authorization': 'Bearer '+DEV_TOKEN})
+    resp = dev_client.post(BASE_URL+'/releases', data=release)
 
     assert resp.status_code == 201
     release_id = resp.json()['kf_id']
@@ -140,8 +135,7 @@ def test_full_release(client, transactional_db, mocker, worker, study):
     # Send publish command
     mock_task_action.json.return_value = {'state': 'publishing'}
 
-    resp = client.post(BASE_URL+'/releases/'+release_id+'/publish',
-                       headers={'Authorization': 'Bearer '+DEV_TOKEN})
+    resp = dev_client.post(BASE_URL+'/releases/'+release_id+'/publish')
     assert resp.status_code == 200
     res = resp.json()
     assert res['message'] == 'publishing'

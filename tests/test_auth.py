@@ -1,4 +1,5 @@
 import os
+import jwt
 import pytest
 from mock import Mock, patch
 from django.conf import settings
@@ -6,62 +7,78 @@ from django.conf import settings
 
 BASE_URL = 'http://testserver'
 
-with open(os.path.join(os.path.dirname(__file__), 'admin_token.txt')) as f:
-    ADMIN_TOKEN = f.read().strip()
-with open(os.path.join(os.path.dirname(__file__), 'dev_token.txt')) as f:
-    DEV_TOKEN = f.read().strip()
-with open(os.path.join(os.path.dirname(__file__), 'user_token.txt')) as f:
-    USER_TOKEN = f.read().strip()
-
 
 def test_invalid_jwt(client, db, fakes):
     """
     Any endpoint will try to authenticate if there is an Authorization
-    header that is prefixed with `Bearer `. Test that invalid token
-    results in 403
+    header that is prefixed with `Bearer `.
+    Test that a poorly formatted token fails validation
     """
     resp = client.post(BASE_URL+'/releases',
                        data={'name': 'test', 'studies': ['SD_00000000']},
                        headers={'Authorization': 'Bearer INVALID'})
 
     assert resp.status_code == 403
-    assert resp.json()['detail'] == 'Not a valid JWT'
+    assert resp.json()['detail'].startswith('Problem authenticating request')
 
 
-def test_my_studies(client, db, fakes):
+def test_invalid_jwt(client, db, token):
+    """
+    Any endpoint will try to authenticate if there is an Authorization
+    header that is prefixed with `Bearer `.
+    Test that an improperly signed token fails validation
+    """
+    decoded = jwt.decode(token(), verify=False)
+    with open('tests/keys/other_private_key.pem') as f:
+        key = f.read()
+    encoded = jwt.encode(decoded, key, algorithm='RS256').decode('utf-8')
+
+    resp = client.post(BASE_URL+'/releases',
+                       data={'name': 'test', 'studies': ['SD_00000000']},
+                       headers={'Authorization': f'Bearer {str(encoded)}'})
+
+    assert resp.status_code == 403
+    assert resp.json()['detail'].startswith('Problem authenticating request')
+
+
+def test_my_studies(user_client, db, fakes):
     """
     Test that the user may create a release involving their studies
     """
-    resp = client.post(BASE_URL+'/releases',
-                       data={'name': 'test',
-                             'studies': ['SD_00000000'],
-                             'tags': []},
-                       headers={'Authorization': 'Bearer '+USER_TOKEN})
+    resp = user_client.post(
+        BASE_URL+'/releases',
+        data={'name': 'test', 'studies': ['SD_00000001'], 'tags': []}
+    )
 
     assert resp.status_code == 201
 
 
-def test_not_my_study(client, db, fakes):
+def test_not_my_study(user_client, db, fakes):
     """
     Test that user is not allowed to release a study they do not own
     """
-    resp = client.post(BASE_URL+'/releases',
-                       data={'name': 'test', 'studies': ['SD_XXXXXXXX']},
-                       headers={'Authorization': 'Bearer '+USER_TOKEN})
+    resp = user_client.post(
+        BASE_URL+'/releases',
+        data={'name': 'test', 'studies': ['SD_XXXXXXXX']}
+    )
 
     assert resp.json()['detail'] == 'Not allowed'
     assert resp.status_code == 403
 
 
-@pytest.mark.parametrize('token,response_code', [
-        (ADMIN_TOKEN, 201),
-        (DEV_TOKEN, 201),
-        (USER_TOKEN, 403)
-    ])
-def test_new_service(client, db, fakes, mocker, token, response_code):
+@pytest.mark.parametrize('user_type,response_code', [
+        ('admin_user', 201),
+        ('dev_user', 201),
+        ('user', 403),
+        ('unauthed_user', 403)
+])
+def test_new_service(client, db, fakes, mocker, user_headers, user_type,
+                     response_code):
     """
     Test that only devs and admin can make services
     """
+    headers = user_headers(user_type)
+
     mock_service_requests = mocker.patch('coordinator.api.validators.requests')
     mock_service_resp = Mock()
     mock_service_resp.status_code = 200
@@ -73,12 +90,11 @@ def test_new_service(client, db, fakes, mocker, token, response_code):
                              'description': 'my service',
                              'author': 'daniel@d3b.center',
                              'url': BASE_URL},
-                       headers={'Authorization': 'Bearer '+token})
-
+                       headers=headers)
     assert resp.status_code == response_code
 
 
-def test_invalid_token(client, db, fakes, mocker):
+def test_invalid_token(user_client, db, fakes, mocker):
     """
     Test that the api rejects permission when token cannot be validated by ego
     """
@@ -88,26 +104,30 @@ def test_invalid_token(client, db, fakes, mocker):
     mock_auth_resp.json.return_value = False
     mock_auth_requests.get.return_value = mock_auth_resp
 
-    resp = client.post(BASE_URL+'/task-services',
-                       data={'name': 'test',
-                             'description': 'my service',
-                             'author': 'daniel@d3b.center',
-                             'url': BASE_URL},
-                       headers={'Authorization': 'Bearer '+USER_TOKEN})
+    resp = user_client.post(
+        BASE_URL+'/task-services',
+        data={'name': 'test',
+              'description': 'my service',
+              'author': 'daniel@d3b.center',
+              'url': BASE_URL}
+    )
 
     assert resp.status_code == 403
-    assert resp.json()['detail'] == 'Auth service unavailable'
+    assert resp.json()['detail'] == 'Must be a developer'
 
 
-@pytest.mark.parametrize('token,response_code', [
-        (ADMIN_TOKEN, 200),
-        (DEV_TOKEN, 200),
-        (USER_TOKEN, 200)
-    ])
-def test_health_checks(client, db, fakes, token, response_code):
+@pytest.mark.parametrize('user_type,response_code', [
+        ('admin_user', 200),
+        ('dev_user', 200),
+        ('user', 200),
+        ('unauthed_user', 200)
+])
+def test_health_checks(client, db, fakes, user_headers, user_type,
+                       response_code):
     """
     Test that all users may post to /heath-checks
     """
+    headers = user_headers(user_type)
     resp = client.post(BASE_URL+'/task-services/health_checks',
-                       headers={'Authorization': 'Bearer '+token})
+                       headers=headers)
     assert resp.status_code == response_code
