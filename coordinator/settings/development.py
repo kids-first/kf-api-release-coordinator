@@ -150,13 +150,13 @@ ego = {
     }
 }
 
-from coordinator.authentication import EgoJWTStore  # nopep8
-EGO_JWT = EgoJWTStore()
 
 # API for Ego
 EGO_API = os.environ.get('EGO_API', 'https://ego')
 # Cache key for where to rerieve and store the ego signing key
 CACHE_EGO_KEY = 'EGO_PUBLIC_KEY'
+# Cache key for where to rerieve and store the ego service token
+CACHE_EGO_TOKEN = 'EGO_SERVICE_TOKEN'
 # How often the Ego public key should be retrieved from ego, 1 day default
 CACHE_EGO_TIMEOUT = 86400
 

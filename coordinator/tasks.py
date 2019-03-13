@@ -2,6 +2,8 @@ import django_rq
 import requests
 import logging
 from django.conf import settings
+from django.core.cache import cache
+from coordinator.authentication import get_service_token
 from coordinator.api.models import Task, TaskService, Release
 
 
@@ -96,7 +98,9 @@ def init_task(release_id, task_service_id, task_id):
     resp = None
     try:
         resp = requests.post(service.url+'/tasks',
-                             headers=settings.EGO_JWT.header,
+                             headers=cache.get_or_set(
+                                settings.CACHE_EGO_TOKEN, get_service_token
+                             ),
                              json=body,
                              timeout=settings.REQUEST_TIMEOUT)
     except requests.exceptions.RequestException:
@@ -143,7 +147,10 @@ def start_release(release_id):
         resp = None
         try:
             resp = requests.post(task.task_service.url+'/tasks',
-                                 headers=settings.EGO_JWT.header,
+                                 headers=cache.get_or_set(
+                                    settings.CACHE_EGO_TOKEN,
+                                    get_service_token
+                                 ),
                                  json=body,
                                  timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
@@ -201,7 +208,10 @@ def publish_release(release_id):
         resp = None
         try:
             resp = requests.post(task.task_service.url+'/tasks',
-                                 headers=settings.EGO_JWT.header,
+                                 headers=cache.get_or_set(
+                                    settings.CACHE_EGO_TOKEN,
+                                    get_service_token
+                                 ),
                                  json=body,
                                  timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
@@ -254,7 +264,10 @@ def cancel_release(release_id, fail=False):
         }
         try:
             requests.post(task.task_service.url+'/tasks',
-                          headers=settings.EGO_JWT.header,
+                          headers=cache.get_or_set(
+                             settings.CACHE_EGO_TOKEN,
+                             get_service_token
+                          ),
                           json=body,
                           timeout=settings.REQUEST_TIMEOUT)
         except requests.exceptions.RequestException:

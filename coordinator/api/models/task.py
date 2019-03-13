@@ -7,7 +7,8 @@ import django_rq
 from django.db import models
 from django.conf import settings
 from django_fsm import FSMField, transition
-
+from django.core.cache import cache
+from coordinator.authentication import get_service_token
 from coordinator.utils import kf_id_generator
 from coordinator.api.models.release import Release
 from coordinator.api.models.taskservice import TaskService
@@ -93,7 +94,10 @@ class Task(models.Model):
         }
         try:
             resp = requests.post(self.task_service.url+'/tasks',
-                                 headers=settings.EGO_JWT.header,
+                                 headers=cache.get_or_set(
+                                    settings.CACHE_EGO_TOKEN,
+                                    get_service_token
+                                 ),
                                  json=body,
                                  timeout=settings.REQUEST_TIMEOUT)
             resp.raise_for_status()
