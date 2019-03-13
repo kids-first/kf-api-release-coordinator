@@ -142,7 +142,7 @@ if redis_pass:
     RQ_QUEUES['health_checks']['PASSWORD'] = redis_pass
 
 # EGO oauth creds
-ego = {
+EGO = {
     'default': {
         'CLIENT_ID': os.environ.get('EGO_CLIENT_ID', None),
         'SECRET': os.environ.get('EGO_SECRET', None),
