@@ -17,7 +17,7 @@ if [[ -n $VAULT_ADDR ]] && [[ -n $VAULT_ROLE ]]; then
     # Get redis password
     if [[ -n $REDIS_SECRET ]] ; then
         echo "Load redis secret from vault"
-        pw=$(vault read -format=json ${REDIS_SECRET} | jq -c '.password')
+        pw=$(vault read -format=json ${REDIS_SECRET} | jq -c -r '.password')
 
         export REDIS_PASS=$pw
     fi
@@ -25,8 +25,8 @@ if [[ -n $VAULT_ADDR ]] && [[ -n $VAULT_ROLE ]]; then
     # Get ego secret
     if [[ -n $EGO_SECRET ]] ; then
         echo "Load ego secret from vault"
-        client=$(vault read -format=json ${EGO_SECRET} | jq -c '.data.client_id')
-        secret=$(vault read -format=json ${EGO_SECRET} | jq -c '.data.client_secret')
+        client=$(vault read -format=json ${EGO_SECRET} | jq -c -r '.data.client_id')
+        secret=$(vault read -format=json ${EGO_SECRET} | jq -c -r '.data.client_secret')
 
         export EGO_CLIENT_ID=$client
         export EGO_SECRET=$secret
