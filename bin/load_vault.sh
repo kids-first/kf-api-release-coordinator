@@ -26,7 +26,7 @@ if [[ -n $VAULT_ADDR ]] && [[ -n $VAULT_ROLE ]]; then
     if [[ -n $EGO_SECRET ]] ; then
         echo "Load ego secret from vault"
         client=$(vault read -format=json ${EGO_SECRET} | jq -c '.data.client_id')
-        secret=$(vault read -format=json ${EGO_SECRET} | jq -c '.password.client_secret')
+        secret=$(vault read -format=json ${EGO_SECRET} | jq -c '.data.client_secret')
 
         export EGO_CLIENT_ID=$client
         export EGO_SECRET=$secret
