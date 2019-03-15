@@ -68,14 +68,14 @@ class EgoAuthentication(authentication.BaseAuthentication):
             header = request.META.get('headers')
             # No headers
             if header is None:
-                return ({}, None)
+                return None
             token = header.get('Authorization', None)
         # No Authorization header
         if token is None:
-            return ({}, None)
+            return None
         # Unexpected token type
         if 'Bearer ' not in token:
-            return ({}, None)
+            return None
 
         token = token.split('Bearer ')[-1]
 
@@ -85,13 +85,11 @@ class EgoAuthentication(authentication.BaseAuthentication):
             token = jwt.decode(token, public_key, algorithms='RS256',
                                options={'verify_aud': False})
         except jwt.exceptions.DecodeError as err:
-            raise exceptions.AuthenticationFailed(
-                f'Problem authenticating request: {err}'
-            )
+            logger.error(f'Problem authenticating request: {err}')
+            return None
         except jwt.exceptions.InvalidTokenError as err:
-            raise exceptions.AuthenticationFailed(
-                f'Token provided is not valid: {err}'
-            )
+            logger.error(f'Token provided is not valid: {err}')
+            return None
 
         user = token['context']['user']
 
@@ -143,14 +141,14 @@ class Auth0Authentication(authentication.BaseAuthentication):
             header = request.META.get('headers')
             # No headers
             if header is None:
-                return ({}, None)
+                return None
             token = header.get('Authorization', None)
         # No Authorization header
         if token is None:
-            return ({}, None)
+            return None
         # Unexpected token type
         if 'Bearer ' not in token:
-            return ({}, None)
+            return None
 
         token = token.split('Bearer ')[-1]
 
@@ -162,13 +160,11 @@ class Auth0Authentication(authentication.BaseAuthentication):
             # If we had trouble getting JWKS
             return None
         except jwt.exceptions.DecodeError as err:
-            raise exceptions.AuthenticationFailed(
-                f'Problem authenticating request: {err}'
-            )
+            logger.error(f'Problem authenticating request: {err}')
+            return None
         except jwt.exceptions.InvalidTokenError as err:
-            raise exceptions.AuthenticationFailed(
-                f'Token provided is not valid: {err}'
-            )
+            logger.error(f'Token provided is not valid: {err}')
+            return None
 
         token['permissions'] = token['https://kidsfirstdrc.org/permissions']
         token['groups'] = token['https://kidsfirstdrc.org/groups']
