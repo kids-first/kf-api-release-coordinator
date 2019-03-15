@@ -15,7 +15,7 @@ with open(os.path.join(dir_path, 'README.md'), 'r') as f:
 schema_view = get_schema_view(
    openapi.Info(
       title="Release Coordinator API",
-      default_version='1.5.2',
+      default_version='1.5.3',
       description=description,
       license=openapi.License(name="Apache 2.0"),
    ),

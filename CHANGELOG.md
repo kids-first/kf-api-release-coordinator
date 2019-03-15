@@ -1,3 +1,33 @@
+# Kids First Release Coordinator Release 1.5.3
+
+## Features
+
+### Summary
+
+Feature Emojis: 🐛x6 ♻️x4 🔥x2 🔧x2 ✨x1 🙈x1 ⬆️x1 🐳x1
+Feature Labels: [bug](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/bug) x8 [refactor](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/refactor) x8 [devops](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/devops) x5 [feature](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/feature) x1
+
+### New features and changes
+
+- (#159) ♻️ Read secrets as raw strings - @dankolbman
+- (#158) 🐛 Fix typo in secret path - @dankolbman
+- (#157) 🐛 Fix EGO settings - @XuTheBunny
+- (#156) 🐛 Allow releases to re-enter cancelling state - @dankolbman
+- (#155) ♻️ Store Ego service token for coordinator in cache - @XuTheBunny
+- (#154) 🔥 Replace pep8 with codestyle - @dankolbman
+- (#152) ♻️ Load secrets directly from vault - @dankolbman
+- (#151) ✨ Store ego public key - @XuTheBunny
+- (#147) 🐛 Fix static paths - @dankolbman
+- (#148) 🐛 Update testing with correct apps - @dankolbman
+- (#150) 🙈 Ignore ci files in jenkins - @dankolbman
+- (#144) 🔧 Improve docker-compose for development - @dankolbman
+- (#145) 🔥 Remove setup.cfg - @dankolbman
+- (#143) 🔧 Refactor settings - @dankolbman
+- (#138) ⬆️  Bump Django version - @dankolbman
+- (#140) ♻️  App pytest.ini for quick access pytest - @XuTheBunny
+- (#137) 🐳 Add dev stage to docker - @XuTheBunny
+- (#133) 🐛 Improve compose for dev - @dankolbman
+
 # Kids First Release Coordinator Release 1.5.2
 
 ## Features
