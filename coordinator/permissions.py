@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from django.contrib.auth.models import AnonymousUser
 
 
 class AdminPermission(permissions.BasePermission):
@@ -7,6 +8,10 @@ class AdminPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
+
+        if isinstance(request.user, AnonymousUser):
+            return False
+
         if 'ADMIN' in roles:
             return True
 
@@ -21,12 +26,16 @@ class DevPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
+
+        if request.method == 'POST' and request.path.endswith('health_checks'):
+            return True
+
+        if isinstance(request.user, AnonymousUser):
+            return False
+
         roles = request.user.get('roles', [])
 
         if 'ADMIN' in roles or 'DEV' in roles:
-            return True
-
-        if request.method == 'POST' and request.path.endswith('health_checks'):
             return True
 
 
@@ -45,6 +54,9 @@ class GroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
+
+        if isinstance(request.user, AnonymousUser):
+            return False
 
         roles = request.user.get('roles', [])
         groups = request.user.get('groups', [])
@@ -69,6 +81,9 @@ class GroupPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
+
+        if isinstance(request.user, AnonymousUser):
+            return False
 
         roles = request.user.get('roles', [])
         groups = request.user.get('groups', [])
