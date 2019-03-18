@@ -3,7 +3,7 @@ from rest_framework import viewsets
 import django_filters.rest_framework
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from coordinator.authentication import EgoAuthentication
+from coordinator.authentication import Auth0Authentication, EgoAuthentication
 from coordinator.permissions import DevPermission
 from coordinator.tasks import health_check
 from coordinator.api.models import TaskService
@@ -39,7 +39,7 @@ class TaskServiceViewSet(viewsets.ModelViewSet):
     destroy:
     Completely remove the task service from the coordinator.
     """
-    authentication_classes = (EgoAuthentication,)
+    authentication_classes = (Auth0Authentication, EgoAuthentication)
     permission_classes = (DevPermission,)
     lookup_field = 'kf_id'
     queryset = TaskService.objects.order_by('-created_at').all()

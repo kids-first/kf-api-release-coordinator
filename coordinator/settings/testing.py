@@ -129,6 +129,12 @@ CACHE_EGO_TOKEN = 'EGO_SERVICE_TOKEN'
 # How often the Ego public key should be retrieved from ego, 1 day default
 CACHE_EGO_TIMEOUT = 86400
 
+AUTH0_JWKS = 'https://kids-first.auth0.com/.well-known/jwks.json'
+CACHE_AUTH0_KEY = 'AUTH0_PUBLIC_KEY'
+CACHE_AUTH0_TIMEOUT = 86400
+
+JWT_AUD = 'https://kf-release-coord.kidsfirstdrc.org'
+
 SNS_ARN = None
 
 DATASERVICE_URL = 'http://dataservice'

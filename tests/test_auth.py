@@ -19,10 +19,10 @@ def test_invalid_jwt(client, db, fakes):
                        headers={'Authorization': 'Bearer INVALID'})
 
     assert resp.status_code == 403
-    assert resp.json()['detail'].startswith('Problem authenticating request')
+    assert resp.json()['detail'].startswith('Authentication credentials were')
 
 
-def test_invalid_jwt(client, db, token):
+def test_invalid_jwt_signature(client, db, token):
     """
     Any endpoint will try to authenticate if there is an Authorization
     header that is prefixed with `Bearer `.
@@ -38,7 +38,7 @@ def test_invalid_jwt(client, db, token):
                        headers={'Authorization': f'Bearer {str(encoded)}'})
 
     assert resp.status_code == 403
-    assert resp.json()['detail'].startswith('Problem authenticating request')
+    assert resp.json()['detail'].startswith('Authentication credentials were')
 
 
 def test_my_studies(user_client, db, fakes):
