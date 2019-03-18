@@ -41,6 +41,16 @@ def test_invalid_jwt_signature(client, db, token):
     assert resp.json()['detail'].startswith('Authentication credentials were')
 
 
+def test_unauthed_user(client, transactional_db, studies):
+    """
+    Test user cannot access the study releases if not authenticated
+    """
+    resp = client.post(BASE_URL+'/releases',
+                       data={'name': 'test', 'studies': ['SD_00000000']})
+    assert resp.status_code == 403
+    assert resp.json()['detail'].startswith('Authentication credentials were')
+
+
 def test_my_studies(user_client, db, fakes):
     """
     Test that the user may create a release involving their studies
