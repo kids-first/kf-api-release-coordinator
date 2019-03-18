@@ -69,6 +69,7 @@ CORS_ORIGIN_WHITELIST = (
 CORS_ORIGIN_REGEX_WHITELIST = (
     r'^(https?:\/\/)?([a-z0-9-]+[.])*kidsfirstdrc\.org$',
     r'^(https?:\/\/)?([a-z0-9-]+[.])*kids-first\.io$',
+    r'^(https?:\/\/)?([a-z0-9-]+)*.netlify\.com$',
 )
 
 # Assume we're in local environment if there is no vault url
