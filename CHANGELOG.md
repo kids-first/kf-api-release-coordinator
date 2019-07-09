@@ -1,3 +1,25 @@
+# Kids First Release Coordinator Release 1.6.0
+
+## Features
+
+Support auth0 token validation.
+
+### Summary
+
+Feature Emojis: ⬆️x3 ♻️x1 ✅x1 🔧x1 ✨x1
+Feature Labels: [refactor](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/refactor) x4 [feature](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/feature) x2 [devops](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/devops) x1
+
+### New features and changes
+
+- (#170) ⬆️ Bump django from 2.1.9 to 2.1.10 - @dependabot[bot]
+- (#169) ⬆️ Bump django from 2.1.7 to 2.1.9 - @dependabot[bot]
+- (#168) ⬆️ Upgrade urllib3 - @dankolbman
+- (#165) ♻️ Refactor for getting db host from environment - @XuTheBunny
+- (#164) ✅ Add test for unauthed user cannot access study releases - @XuTheBunny
+- (#162) 🔧 Add netlify to CORS whitelist - @dankolbman
+- (#160) ✨ Add auth0 token validation - @dankolbman
+
+
 # Kids First Release Coordinator Release 1.5.3
 
 ## Features
