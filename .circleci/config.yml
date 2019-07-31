@@ -45,6 +45,33 @@ jobs:
             python-codacy-coverage -r coverage.xml
           environment:
             - FLASK_APP: "manage"
+      - run:
+          name: Lint documentation
+          command: |
+            . venv/bin/activate
+            doc8 docs
+      - run:
+          name: Build docs site
+          command: |
+            . venv/bin/activate
+            sphinx-build -W docs staged
+      - run:
+          name: Deploy if master branch
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+                touch .nojekyll
+                git config --global user.email "dankolbman@gmail.com"
+                git config --global user.name "Dan Kolbman"
+                mv staged/ ../
+                git checkout -b gh-pages
+                git fetch origin gh-pages
+                git reset --hard origin/gh-pages
+                rm -r ./*
+                mv ../staged/* ./
+                git add -A .
+                git commit --allow-empty -m ":recycle: Update docs site"
+                git push -q https://${GITHUB_TOKEN}@github.com/kids-first/kf-api-study-creator.git
+            fi
 
       - store_artifacts:
           path: test-reports
