@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/release_coordinator.png">
+  <img src="docs/_static/images/release_coordinator.png">
 </p>
 <p align="center">
   <a href="https://github.com/kids-first/kf-api-release-coordinator/blob/master/LICENSE"><img src="https://img.shields.io/github/license/kids-first/kf-api-release-coordinator.svg?style=for-the-badge"></a>
