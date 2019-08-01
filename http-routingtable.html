@@ -1,0 +1,372 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>HTTP Routing Table &mdash; Kids First Release Coordinator  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/sphinxcontrib-httpexample.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/sphinxcontrib-httpexample.css" type="text/css" />
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="stylesheet" href="https://kids-first.github.io/kf-sphinx-docs-theme/sphinx_kidsfirst_theme/static/css/kidsfirst.css" type="text/css" />
+
+ 
+
+    <script type="text/javascript">
+      DOCUMENTATION_OPTIONS.COLLAPSE_INDEX = true;
+    </script>
+
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/release_coordinator.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Release Coordinator:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="release_coordinator/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release_coordinator/api.html">Release Coordinator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release_coordinator/resources.html">Resources and Endpoints</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Task Services:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="task_service/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_service/api.html">Task Service API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Kids First Release Coordinator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>HTTP Routing Table</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+
+   <h1>HTTP Routing Table</h1>
+
+   <div class="modindex-jumpbox">
+   <a href="#cap-/events"><strong>/events</strong></a> | 
+   <a href="#cap-/release-notes"><strong>/release-notes</strong></a> | 
+   <a href="#cap-/releases"><strong>/releases</strong></a> | 
+   <a href="#cap-/status"><strong>/status</strong></a> | 
+   <a href="#cap-/studies"><strong>/studies</strong></a> | 
+   <a href="#cap-/task-services"><strong>/task-services</strong></a> | 
+   <a href="#cap-/tasks"><strong>/tasks</strong></a>
+   </div>
+
+   <table class="indextable modindextable">
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-/events"><td></td><td>
+       <strong>/events</strong></td><td></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#get--events"><code class="xref">GET /events</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#get--events-(kf_id)"><code class="xref">GET /events/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#post--events"><code class="xref">POST /events</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#delete--events-(kf_id)"><code class="xref">DELETE /events/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-/release-notes"><td></td><td>
+       <strong>/release-notes</strong></td><td></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#get--release-notes"><code class="xref">GET /release-notes</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#get--release-notes-(kf_id)"><code class="xref">GET /release-notes/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#post--release-notes"><code class="xref">POST /release-notes</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#delete--release-notes-(kf_id)"><code class="xref">DELETE /release-notes/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#patch--release-notes-(kf_id)"><code class="xref">PATCH /release-notes/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-/releases"><td></td><td>
+       <strong>/releases</strong></td><td></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#get--releases"><code class="xref">GET /releases</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#get--releases-(kf_id)"><code class="xref">GET /releases/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#post--releases"><code class="xref">POST /releases</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#post--releases-(kf_id)-publish"><code class="xref">POST /releases/(kf_id)/publish</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#delete--releases-(kf_id)"><code class="xref">DELETE /releases/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#patch--releases-(kf_id)"><code class="xref">PATCH /releases/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-/status"><td></td><td>
+       <strong>/status</strong></td><td></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="task_service/api.html#get--status"><code class="xref">GET /status</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-/studies"><td></td><td>
+       <strong>/studies</strong></td><td></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#get--studies"><code class="xref">GET /studies</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-/task-services"><td></td><td>
+       <strong>/task-services</strong></td><td></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#get--task-services"><code class="xref">GET /task-services</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#get--task-services-(kf_id)"><code class="xref">GET /task-services/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#post--task-services"><code class="xref">POST /task-services</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#delete--task-services-(kf_id)"><code class="xref">DELETE /task-services/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#patch--task-services"><code class="xref">PATCH /task-services</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-/tasks"><td></td><td>
+       <strong>/tasks</strong></td><td></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#get--tasks"><code class="xref">GET /tasks</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="task_service/api.html#post--tasks"><code class="xref">POST /tasks</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="release_coordinator/resources.html#patch--tasks-(kf_id)"><code class="xref">PATCH /tasks/(kf_id)</code></a></td><td>
+       <em></em></td></tr>
+   </table>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Kids First
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

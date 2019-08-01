@@ -1,0 +1,444 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Task Service API &mdash; Kids First Release Coordinator  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/sphinxcontrib-httpexample.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/sphinxcontrib-httpexample.css" type="text/css" />
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" />
+    <link rel="stylesheet" href="https://kids-first.github.io/kf-sphinx-docs-theme/sphinx_kidsfirst_theme/static/css/kidsfirst.css" type="text/css" />
+ 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/release_coordinator.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Release Coordinator:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../release_coordinator/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_coordinator/api.html">Release Coordinator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_coordinator/resources.html">Resources and Endpoints</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Task Services:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Task Service API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#task-actions">Task Actions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-states">Task States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#authentication">Authentication</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Kids First Release Coordinator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Task Service API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/task_service/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="task-service-api">
+<h1>Task Service API<a class="headerlink" href="#task-service-api" title="Permalink to this headline">¶</a></h1>
+<p>Below is documented the API specification that Task Services must follow
+in order to be utilized by the Release Coordinator.</p>
+<dl class="get">
+<dt id="get--status">
+<code class="descname">GET </code><code class="descname">/status</code><a class="headerlink" href="#get--status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns information about the Task service including the current status.
+This endpoint is used by the Coordinator to determine the health of the task
+service. Any non-<code class="docutils literal notranslate"><span class="pre">200</span></code> response will imply that the service is
+unavailable. If enough consecutive non-<code class="docutils literal notranslate"><span class="pre">200</span></code> responses are received by the
+Coordinator, then any tasks that may have been issued to the task service
+will be assumed as failed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Response JSON Object:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>string</em>) – The name of the task service</li>
+<li><strong>message</strong> (<em>string</em>) – A status message</li>
+<li><strong>version</strong> (<em>string</em>) – The software version of the task service</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – Ready to receive tasks</li>
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.4">503 Service Unavailable</a> – Service unavailable</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example</strong>:</p>
+<div class="http-example docutils container">
+<div class="http-example-http docutils container" id="id1">
+<p class="caption"><span class="caption-text">http</span></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/status</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">kf-task-servec.kidsfirstdrc.org</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">application/json</span>
+</pre></div>
+</div>
+</div>
+<div class="http-example-curl docutils container" id="id2">
+<p class="caption"><span class="caption-text">curl</span></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -i http://kf-task-servec.kidsfirstdrc.org/status -H <span class="s1">&#39;Accept: application/json&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="http-example-response docutils container" id="id3">
+<p class="caption"><span class="caption-text">response</span></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Allow</span><span class="o">:</span> <span class="l">GET, POST, HEAD, OPTIONS</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Vary</span><span class="o">:</span> <span class="l">Accept</span>
+
+<span class="p">{</span>
+     <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;datamodel rollover&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;ready for work&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;2.0.4&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="post">
+<dt id="post--tasks">
+<code class="descname">POST </code><code class="descname">/tasks</code><a class="headerlink" href="#post--tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>The primary endpoint for communicating with a Service</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Request JSON Object:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>action</strong> (<em>string</em>) – Action the action or procedure to run</li>
+<li><strong>task_id</strong> (<em>string</em>) – The <code class="docutils literal notranslate"><span class="pre">kf_id</span></code> of the task instance to perform the
+action on</li>
+<li><strong>release_id</strong> (<em>string</em>) – The <code class="docutils literal notranslate"><span class="pre">kf_id</span></code> of the task’s related release</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Response JSON Object:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>string</em>) – The name of the task service</li>
+<li><strong>kf_id</strong> (<em>string</em>) – The <code class="docutils literal notranslate"><span class="pre">kf_id</span></code> for which the action was performed</li>
+<li><strong>release_id</strong> (<em>string</em>) – The <code class="docutils literal notranslate"><span class="pre">kf_id</span></code> of the release related to the task</li>
+<li><strong>state</strong> (<em>string</em>) – The current state of the task</li>
+<li><strong>progress</strong> (<em>int</em>) – The Percentage completion of the task</li>
+<li><strong>date_submitted</strong> (<em>date</em>) – The date at which the Service recieved the task</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> – Action accepted</li>
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.1">400 Bad Request</a> – Invalid input</li>
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> – Task not found</li>
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.4">503 Service Unavailable</a> – Action rejected</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example</strong>:</p>
+<div class="http-example docutils container">
+<div class="http-example-http docutils container" id="id4">
+<p class="caption"><span class="caption-text">http</span></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/tasks</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">kf-task-servec.kidsfirstdrc.org</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">application/json</span>
+
+{
+     &quot;action&quot;: &quot;start&quot;,
+     &quot;task_id&quot;: &quot;TA_3G2409A2&quot;,
+     &quot;release_id&quot;: &quot;RE_AB28FG90&quot;
+}
+</pre></div>
+</div>
+</div>
+<div class="http-example-curl docutils container" id="id5">
+<p class="caption"><span class="caption-text">curl</span></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -i -X POST http://kf-task-servec.kidsfirstdrc.org/tasks -H <span class="s1">&#39;Accept: application/json&#39;</span> --data-raw <span class="s1">&#39;{</span>
+
+<span class="s1">     &quot;action&quot;: &quot;start&quot;,</span>
+
+<span class="s1">     &quot;task_id&quot;: &quot;TA_3G2409A2&quot;,</span>
+
+<span class="s1">     &quot;release_id&quot;: &quot;RE_AB28FG90&quot;</span>
+
+<span class="s1">}&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="http-example-response docutils container" id="id6">
+<p class="caption"><span class="caption-text">response</span></p>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Allow</span><span class="o">:</span> <span class="l">GET, POST, HEAD, OPTIONS</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Vary</span><span class="o">:</span> <span class="l">Accept</span>
+
+<span class="p">{</span>
+     <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;data model rollover&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;kf_id&quot;</span><span class="p">:</span> <span class="s2">&quot;TA_3G2409A2&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;release_id&quot;</span><span class="p">:</span> <span class="s2">&quot;RE_AB28FG90&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;running&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;progress&quot;</span><span class="p">:</span> <span class="s2">&quot;50%&quot;</span><span class="p">,</span>
+     <span class="nt">&quot;date_submitted&quot;</span><span class="p">:</span> <span class="s2">&quot;2018-03-19T20:12:24.702813+00:00&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</dd></dl>
+
+<p>The Release Coordinator will use this endpoint to communicate all actions (via
+a <code class="docutils literal notranslate"><span class="pre">POST</span></code>) that the task service must take during the release publish. When a
+release is begun, the Release Coordinator service will send a <code class="docutils literal notranslate"><span class="pre">POST</span></code> to this
+endpoint with an <code class="docutils literal notranslate"><span class="pre">initialize</span></code> action. The task service should set its state
+to pending and respond with a status code <code class="docutils literal notranslate"><span class="pre">200</span></code>. The Coordinator will expect
+a <code class="docutils literal notranslate"><span class="pre">200</span></code> response from all task services in the release to continue with the
+release process.</p>
+<p>If any non-<code class="docutils literal notranslate"><span class="pre">200</span></code> response is returned, the Coordinator will cancel the
+release.</p>
+<p>Once the Coordinator has verified that all tasks are ready for work, it will
+signal the task service to begin staging data via a <code class="docutils literal notranslate"><span class="pre">POST</span></code> with action set to
+<code class="docutils literal notranslate"><span class="pre">start</span></code>. Upon receiving the <code class="docutils literal notranslate"><span class="pre">start</span></code> action, the task service should begin
+staging the data and set it’s state to running.</p>
+<p>During the staging process the Release Coordinator will poll the task service
+for status via a <code class="docutils literal notranslate"><span class="pre">POST</span></code> and action set to <code class="docutils literal notranslate"><span class="pre">get_status</span></code>. The task service
+should respond with its latest state and progress. If any non-<code class="docutils literal notranslate"><span class="pre">200</span></code> response
+is returned, the Coordinator will cancel the release. Once work is completed,
+the task should set its state to staged and task service should notify the
+Coordinator with its new state.</p>
+<p>When its time for the data release to be made public, the Coordinator will
+signal the task service to begin publishing via a <code class="docutils literal notranslate"><span class="pre">POST</span></code> to this endpoint
+with action set to <code class="docutils literal notranslate"><span class="pre">publish</span></code>. Upon receiving the <code class="docutils literal notranslate"><span class="pre">publish</span></code> action, the task
+service should set it’s state to publishing. Once again, the Release
+Coordinator will poll the task service for status via a <code class="docutils literal notranslate"><span class="pre">POST</span></code> and action set
+<code class="docutils literal notranslate"><span class="pre">to</span> <span class="pre">get_status</span></code>. If any non-<code class="docutils literal notranslate"><span class="pre">200</span></code> response is returned, the Coordinator
+will cancel the release.</p>
+<p>If a task ever needs to be explicitly stopped at any point in time due to a
+failure of any kind, the task service may set its state to failed. If the
+release is ever halted due to an explicit stop or because of a failure in any
+task, the Coordinator will issue a <code class="docutils literal notranslate"><span class="pre">cancel</span></code> action to all task services
+informing them to stop their task or discard any operations.</p>
+<div class="section" id="task-actions">
+<h2>Task Actions<a class="headerlink" href="#task-actions" title="Permalink to this headline">¶</a></h2>
+<p>To summarize, the possible actions in a <code class="docutils literal notranslate"><span class="pre">POST</span></code> to this endpoint are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">initialize</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">start</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">publish</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">get_status</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">cancel</span></code></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="task-states">
+<h2>Task States<a class="headerlink" href="#task-states" title="Permalink to this headline">¶</a></h2>
+<p>The possible states of a task are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">pending</span></code> - Received the <code class="docutils literal notranslate"><span class="pre">initialize</span></code> action, but waiting for start</li>
+<li><code class="docutils literal notranslate"><span class="pre">running</span></code> - After <code class="docutils literal notranslate"><span class="pre">start</span></code> action while the task is processing</li>
+<li><code class="docutils literal notranslate"><span class="pre">staged</span></code> - After completing work</li>
+<li><code class="docutils literal notranslate"><span class="pre">publishing</span></code> - While publicizing work</li>
+<li><code class="docutils literal notranslate"><span class="pre">published</span></code> - After successfully publishing</li>
+<li><code class="docutils literal notranslate"><span class="pre">canceled</span></code> - Task was canceled by coordinator</li>
+<li><code class="docutils literal notranslate"><span class="pre">failed</span></code> - Task failed at some stage</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="authentication">
+<h2>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h2>
+<p>To ensure that a request to the task service originates from the coordinator,
+all requests to the task services will be made with a Authorization header
+containing a bearer jwt for ego. This token may be used to verify the
+coordinator’s identity against ego using the /oauth/token/verify endpoint.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Kids First
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
