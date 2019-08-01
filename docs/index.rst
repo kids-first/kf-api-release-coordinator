@@ -45,3 +45,10 @@ The api will be exposed at `<http://localhost:5000>`_ by default.
    release_coordinator/introduction
    release_coordinator/api
    release_coordinator/resources
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Task Services:
+
+   task_service/introduction
+   task_service/api
