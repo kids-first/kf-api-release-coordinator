@@ -18,3 +18,4 @@ django-fsm==2.6.0
 semantic-version==2.6.0
 drf-nested-routers==0.90.2
 boto3==1.9.112
+packaging==19.1
