@@ -12,6 +12,8 @@ class AdminPermission(permissions.BasePermission):
         if isinstance(request.user, AnonymousUser):
             return False
 
+        roles = request.user.get('roles', [])
+
         if 'ADMIN' in roles:
             return True
 
