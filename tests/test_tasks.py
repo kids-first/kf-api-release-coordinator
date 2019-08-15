@@ -111,3 +111,22 @@ def test_status_check(client, transactional_db, task, worker, mock_ego):
         # worker.work(burst=True)
         # release = t.release
         # assert release.state == 'canceling'
+
+
+@pytest.mark.parametrize(
+    "user_type,expected_status",
+    [("admin", 201), ("dev", 403), ("user", 403), ("anon", 403)],
+)
+def test_task_creation(
+    db, test_client, release, task_service, user_type, expected_status
+):
+    """ Test that only admins may create tasks """
+    client = test_client(user_type)
+    resp = client.post(
+        f"{BASE_URL}/tasks",
+        data={
+            "release": f"{BASE_URL}/releases/{release['kf_id']}",
+            "task_service": f"{BASE_URL}/task-services/{task_service['kf_id']}",
+        },
+    )
+    assert resp.status_code == expected_status

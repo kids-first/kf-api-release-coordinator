@@ -3,6 +3,9 @@ from rest_framework import viewsets
 import django_filters.rest_framework
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from coordinator.authentication import Auth0Authentication, EgoAuthentication
+from coordinator.permissions import AdminPermission
 from coordinator.tasks import status_check, cancel_release
 from coordinator.api.models import Task
 from coordinator.api.serializers import TaskSerializer
@@ -32,6 +35,8 @@ class TaskViewSet(viewsets.ModelViewSet):
     destroy:
     Removes a task entirely
     """
+    authentication_classes = (Auth0Authentication, EgoAuthentication,)
+    permission_classes = (AdminPermission,)
     lookup_field = 'kf_id'
     queryset = Task.objects.order_by('-created_at').all()
     serializer_class = TaskSerializer

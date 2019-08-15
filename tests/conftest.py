@@ -84,6 +84,17 @@ def user_client(token):
 
 
 @pytest.yield_fixture
+def test_client(admin_client, dev_client, user_client, client):
+    """ Returns a client for the specified user_type """
+    yield lambda user_type: {
+        "admin": admin_client,
+        "dev": dev_client,
+        "user": user_client,
+        "anon": client,
+    }[user_type]
+
+
+@pytest.yield_fixture
 def worker():
     # Clear queue
     q = django_rq.get_queue()
