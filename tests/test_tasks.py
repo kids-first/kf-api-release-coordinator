@@ -111,3 +111,11 @@ def test_status_check(client, transactional_db, task, worker, mock_ego):
         # worker.work(burst=True)
         # release = t.release
         # assert release.state == 'canceling'
+
+
+def test_no_deletion(db, admin_client, task):
+    """ Check that tasks cannot be deleted """
+    assert Task.objects.count() == 1
+    resp = admin_client.delete(f"{BASE_URL}/tasks/{task['kf_id']}")
+    assert resp.status_code == 405
+    assert Task.objects.count() == 1
