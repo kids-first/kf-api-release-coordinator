@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 
 from coordinator.utils import kf_id_generator
-from coordinator.api.models.task import Task, task_id
+from coordinator.api.models.task import Task
 from coordinator.api.models.release import Release
 from coordinator.api.models.taskservice import TaskService
 
@@ -29,8 +29,7 @@ class Event(models.Model):
     :param event_type: The type of event, warning, info, or error.
     :param created_at: The time the event occurred
     """
-    kf_id = models.CharField(max_length=11, primary_key=True,
-                             default=task_id)
+    kf_id = models.CharField(max_length=11, primary_key=True, default=event_id)
     uuid = models.UUIDField(default=uuid.uuid4,
                             help_text='UUID used internally')
     event_type = models.CharField(max_length=20,
