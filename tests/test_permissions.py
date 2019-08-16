@@ -3,6 +3,7 @@ import pytest
 
 from coordinator.api.factories.task import TaskFactory
 from coordinator.api.factories.release import ReleaseFactory
+from coordinator.api.factories.study import StudyFactory
 
 
 BASE_URL = "http://testserver"
@@ -94,6 +95,47 @@ def test_release_permissions(
             "description": release.description,
             "studies": [release.studies.first().kf_id],
         }
+    client = test_client(user_type)
+    call = getattr(client, method)
+    resp = call(endpoint, data=body)
+    assert resp.status_code == status_code
+
+
+@pytest.mark.parametrize(
+    "user_type,endpoint,method,status_code",
+    [
+        # admin
+        ("admin", "/studies", "get", 200),
+        ("admin", "/studies", "post", 405),
+        ("admin", "/studies/<kf_id>", "get", 200),
+        ("admin", "/studies/<kf_id>", "patch", 405),
+        ("admin", "/studies/<kf_id>", "put", 405),
+        ("admin", "/studies/<kf_id>", "delete", 405),
+        # user
+        ("user", "/studies", "get", 200),
+        ("user", "/studies", "post", 405),
+        ("user", "/studies/<kf_id>", "get", 200),
+        ("user", "/studies/<kf_id>", "patch", 405),
+        ("user", "/studies/<kf_id>", "put", 405),
+        ("user", "/studies/<kf_id>", "delete", 405),
+        # anon
+        ("anon", "/studies", "get", 200),
+        ("anon", "/studies", "post", 405),
+        ("anon", "/studies/<kf_id>", "get", 200),
+        ("anon", "/studies/<kf_id>", "patch", 405),
+        ("anon", "/studies/<kf_id>", "put", 405),
+        ("anon", "/studies/<kf_id>", "delete", 405),
+    ],
+)
+@pytest.mark.django_db
+def test_study_permissions(
+    test_client, user_type, endpoint, method, status_code
+):
+    study = StudyFactory(kf_id="SD_TESTTEST")
+    endpoint = endpoint.replace("<kf_id>", study.kf_id)
+    body = None
+    if method in ["post", "patch", "put"]:
+        body = {"name": study.name}
     client = test_client(user_type)
     call = getattr(client, method)
     resp = call(endpoint, data=body)
