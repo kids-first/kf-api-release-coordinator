@@ -50,6 +50,11 @@ class AdminOrReadOnlyPermission(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
+        # We have to allow unauthenticated updates to tasks as some task
+        # services do not currently send us any authentication
+        if view.basename == "task" and view.action == 'partial_update':
+            return True
+
         if isinstance(request.user, AnonymousUser):
             return False
 
