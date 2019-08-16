@@ -1,7 +1,9 @@
 import time
 import pytest
+from mock import Mock
 
 from coordinator.api.factories.task import TaskFactory
+from coordinator.api.factories.task_service import TaskServiceFactory
 from coordinator.api.factories.release import ReleaseFactory
 from coordinator.api.factories.study import StudyFactory
 
@@ -136,6 +138,58 @@ def test_study_permissions(
     body = None
     if method in ["post", "patch", "put"]:
         body = {"name": study.name}
+    client = test_client(user_type)
+    call = getattr(client, method)
+    resp = call(endpoint, data=body)
+    assert resp.status_code == status_code
+
+
+@pytest.mark.parametrize(
+    "user_type,endpoint,method,status_code",
+    [
+        # admin
+        ("admin", "/task-services", "get", 200),
+        ("admin", "/task-services", "post", 201),
+        ("admin", "/task-services/<kf_id>", "get", 200),
+        ("admin", "/task-services/<kf_id>", "patch", 200),
+        ("admin", "/task-services/<kf_id>", "put", 200),
+        ("admin", "/task-services/<kf_id>", "delete", 204),
+        # user
+        ("user", "/task-services", "get", 200),
+        ("user", "/task-services", "post", 403),
+        ("user", "/task-services/<kf_id>", "get", 200),
+        ("user", "/task-services/<kf_id>", "patch", 403),
+        ("user", "/task-services/<kf_id>", "put", 403),
+        ("user", "/task-services/<kf_id>", "delete", 403),
+        # anon
+        ("anon", "/task-services", "get", 200),
+        ("anon", "/task-services", "post", 403),
+        ("anon", "/task-services/<kf_id>", "get", 200),
+        ("anon", "/task-services/<kf_id>", "patch", 403),
+        ("anon", "/task-services/<kf_id>", "put", 403),
+        ("anon", "/task-services/<kf_id>", "delete", 403),
+    ],
+)
+@pytest.mark.django_db
+def test_task_service_permissions(
+    mocker, test_client, user_type, endpoint, method, status_code
+):
+    mock_requests = mocker.patch("coordinator.api.validators.requests")
+    mock_resp = Mock()
+    mock_resp.content = str.encode('{"name": "test"}')
+    mock_resp.status_code = 200
+    mock_requests.get.return_value = mock_resp
+
+    service = TaskServiceFactory()
+    endpoint = endpoint.replace("<kf_id>", service.kf_id)
+    body = None
+    if method in ["post", "patch", "put"]:
+        body = {
+            "name": "My service",
+            "description": "testing",
+            "author": "me",
+            "url": "http://test",
+        }
     client = test_client(user_type)
     call = getattr(client, method)
     resp = call(endpoint, data=body)
