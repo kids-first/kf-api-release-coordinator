@@ -2,6 +2,9 @@ import pytest
 from mock import Mock, patch
 from coordinator.api.models import Release, Task, TaskService, Event
 
+from coordinator.api.factories.event import EventFactory
+from coordinator.api.factories.task import TaskFactory
+
 
 BASE_URL = 'http://testserver'
 
@@ -42,21 +45,12 @@ def test_filters(client, transactional_db, event):
     assert resp.json()['results'][0]['task'].endswith(task1['kf_id'])
 
     # Make a new task
-    task = {
-        'task_service': BASE_URL+'/task-services/'+service['kf_id'],
-        'release': BASE_URL+'/releases/'+release['kf_id']
-    }
-    resp = client.post(BASE_URL+'/tasks', data=task)
-    task2 = resp.json()
+    task2 = TaskFactory(
+        release=Release.objects.get(kf_id=release["kf_id"]),
+        task_service=TaskService.objects.get(kf_id=service["kf_id"]),
+    )
 
-    event = {
-        'event_type': 'info',
-        'message': 'made a new task for a release',
-        'release': BASE_URL+'/releases/'+release['kf_id'],
-        'task': BASE_URL+'/tasks/'+task2['kf_id']
-    }
-    resp = client.post(BASE_URL+'/events', data=event)
-    event2 = resp.json()
+    event2 = EventFactory(task=task2, release=task2.release)
 
     # Release should now have two events, but only one event per task
     resp = client.get(BASE_URL+'/events')
@@ -65,7 +59,7 @@ def test_filters(client, transactional_db, event):
     assert len(resp.json()['results']) == 2
     resp = client.get(BASE_URL+'/events?task='+task1['kf_id'])
     assert len(resp.json()['results']) == 1
-    resp = client.get(BASE_URL+'/events?task='+task2['kf_id'])
+    resp = client.get(BASE_URL+'/events?task='+task2.kf_id)
     assert len(resp.json()['results']) == 1
 
 
