@@ -5,12 +5,14 @@ from mock import Mock
 from coordinator.api.factories.task import TaskFactory
 from coordinator.api.factories.task_service import TaskServiceFactory
 from coordinator.api.factories.release import ReleaseFactory
+from coordinator.api.factories.release_note import ReleaseNoteFactory
 from coordinator.api.factories.study import StudyFactory
 
 
 BASE_URL = "http://testserver"
 SERVICE_URL = f"{BASE_URL}/task-services/"
 RELEASE_URL = f"{BASE_URL}/releases/"
+STUDY_URL = f"{BASE_URL}/studies/"
 
 
 @pytest.mark.parametrize(
@@ -96,6 +98,52 @@ def test_release_permissions(
             "name": release.name,
             "description": release.description,
             "studies": [release.studies.first().kf_id],
+        }
+    client = test_client(user_type)
+    call = getattr(client, method)
+    resp = call(endpoint, data=body)
+    assert resp.status_code == status_code
+
+
+@pytest.mark.parametrize(
+    "user_type,endpoint,method,status_code",
+    [
+        # admin
+        ("admin", "/release-notes", "get", 200),
+        ("admin", "/release-notes", "post", 201),
+        ("admin", "/release-notes/<kf_id>", "get", 200),
+        ("admin", "/release-notes/<kf_id>", "patch", 200),
+        ("admin", "/release-notes/<kf_id>", "put", 200),
+        ("admin", "/release-notes/<kf_id>", "delete", 204),
+        # user
+        ("user", "/release-notes", "get", 200),
+        ("user", "/release-notes", "post", 403),
+        ("user", "/release-notes/<kf_id>", "get", 200),
+        ("user", "/release-notes/<kf_id>", "patch", 403),
+        ("user", "/release-notes/<kf_id>", "put", 403),
+        ("user", "/release-notes/<kf_id>", "delete", 403),
+        # anon
+        ("anon", "/release-notes", "get", 200),
+        ("anon", "/release-notes", "post", 403),
+        ("anon", "/release-notes/<kf_id>", "get", 200),
+        ("anon", "/release-notes/<kf_id>", "patch", 403),
+        ("anon", "/release-notes/<kf_id>", "put", 403),
+        ("anon", "/release-notes/<kf_id>", "delete", 403),
+    ],
+)
+@pytest.mark.django_db
+def test_release_note_permissions(
+    test_client, user_type, endpoint, method, status_code
+):
+    note = ReleaseNoteFactory()
+    endpoint = endpoint.replace("<kf_id>", note.kf_id)
+    body = None
+    if method in ["post", "patch", "put"]:
+        body = {
+            "description": "testing",
+            "author": "me",
+            "study": STUDY_URL + note.study.kf_id,
+            "release": RELEASE_URL + note.release.kf_id,
         }
     client = test_client(user_type)
     call = getattr(client, method)
