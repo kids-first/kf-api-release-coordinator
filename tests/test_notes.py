@@ -1,26 +1,30 @@
 from coordinator.api.models import ReleaseNote
 
 
-def test_new_note(client, db, release, study):
+def test_new_note(admin_client, db, release, study):
     """ Test basic response """
     assert ReleaseNote.objects.count() == 0
-    resp = client.get('http://testserver/release-notes')
+    resp = admin_client.get('http://testserver/release-notes')
     assert resp.status_code == 200
     assert resp.json()['count'] == 0
 
-    resp = client.post('http://testserver/release-notes', data={
-        'author': 'test',
-        'description': 'Lorem ipsum',
-        'release': 'http://testserver/releases/'+release['kf_id'],
-        'study': 'http://testserver/studies/'+study.kf_id})
+    resp = admin_client.post(
+        "http://testserver/release-notes",
+        data={
+            "author": "test",
+            "description": "Lorem ipsum",
+            "release": "http://testserver/releases/" + release["kf_id"],
+            "study": "http://testserver/studies/" + study.kf_id,
+        },
+    )
 
     assert resp.status_code == 201
 
-    resp = client.get('http://testserver/release-notes')
+    resp = admin_client.get('http://testserver/release-notes')
     assert resp.status_code == 200
     assert resp.json()['count'] == 1
 
-    resp = client.get('http://testserver/releases/'+release['kf_id'])
+    resp = admin_client.get('http://testserver/releases/'+release['kf_id'])
     assert resp.status_code == 200
     assert 'notes' in resp.json()
     assert len(resp.json()['notes']) == 1

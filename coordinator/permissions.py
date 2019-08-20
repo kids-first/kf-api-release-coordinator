@@ -35,7 +35,32 @@ class DevPermission(permissions.BasePermission):
 
         roles = request.user.get('roles', [])
 
-        if 'ADMIN' in roles or 'DEV' in roles:
+        if "ADMIN" in roles or "DEV" in roles:
+            return True
+
+
+class AdminOrReadOnlyPermission(permissions.BasePermission):
+    """
+    Only allow admin, or read only to everyone else.
+    """
+
+    message = "Must be an admin"
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        # We have to allow unauthenticated updates to tasks as some task
+        # services do not currently send us any authentication
+        if view.basename == "task" and view.action == 'partial_update':
+            return True
+
+        if isinstance(request.user, AnonymousUser):
+            return False
+
+        roles = request.user.get("roles", [])
+
+        if "ADMIN" in roles:
             return True
 
 
