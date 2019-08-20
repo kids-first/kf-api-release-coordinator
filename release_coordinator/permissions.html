@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Release Coordinator API &mdash; Kids First Release Coordinator  documentation</title>
+  <title>Permissions &mdash; Kids First Release Coordinator  documentation</title>
   
 
   
@@ -38,8 +38,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Resources and Endpoints" href="resources.html" />
-    <link rel="prev" title="Introduction" href="introduction.html" />
+    <link rel="next" title="Introduction" href="../task_service/introduction.html" />
+    <link rel="prev" title="Resources and Endpoints" href="resources.html" />
     <link rel="stylesheet" href="https://kids-first.github.io/kf-sphinx-docs-theme/sphinx_kidsfirst_theme/static/css/kidsfirst.css" type="text/css" />
  
 </head>
@@ -95,9 +95,13 @@
 <p class="caption"><span class="caption-text">Release Coordinator:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Release Coordinator API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Release Coordinator API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources and Endpoints</a></li>
-<li class="toctree-l1"><a class="reference internal" href="permissions.html">Permissions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Permissions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#unauthorized-and-user-role-permissions">Unauthorized and <code class="docutils literal notranslate"><span class="pre">USER</span></code> Role Permissions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#admin-role-permissions"><code class="docutils literal notranslate"><span class="pre">ADMIN</span></code> Role Permissions</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Task Services:</span></p>
 <ul>
@@ -148,13 +152,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>Release Coordinator API</li>
+      <li>Permissions</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/release_coordinator/api.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/release_coordinator/permissions.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -167,13 +171,131 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="release-coordinator-api">
-<h1>Release Coordinator API<a class="headerlink" href="#release-coordinator-api" title="Permalink to this headline">¶</a></h1>
-<p>The Release Coordinator exposes a Django REST API for interacting
-programatically with users, services, and applications.</p>
-<p>When running the coordinator locally, the Django REST Framework will be
-available at the root url, <a class="reference external" href="http://localhost:5000">http://localhost:5000</a> by default.
-The live production api is also available at <a class="reference external" href="https://kf-release-coord.kidsfirstdrc.org">https://kf-release-coord.kidsfirstdrc.org</a>.</p>
+  <div class="section" id="permissions">
+<h1>Permissions<a class="headerlink" href="#permissions" title="Permalink to this headline">¶</a></h1>
+<p>Authorization and permissions are granted based on a user’s <code class="docutils literal notranslate"><span class="pre">roles</span></code> as
+provided by the token sent with each request.</p>
+<div class="section" id="unauthorized-and-user-role-permissions">
+<h2>Unauthorized and <code class="docutils literal notranslate"><span class="pre">USER</span></code> Role Permissions<a class="headerlink" href="#unauthorized-and-user-role-permissions" title="Permalink to this headline">¶</a></h2>
+<p>Users that have not provided a valid JWT or only have the <code class="docutils literal notranslate"><span class="pre">USER</span></code> role may
+access all resources as read-only.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="14%" />
+<col width="16%" />
+<col width="18%" />
+<col width="18%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Resource</th>
+<th class="head">List</th>
+<th class="head">Create</th>
+<th class="head">Update</th>
+<th class="head">Delete</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Study</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="row-odd"><td>Release</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="row-even"><td>Release Note</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="row-odd"><td>Task</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="row-even"><td>Task Service</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="row-odd"><td>Event</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="admin-role-permissions">
+<h2><code class="docutils literal notranslate"><span class="pre">ADMIN</span></code> Role Permissions<a class="headerlink" href="#admin-role-permissions" title="Permalink to this headline">¶</a></h2>
+<p>Admins have the ability to create and update  most all resources with
+excpetion to events, which are generated automatically, and studies, which
+are synchronized with studies in the dataservice.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="34%" />
+<col width="14%" />
+<col width="16%" />
+<col width="18%" />
+<col width="18%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Resource</th>
+<th class="head">List</th>
+<th class="head">Create</th>
+<th class="head">Update</th>
+<th class="head">Delete</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Study</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr class="row-odd"><td>Release</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-even"><td>Release Note</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-odd"><td>Task</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr class="row-even"><td>Task Service</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="row-odd"><td>Event</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 
 
@@ -184,10 +306,10 @@ The live production api is also available at <a class="reference external" href=
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="resources.html" class="btn btn-neutral float-right" title="Resources and Endpoints" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../task_service/introduction.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="resources.html" class="btn btn-neutral float-left" title="Resources and Endpoints" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
