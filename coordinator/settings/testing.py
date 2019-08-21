@@ -20,6 +20,7 @@ APPEND_SLASH = False
 
 INSTALLED_APPS = [
     'coordinator.api.apps.ApiConfig',
+    'coordinator.graphql.apps.GraphQLConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -32,6 +33,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_fsm',
     'corsheaders',
+    'graphene_django'
 ]
 
 MIDDLEWARE = [
@@ -184,6 +186,10 @@ STATIC_ROOT = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, '../', 'static')
 ]
+
+GRAPHENE = {
+    'SCHEMA': 'coordinator.graphql.schema.schema'
+}
 
 # APIs
 EGO_API = 'http://ego'
