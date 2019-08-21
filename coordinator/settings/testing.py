@@ -41,6 +41,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'coordinator.middleware.Auth0AuthenticationMiddleware',
 ]
 
 ROOT_URLCONF = 'coordinator.urls'

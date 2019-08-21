@@ -23,15 +23,7 @@ class ReleaseFilter(FilterSet):
 
     class Meta:
         model = Release
-        fields = [
-            "kf_id",
-            "version",
-            "state",
-            "author",
-            "name",
-            "created_at",
-            "is_major",
-        ]
+        fields = ["version", "state", "author", "name", "is_major"]
 
 
 class Query:
@@ -45,4 +37,10 @@ class Query:
     )
 
     def resolve_all_releases(self, info, **kwargs):
-        return Release.objects.all()
+        user = info.context.user
+        if hasattr(user, "roles") and (
+            "ADMIN" in user.roles or "DEV" in user.roles
+        ):
+            return Release.objects.all()
+
+        return Release.objects.filter(state="published").all()
