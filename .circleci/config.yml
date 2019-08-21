@@ -9,7 +9,7 @@ jobs:
       ignore:
         - gh-pages
     docker:
-      - image: circleci/python:3.6.1
+      - image: circleci/python:3.7
       - image: postgres:9.5
       - image: redis:latest
         environment:

@@ -1,4 +1,4 @@
-FROM        python:3.6-alpine3.7 as base
+FROM        python:3.7-alpine3.7 as base
 
 ADD         requirements.txt /app/
 WORKDIR     /app
