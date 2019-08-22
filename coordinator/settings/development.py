@@ -36,6 +36,7 @@ RQ_API_TOKEN = os.environ.get('RQ_API_TOKEN', None)
 
 INSTALLED_APPS = [
     'coordinator.api.apps.ApiConfig',
+    'coordinator.graphql.apps.GraphQLConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_fsm',
     'corsheaders',
+    'graphene_django'
 ]
 
 MIDDLEWARE = [
@@ -57,6 +59,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'coordinator.middleware.Auth0AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -215,6 +218,10 @@ STATIC_ROOT = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, '../', 'static')
 ]
+
+GRAPHENE = {
+    'SCHEMA': 'coordinator.graphql.schema.schema'
+}
 
 # APIs
 EGO_API = os.environ.get('EGO_URL', None)
