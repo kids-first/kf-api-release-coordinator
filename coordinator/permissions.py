@@ -50,6 +50,10 @@ class AdminOrReadOnlyPermission(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
+        # Allow anyone to trigger status checks, should be removed in favor
+        # of an internal scheduler and made an admin-only action
+        if view.action == "status_checks":
+            return True
         # We have to allow unauthenticated updates to tasks as some task
         # services do not currently send us any authentication
         if view.basename == "task" and view.action == 'partial_update':
@@ -78,6 +82,11 @@ class GroupPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
+            return True
+
+        # Allow anyone to trigger status checks, should be removed in favor
+        # of an internal scheduler and made an admin-only action
+        if view.action == "status_checks":
             return True
 
         if isinstance(request.user, AnonymousUser):
