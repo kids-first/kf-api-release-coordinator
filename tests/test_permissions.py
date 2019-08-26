@@ -242,3 +242,35 @@ def test_task_service_permissions(
     call = getattr(client, method)
     resp = call(endpoint, data=body)
     assert resp.status_code == status_code
+
+
+@pytest.mark.parametrize(
+    "user_type,endpoint,method,status_code",
+    [
+        # admin
+        ("admin", "/releases/status_checks", "post", 200),
+        ("admin", "/tasks/status_checks", "post", 200),
+        # user
+        ("user", "/releases/status_checks", "post", 200),
+        ("user", "/tasks/status_checks", "post", 200),
+        # anon
+        ("anon", "/releases/status_checks", "post", 200),
+        ("anon", "/tasks/status_checks", "post", 200),
+    ],
+)
+@pytest.mark.django_db
+def test_status_permissions(
+    mocker, test_client, user_type, endpoint, method, status_code
+):
+    mock_requests = mocker.patch("coordinator.api.validators.requests")
+    mock_resp = Mock()
+    mock_resp.content = str.encode('{"name": "test"}')
+    mock_resp.status_code = 200
+    mock_requests.get.return_value = mock_resp
+
+    service = TaskServiceFactory()
+    endpoint = endpoint.replace("<kf_id>", service.kf_id)
+    client = test_client(user_type)
+    call = getattr(client, method)
+    resp = call(endpoint)
+    assert resp.status_code == status_code
