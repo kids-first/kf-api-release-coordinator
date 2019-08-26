@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; Kids First Release Coordinator  documentation</title>
+  <title>Development &mdash; Kids First Release Coordinator  documentation</title>
   
 
   
@@ -38,8 +38,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Release Coordinator API" href="api.html" />
-    <link rel="prev" title="Introduction" href="../introduction.html" />
+    <link rel="next" title="Introduction" href="../task_service/introduction.html" />
+    <link rel="prev" title="Permissions" href="permissions.html" />
     <link rel="stylesheet" href="https://kids-first.github.io/kf-sphinx-docs-theme/sphinx_kidsfirst_theme/static/css/kidsfirst.css" type="text/css" />
  
 </head>
@@ -94,11 +94,16 @@
 </ul>
 <p class="caption"><span class="caption-text">Release Coordinator:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Release Coordinator API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="resources.html">Resources and Endpoints</a></li>
 <li class="toctree-l1"><a class="reference internal" href="permissions.html">Permissions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#developing-with-docker">Developing with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#changing-settings">Changing Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generating-mock-data">Generating Mock Data</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Task Services:</span></p>
 <ul>
@@ -149,13 +154,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>Introduction</li>
+      <li>Development</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/release_coordinator/introduction.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/release_coordinator/development.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -168,13 +173,50 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>The Release Coordinator service is the central control point for issuing new
-releases in Kids First.
-It coordinates many Task Services and keeps tabs on their status as well as
-provides historical data about releases and tasks within them.</p>
-<p><a class="reference external" href="https://kf-release-coord.kidsfirstdrc.org/">https://kf-release-coord.kidsfirstdrc.org/</a></p>
+  <div class="section" id="development">
+<h1>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="developing-with-docker">
+<h2>Developing with Docker<a class="headerlink" href="#developing-with-docker" title="Permalink to this headline">¶</a></h2>
+<p>The Release Coordinator includes a <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> file that is
+configured to quickly get started with running and developing on the codebase.
+Running <code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">up</span></code> from the root directory will start up the
+Coordinator and dependent services such as a postgres database, redis, a task
+runner, and a task scheduler.
+The codebase will also be mounted into the running services so that development
+changes may be reflected immediately.</p>
+</div>
+<div class="section" id="changing-settings">
+<h2>Changing Settings<a class="headerlink" href="#changing-settings" title="Permalink to this headline">¶</a></h2>
+<p>The Coordinator includes three settings files by default: development,
+testing, and production.
+When run using <code class="docutils literal notranslate"><span class="pre">docker-compose</span></code>, the Coordinator will default to the
+<code class="docutils literal notranslate"><span class="pre">testing</span></code> settings, which will enforce authentication and permissions
+checking.
+The settings that the Coordinator runs with may be configured with the
+<code class="docutils literal notranslate"><span class="pre">DJANGO_SETTINGS_MODULE</span></code> environment variable.
+For example, when running with <code class="docutils literal notranslate"><span class="pre">docker-compose</span></code>:</p>
+<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DJANGO_SETTINGS_MODULE</span><span class="o">=</span><span class="n">coordinator</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">testing</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span>
+</pre></div>
+</div>
+<p>Often, it’s desirable to want full access to the api without having to
+configure an authentication backend or gain access to an existing one.
+To do this, the <code class="docutils literal notranslate"><span class="pre">development</span></code> settings may be used which will automatically
+authenticate every request as an <code class="docutils literal notranslate"><span class="pre">ADMIN</span></code> user and giving complete access to
+the api.</p>
+</div>
+<div class="section" id="generating-mock-data">
+<h2>Generating Mock Data<a class="headerlink" href="#generating-mock-data" title="Permalink to this headline">¶</a></h2>
+<p>When running with <code class="docutils literal notranslate"><span class="pre">docker-compose</span></code>, the Coordinator will automatically
+bootstrap the database with a number of fake entries to enable faster
+development.
+This setting may be overridden by providing any value other than <code class="docutils literal notranslate"><span class="pre">FAKE</span></code> for
+the <code class="docutils literal notranslate"><span class="pre">PRELOAD_DATA</span></code> environment variable.
+The mock data is generated through a Django management command, <code class="docutils literal notranslate"><span class="pre">fakedata</span></code>,
+which may be run by itself if developing outside of docker:</p>
+<div class="code highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">fakedata</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -185,10 +227,10 @@ provides historical data about releases and tasks within them.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api.html" class="btn btn-neutral float-right" title="Release Coordinator API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../task_service/introduction.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="permissions.html" class="btn btn-neutral float-left" title="Permissions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
