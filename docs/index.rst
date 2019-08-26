@@ -46,6 +46,7 @@ The api will be exposed at `<http://localhost:5000>`_ by default.
    release_coordinator/api
    release_coordinator/resources
    release_coordinator/permissions
+   release_coordinator/development
 
 .. toctree::
    :maxdepth: 2
