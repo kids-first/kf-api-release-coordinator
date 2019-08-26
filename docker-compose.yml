@@ -23,6 +23,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-coordinator.settings.testing}
+      - PRELOAD_DATA=FAKE
     depends_on:
       - pg
       - redis
