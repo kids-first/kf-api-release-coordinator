@@ -60,7 +60,14 @@ class Auth0AuthenticationMiddleware:
         """
         if settings.DEBUG:
             # Assume user is admin if running in dev mode
-            return User(username="devadmin", roles=["ADMIN"])
+            return User(
+                username="devadmin",
+                roles=["ADMIN"],
+                email="admin@kidsfirstdrc.org",
+                first_name="dev",
+                last_name="admin",
+                sub="123",
+            )
 
         user = request.user
         if user.is_authenticated:

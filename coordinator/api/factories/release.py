@@ -11,6 +11,9 @@ class ReleaseFactory(factory.django.DjangoModelFactory):
     name = factory.Faker("bs")
     author = factory.Faker("name")
     description = factory.Faker("bs")
+    tasks = factory.RelatedFactory(
+        "coordinator.api.factories.task.TaskFactory", "release"
+    )
 
     @factory.post_generation
     def studies(self, create, extracted, **kwargs):
