@@ -41,7 +41,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.order_by('-created_at').all()
     serializer_class = TaskSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_class = TaskFilter
+    filterset_class = TaskFilter
     http_method_names = ["get", "post", "head", "put", "patch"]
 
     def partial_update(self, request, kf_id=None):

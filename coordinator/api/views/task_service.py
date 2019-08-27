@@ -45,7 +45,7 @@ class TaskServiceViewSet(viewsets.ModelViewSet):
     queryset = TaskService.objects.order_by('-created_at').all()
     serializer_class = TaskServiceSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_class = TaskServiceFilter
+    filterset_class = TaskServiceFilter
 
     @action(methods=['post'], detail=False)
     def health_checks(self, request):
