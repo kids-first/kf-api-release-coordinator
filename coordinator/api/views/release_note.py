@@ -41,4 +41,4 @@ class ReleaseNoteViewSet(viewsets.ModelViewSet):
     queryset = ReleaseNote.objects.order_by("-created_at").all()
     serializer_class = ReleaseNoteSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_class = ReleaseNoteFilter
+    filterset_class = ReleaseNoteFilter

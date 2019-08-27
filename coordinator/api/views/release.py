@@ -45,7 +45,7 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
     queryset = Release.objects.order_by('-created_at').all()
     serializer_class = ReleaseSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_class = ReleaseFilter
+    filterset_class = ReleaseFilter
 
     def create(self, *args, **kwargs):
         """
