@@ -42,7 +42,7 @@ study_router = routers.NestedSimpleRouter(router, r'studies',
                                           trailing_slash=False,
                                           lookup='study')
 study_router.register(r'releases', views.StudyReleasesViewSet,
-                      base_name='study-releases')
+                      basename='study-releases')
 
 urlpatterns = [
     url(r'^', include(router.urls)),
