@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -9,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; Kids First Release Coordinator  documentation</title>
+  <title>Service Authentication &mdash; Kids First Release Coordinator  documentation</title>
   
 
   
@@ -37,8 +36,10 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/sphinxcontrib-httpexample.css" type="text/css" />
     
-    <link rel="index" title="Index" href="#" />
+    <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="release_coordinator/introduction.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" />
     <link rel="stylesheet" href="https://kids-first.github.io/kf-sphinx-docs-theme/sphinx_kidsfirst_theme/static/css/kidsfirst.css" type="text/css" />
  
 </head>
@@ -88,9 +89,13 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="service_authentication.html">Service Authentication</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Service Authentication</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#identifying-outgoing-requests">Identifying Outgoing Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#authenticating-incoming-requests">Authenticating Incoming Requests</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Release Coordinator:</span></p>
 <ul>
@@ -149,12 +154,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Index</li>
+      <li>Service Authentication</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/service_authentication.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -166,11 +173,44 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-
-<h1 id="index">Index</h1>
-
-<div class="genindex-jumpbox">
- 
+  <div class="section" id="service-authentication">
+<h1>Service Authentication<a class="headerlink" href="#service-authentication" title="Permalink to this headline">¶</a></h1>
+<p>Because communication between Task Services and the Coordinator may occur over
+the public internet, it is vital that each side verify any requests recieved.</p>
+<p>The primary mechanism for this is through an <a class="reference external" href="https://tools.ietf.org/html/rfc6749#section-4.4">OAuth2 Client Credentials flow</a>
+where the services and credentials are mediated by Auth0
+(which calls this flow ‘Machine-to-Machine’).</p>
+<p>The Coordinator and each Task Service must be registered in the Kids First
+account to recieve a set of credentials which will allow them to generate
+access tokens of the <code class="docutils literal notranslate"><span class="pre">client_credentials</span></code> grant type as needed.
+<a class="reference external" href="https://auth0.com/blog/using-m2m-authorization">This article</a> outlines the
+process of setting up a new application in Auth0 and using it to generate
+access tokens.</p>
+<div class="section" id="identifying-outgoing-requests">
+<h2>Identifying Outgoing Requests<a class="headerlink" href="#identifying-outgoing-requests" title="Permalink to this headline">¶</a></h2>
+<p>Each outward request to the Coordinator or a Task service will need to provide
+a way of identifying itself to the recipient service.
+This may be done through the standard mechanism of attaching the JWT obtained
+through the above process to <code class="docutils literal notranslate"><span class="pre">Authorization</span></code> header, and prefixed with
+<code class="docutils literal notranslate"><span class="pre">Bearer</span></code>.
+It’s recommended that each service issuing tokens with each request cache a
+single token for as long as it is valid so as to reduce network requests to
+Auth0 and reduce the number of valid tokens in circulation at any given time.</p>
+</div>
+<div class="section" id="authenticating-incoming-requests">
+<h2>Authenticating Incoming Requests<a class="headerlink" href="#authenticating-incoming-requests" title="Permalink to this headline">¶</a></h2>
+<p>Requests recieved either by the Coordinator from a Task Service or by a Task
+Service by the Coordinator must be verified as originating from an authorized
+service.
+If they are not, it’s possible that anyone may issue requests and invoke
+unallowed actions such as continually spinning release tasks, prematurely
+ending tasks, or releasing private data to the public.</p>
+<p>To verify the identity of a request, the <code class="docutils literal notranslate"><span class="pre">Bearer</span></code> token attached to the
+request’s <code class="docutils literal notranslate"><span class="pre">Authorization</span></code> header may be validated by checking the signature
+against the Kids First keys.
+These keys are provided publicly at:
+<a class="reference external" href="https://kids-first.auth0.com/.well-known/jwks.json">https://kids-first.auth0.com/.well-known/jwks.json</a></p>
+</div>
 </div>
 
 
@@ -178,6 +218,15 @@
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="release_coordinator/introduction.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
