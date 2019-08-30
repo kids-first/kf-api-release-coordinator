@@ -37,6 +37,7 @@ The api will be exposed at `<http://localhost:5000>`_ by default.
    :caption: Contents:
 
    introduction
+   service_authentication
 
 .. toctree::
    :maxdepth: 2
