@@ -3,7 +3,7 @@ import requests
 import logging
 from django.conf import settings
 from django.core.cache import cache
-from coordinator.authentication import get_service_token
+from coordinator.authentication import headers
 from coordinator.api.models import Task, TaskService, Release
 
 
@@ -97,12 +97,12 @@ def init_task(release_id, task_service_id, task_id):
     failed = False
     resp = None
     try:
-        resp = requests.post(service.url+'/tasks',
-                             headers=cache.get_or_set(
-                                settings.CACHE_EGO_TOKEN, get_service_token
-                             ),
-                             json=body,
-                             timeout=settings.REQUEST_TIMEOUT)
+        resp = requests.post(
+            service.url + "/tasks",
+            headers=headers(),
+            json=body,
+            timeout=settings.REQUEST_TIMEOUT,
+        )
     except requests.exceptions.RequestException:
         failed = True
         logger.error(f'problem requesting task for init: {resp.content}')
@@ -146,13 +146,12 @@ def start_release(release_id):
         failed = False
         resp = None
         try:
-            resp = requests.post(task.task_service.url+'/tasks',
-                                 headers=cache.get_or_set(
-                                    settings.CACHE_EGO_TOKEN,
-                                    get_service_token
-                                 ),
-                                 json=body,
-                                 timeout=settings.REQUEST_TIMEOUT)
+            resp = requests.post(
+                task.task_service.url + "/tasks",
+                headers=headers(),
+                json=body,
+                timeout=settings.REQUEST_TIMEOUT,
+            )
             resp.raise_for_status()
         except requests.exceptions.RequestException:
             logger.error(f'problem requesting task for start: {resp.content}')
@@ -207,13 +206,12 @@ def publish_release(release_id):
         failed = False
         resp = None
         try:
-            resp = requests.post(task.task_service.url+'/tasks',
-                                 headers=cache.get_or_set(
-                                    settings.CACHE_EGO_TOKEN,
-                                    get_service_token
-                                 ),
-                                 json=body,
-                                 timeout=settings.REQUEST_TIMEOUT)
+            resp = requests.post(
+                task.task_service.url + "/tasks",
+                headers=headers(),
+                json=body,
+                timeout=settings.REQUEST_TIMEOUT,
+            )
             resp.raise_for_status()
         except requests.exceptions.RequestException:
             logger.error(f'problem requesting task for publish: ' +
@@ -263,13 +261,12 @@ def cancel_release(release_id, fail=False):
             'release_id': release.kf_id
         }
         try:
-            requests.post(task.task_service.url+'/tasks',
-                          headers=cache.get_or_set(
-                             settings.CACHE_EGO_TOKEN,
-                             get_service_token
-                          ),
-                          json=body,
-                          timeout=settings.REQUEST_TIMEOUT)
+            requests.post(
+                task.task_service.url + "/tasks",
+                headers=headers(),
+                json=body,
+                timeout=settings.REQUEST_TIMEOUT,
+            )
         except requests.exceptions.RequestException:
             pass
 
