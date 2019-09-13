@@ -9,8 +9,8 @@ class ReleaseNoteFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ReleaseNote
 
-    kf_id = "RN_00000000"
+    kf_id = factory.Sequence(lambda n: f"RN_{n:08}")
     author = factory.Faker("name")
     description = factory.Faker("bs")
+    release = factory.SubFactory(ReleaseFactory)
     study = factory.SubFactory(StudyFactory)
-    release = factory.SubFactory(ReleaseFactory, kf_id="RE_00000000")
