@@ -202,7 +202,7 @@ def get_service_token():
 
     try:
         resp = requests.post(
-            url, headers=headers, data=data, timeout=settings.REQUEST_TIMEOUT
+            url, headers=headers, json=data, timeout=settings.REQUEST_TIMEOUT
         )
         resp.raise_for_status()
     except requests.exceptions.RequestException as err:
