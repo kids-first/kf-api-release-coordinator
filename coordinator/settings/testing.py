@@ -151,7 +151,7 @@ CACHE_AUTH0_KEY = os.environ.get("CACHE_AUTH0_KEY", "AUTH0_PUBLIC_KEY")
 CACHE_AUTH0_SERVICE_KEY = os.environ.get(
     "CACHE_AUTH0_SERVICE_KEY", "AUTH0_SERVICE_KEY"
 )
-CACHE_AUTH0_TIMEOUT = os.environ.get("CACHE_AUTH0_TIMEOUT", 86400)
+CACHE_AUTH0_TIMEOUT = int(os.environ.get("CACHE_AUTH0_TIMEOUT", 86400))
 
 JWT_AUD = 'https://kf-release-coord.kidsfirstdrc.org'
 
