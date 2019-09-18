@@ -1,10 +1,11 @@
 #!/bin/ash
 source /app/bin/load_vault.sh
 
-if [[ -n $AUTH0_SECRET]] ; then
+if [ -n $AUTH0_SECRET ]; then
     echo "Load AUTH0 secrets from s3"
     aws s3 cp $AUTH0_SECRET ./auth0_secrets.env
     source ./auth0_secrets.env
+    export $(cut -d= -f1 ./auth0_secrets.env)
     rm ./auth0_secrets.env
 fi
 
