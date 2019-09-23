@@ -163,9 +163,26 @@ CACHE_EGO_TOKEN = 'EGO_SERVICE_TOKEN'
 # How often the Ego public key should be retrieved from ego, 1 day default
 CACHE_EGO_TIMEOUT = 86400
 
-AUTH0_JWKS = 'https://kids-first.auth0.com/.well-known/jwks.json'
-CACHE_AUTH0_KEY = 'AUTH0_PUBLIC_KEY'
-CACHE_AUTH0_TIMEOUT = 86400
+# Settings for Auth0
+# Store both the public key for verifying incoming requests and a service key
+# for attaching to outgoing requests.
+# The public key will be fetched after the timeout window has elapsed, but
+# the service key will be refetched after it the expiration date included
+# in the last access token.
+AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "kids-first.auth0.com")
+AUTH0_JWKS = os.environ.get(
+    "AUTH0_JWKS", "https://kids-first.auth0.com/.well-known/jwks.json"
+)
+AUTH0_AUD = os.environ.get(
+    "AUTH0_AUD", "https://kf-release-coord.kidsfirstdrc.org"
+)
+AUTH0_CLIENT = os.environ.get("AUTH0_CLIENT")
+AUTH0_SECRET = os.environ.get("AUTH0_SECRET")
+CACHE_AUTH0_KEY = os.environ.get("CACHE_AUTH0_KEY", "AUTH0_PUBLIC_KEY")
+CACHE_AUTH0_SERVICE_KEY = os.environ.get(
+    "CACHE_AUTH0_SERVICE_KEY", "AUTH0_SERVICE_KEY"
+)
+CACHE_AUTH0_TIMEOUT = int(os.environ.get("CACHE_AUTH0_TIMEOUT", 86400))
 
 JWT_AUD = 'https://kf-release-coord.kidsfirstdrc.org'
 
@@ -231,6 +248,9 @@ DATASERVICE_API = os.environ.get('DATASERVICE_URL', None)
 TASK_TIMEOUT = 160000
 RELEASE_TIMEOUT = 360000
 REQUEST_TIMEOUT = 15
+REQUESTS_HEADERS = {
+    "User-Agent": "ReleaseCoordinator/development (python-requests)"
+}
 
 LOGGING = {
     "version": 1,

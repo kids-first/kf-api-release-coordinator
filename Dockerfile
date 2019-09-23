@@ -14,6 +14,7 @@ RUN apk --update add py3-psycopg2 musl-dev \
 
 # Python deps
 RUN         pip install -r /app/requirements.txt 
+RUN         pip install awscli
 
 ADD         . /app
 

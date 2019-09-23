@@ -8,7 +8,7 @@ from django.db import models
 from django.conf import settings
 from django_fsm import FSMField, transition
 from django.core.cache import cache
-from coordinator.authentication import get_service_token
+from coordinator.authentication import headers
 from coordinator.utils import kf_id_generator
 from coordinator.api.models.release import Release
 from coordinator.api.models.taskservice import TaskService
@@ -93,13 +93,12 @@ class Task(models.Model):
             'action': 'get_status'
         }
         try:
-            resp = requests.post(self.task_service.url+'/tasks',
-                                 headers=cache.get_or_set(
-                                    settings.CACHE_EGO_TOKEN,
-                                    get_service_token
-                                 ),
-                                 json=body,
-                                 timeout=settings.REQUEST_TIMEOUT)
+            resp = requests.post(
+                self.task_service.url + "/tasks",
+                headers=headers(),
+                json=body,
+                timeout=settings.REQUEST_TIMEOUT,
+            )
             resp.raise_for_status()
         except (ConnectionError, HTTPError):
             # Cancel release if there is a problem

@@ -154,7 +154,7 @@ class Release(models.Model):
             return
 
         # Check if any contained tasks have failed/canceled
-        for task in self.tasks:
+        for task in self.tasks.all():
             if task.state in ['failed', 'canceled', 'rejected']:
                 if self.state == 'canceling':
                     return
