@@ -25,6 +25,7 @@ def headers():
             settings.CACHE_AUTH0_TIMEOUT,
         )
     }
+    headers.update(settings.REQUESTS_HEADERS)
     return headers
 
 

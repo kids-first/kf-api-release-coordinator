@@ -102,7 +102,10 @@ def test_status_check(client, transactional_db, task, worker, mock_ego):
             'release_id': t.release.kf_id,
             'action': 'get_status'
         }
-        headers = {'Authorization': 'Bearer abc'}
+        headers = {
+            "Authorization": "Bearer abc",
+            "User-Agent": "ReleaseCoordinator/testing (python-requests)",
+        }
         mock_requests.post.assert_called_with('http://ts.com/tasks',
                                               timeout=0.1,
                                               headers=headers,

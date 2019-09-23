@@ -195,7 +195,10 @@ def test_task_service_bad_status(client, db, task_service):
         ts.health_check()
         assert mock_requests.get.call_count == 1
         assert ts.health_status == 'ok'
-        headers = {'Authorization': 'Bearer abc'}
+        headers = {
+            "Authorization": "Bearer abc",
+            "User-Agent": "ReleaseCoordinator/testing (python-requests)",
+        }
         mock_requests.get.assert_called_with('http://ts.com/status',
                                              headers=headers,
                                              timeout=0.1)

@@ -54,7 +54,10 @@ def test_full_release(client, dev_client, transactional_db, mocker, worker,
     ts = TaskService.objects.first()
     ts.health_check()
     assert mock_requests.get.call_count == 1
-    headers = {'Authorization': 'Bearer abc'}
+    headers = {
+        "Authorization": "Bearer abc",
+        "User-Agent": "ReleaseCoordinator/testing (python-requests)",
+    }
     mock_requests.get.assert_called_with('http://ts.com/status',
                                          headers=headers,
                                          timeout=0.1)

@@ -248,6 +248,9 @@ DATASERVICE_API = os.environ.get('DATASERVICE_URL', None)
 TASK_TIMEOUT = 160000
 RELEASE_TIMEOUT = 360000
 REQUEST_TIMEOUT = 15
+REQUESTS_HEADERS = {
+    "User-Agent": "ReleaseCoordinator/development (python-requests)"
+}
 
 LOGGING = {
     "version": 1,
