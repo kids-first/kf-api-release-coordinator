@@ -1,6 +1,7 @@
 import os
 from django.urls import path
 from django.conf.urls import url, include
+from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import routers
 from rest_framework_nested import routers
@@ -54,5 +55,5 @@ urlpatterns = [
         name='schema-swagger-ui'),
     url(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=None),
         name='schema-redoc'),
-    path('graphql', GraphQLView.as_view(graphiql=True)),
+    path('graphql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
 ]
