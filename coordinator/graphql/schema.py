@@ -7,6 +7,7 @@ from .tasks import Query as TaskQuery
 from .task_services import Query as TaskServiceQuery
 from .events import Query as EventQuery
 from .release_notes import Query as ReleaseNoteQuery
+from .studies import Query as StudyQuery
 
 
 class Query(
@@ -16,6 +17,7 @@ class Query(
     TaskServiceQuery,
     EventQuery,
     ReleaseNoteQuery,
+    StudyQuery,
 ):
     pass
 
