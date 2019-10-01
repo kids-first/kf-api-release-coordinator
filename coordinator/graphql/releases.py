@@ -1,7 +1,11 @@
 from django_filters import CharFilter, FilterSet, NumberFilter, OrderingFilter
-from graphene import relay, ObjectType
+import graphene
+import django_rq
+from graphql import GraphQLError
+from graphql_relay import from_global_id
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from coordinator.tasks import init_release
 
 from coordinator.api.models.release import Release
 
@@ -12,7 +16,7 @@ class ReleaseNode(DjangoObjectType):
     class Meta:
         model = Release
         filter_fields = {}
-        interfaces = (relay.Node,)
+        interfaces = (graphene.relay.Node,)
 
 
 class ReleaseFilter(FilterSet):
@@ -26,8 +30,46 @@ class ReleaseFilter(FilterSet):
         fields = ["version", "state", "author", "name", "is_major"]
 
 
+class ReleaseInput(graphene.InputObjectType):
+    name = graphene.String(required=True)
+    description = graphene.String(required=False)
+    is_major = graphene.Boolean(required=False)
+    studies = graphene.List(graphene.ID, required=True)
+
+
+class StartRelease(graphene.Mutation):
+    class Arguments:
+        input = ReleaseInput(required=True)
+
+    release = graphene.Field(ReleaseNode)
+
+    @staticmethod
+    def mutate(root, info, input=None):
+        """
+        Create a new release and start the release process
+        """
+        user = info.context.user
+        if not hasattr(user, "roles") or (
+            "ADMIN" not in user.roles and "DEV" not in user.roles
+        ):
+            raise GraphQLError("Not authenticated to create a release.")
+
+        studies = [from_global_id(study)[1] for study in input.get("studies")]
+        del input["studies"]
+
+        release = Release(**input)
+        release.author = user.username
+        release.save()
+        release.studies.set(studies)
+        release.save()
+
+        django_rq.enqueue(init_release, release.kf_id)
+
+        return StartRelease(release=release)
+
+
 class Query:
-    release = relay.Node.Field(
+    release = graphene.relay.Node.Field(
         ReleaseNode, description="Retrieve a single release"
     )
     all_releases = DjangoFilterConnectionField(
@@ -44,3 +86,7 @@ class Query:
             return Release.objects.all()
 
         return Release.objects.filter(state="published").all()
+
+
+class Mutation:
+    start_release = StartRelease.Field(description="Start a new release")
