@@ -1,3 +1,37 @@
+# Kids First Release Coordinator Release 1.7.0
+
+## Features
+
+### Summary
+
+Feature Emojis: ✨x6 ⬆️x3 📝x2 🐛x2 🔒x1 x1 Fixx1 🏭x1 🔓x1 ✨Graphqlx1 ♻️x1 👷x1
+Feature Labels: [feature](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/feature) x7 [refactor](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/refactor) x6 [documentation](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/documentation) x3 [bug](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/bug) x3 [devops](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/devops) x2
+
+### New features and changes
+
+- (#218) ✨ Add study queries - @dankolbman
+- (#216) 🔒 Exempt graphql endpoint from csrf - @dankolbman
+- (#209) ✨ Replace ego service token with Auth0 - @dankolbman
+- (#213) ⬆️ Upgrade semantic-version package - @dankolbman
+- (#211) ✨ Add graphql query for release notes - @dankolbman
+- (#210) ✨ Add graphql query for events - @dankolbman
+- (#208)  📝 Add page on service authentication - @dankolbman
+- (#206) ✨ Add queries for task services - @dankolbman
+- (#207) Fix deprecation warnings - @dankolbman
+- (#205) 📝 Add docs on development - @dankolbman
+- (#194) ✨ Add queries for tasks - @dankolbman
+- (#204) 🏭 Add fakedata command - @dankolbman
+- (#193) 🔓 Disable permissions for status checks - @dankolbman
+- (#191) ✨Graphql API - @dankolbman
+- (#190) ♻️ Permissions overhaul - @dankolbman
+- (#188) 🐛 Don't allow tasks to be deleted - @dankolbman
+- (#187) 🐛 Change events to use EV prefix - @dankolbman
+- (#186) ⬆️ Bump requests version - @dankolbman
+- (#185) ⬆️ Bump django from 2.1.10 to 2.1.11 - @dependabot[bot]
+- (#184) 👷 Update gh-pages build - @dankolbman
+- (#176) 📝 Sphinx docs - @dankolbman
+
+
 # Kids First Release Coordinator Release 1.6.0
 
 ## Features
