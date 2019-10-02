@@ -5,7 +5,7 @@ from graphql import GraphQLError
 from graphql_relay import from_global_id
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from coordinator.tasks import init_release
+from coordinator.tasks import init_release, cancel_release
 
 from coordinator.api.models.release import Release
 
@@ -68,6 +68,44 @@ class StartRelease(graphene.Mutation):
         return StartRelease(release=release)
 
 
+class CancelRelease(graphene.Mutation):
+    class Arguments:
+        release = graphene.ID(required=True)
+
+    release = graphene.Field(ReleaseNode)
+
+    @staticmethod
+    def mutate(root, info, release):
+        """
+        Cancel a release
+        """
+        user = info.context.user
+        if not hasattr(user, "roles") or (
+            "ADMIN" not in user.roles and "DEV" not in user.roles
+        ):
+            raise GraphQLError("Not authenticated to cancel a release.")
+
+        _, kf_id = from_global_id(release)
+
+        try:
+            release = Release.objects.get(kf_id=kf_id)
+        except Release.DoesNotExist:
+            raise GraphQLError("The release was not found.")
+
+        try:
+            release.cancel()
+            release.save()
+        except django_fsm.TransitionNotAllowed:
+            # Release must already be canceled or is canceling
+            raise GraphQLError(
+                f"The release in state {release.state} may not be canceled."
+            )
+
+        django_rq.enqueue(cancel_release, release.kf_id)
+
+        return CancelRelease(release=release)
+
+
 class Query:
     release = graphene.relay.Node.Field(
         ReleaseNode, description="Retrieve a single release"
@@ -90,3 +128,4 @@ class Query:
 
 class Mutation:
     start_release = StartRelease.Field(description="Start a new release")
+    cancel_release = CancelRelease.Field(description="Cancel a release")
