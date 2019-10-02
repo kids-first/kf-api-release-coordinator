@@ -1,11 +1,12 @@
 from django_filters import CharFilter, FilterSet, NumberFilter, OrderingFilter
 import graphene
 import django_rq
+import django_fsm
 from graphql import GraphQLError
 from graphql_relay import from_global_id
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-from coordinator.tasks import init_release, cancel_release
+from coordinator.tasks import init_release, cancel_release, publish_release
 
 from coordinator.api.models.release import Release
 
@@ -106,6 +107,44 @@ class CancelRelease(graphene.Mutation):
         return CancelRelease(release=release)
 
 
+class PublishRelease(graphene.Mutation):
+    class Arguments:
+        release = graphene.ID(required=True)
+
+    release = graphene.Field(ReleaseNode)
+
+    @staticmethod
+    def mutate(root, info, release):
+        """
+        Publish a staged release.
+
+        Only releases that have made it to the staged state may be published
+        by an administrator.
+        """
+        user = info.context.user
+        if not hasattr(user, "roles") or "ADMIN" not in user.roles:
+            raise GraphQLError("Not authenticated to publish a release.")
+
+        _, kf_id = from_global_id(release)
+
+        try:
+            release = Release.objects.get(kf_id=kf_id)
+        except Release.DoesNotExist:
+            raise GraphQLError("The release was not found.")
+
+        try:
+            release.publish()
+            release.save()
+        except django_fsm.TransitionNotAllowed:
+            raise GraphQLError(
+                f"The release in state {release.state} may not be published."
+            )
+
+        django_rq.enqueue(publish_release, release.kf_id)
+
+        return CancelRelease(release=release)
+
+
 class Query:
     release = graphene.relay.Node.Field(
         ReleaseNode, description="Retrieve a single release"
@@ -129,3 +168,4 @@ class Query:
 class Mutation:
     start_release = StartRelease.Field(description="Start a new release")
     cancel_release = CancelRelease.Field(description="Cancel a release")
+    publish_release = PublishRelease.Field(description="Publish a release")
