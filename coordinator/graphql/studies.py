@@ -1,13 +1,20 @@
 from django_filters import CharFilter, FilterSet, NumberFilter, OrderingFilter
-from graphene import relay, ObjectType
+from graphene import relay, ObjectType, String
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from coordinator.api.models.study import Study
+from .releases import ReleaseNode, ReleaseFilter
 
 
 class StudyNode(DjangoObjectType):
     """ A study in the release coordinator """
+
+    releases = DjangoFilterConnectionField(
+        ReleaseNode,
+        filterset_class=ReleaseFilter,
+        description="Get releases for a study",
+    )
 
     class Meta:
         model = Study
@@ -20,6 +27,7 @@ class StudyFilter(FilterSet):
     created_before = NumberFilter(field_name="created_at", lookup_expr="lt")
     created_after = NumberFilter(field_name="created_at", lookup_expr="gt")
     order_by = OrderingFilter(fields=("created_at",))
+    name_contains = CharFilter(field_name="name", lookup_expr="icontains")
 
     class Meta:
         model = Study
