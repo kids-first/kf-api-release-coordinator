@@ -1,5 +1,6 @@
 import graphene
 from graphql import GraphQLError
+from graphql_relay import from_global_id
 from django.core.exceptions import ValidationError
 from django_filters import CharFilter, FilterSet, NumberFilter, OrderingFilter
 from graphene_django.types import DjangoObjectType
@@ -71,6 +72,40 @@ class CreateTaskService(graphene.Mutation):
         return CreateTaskService(task_service=service)
 
 
+class UpdateTaskService(graphene.Mutation):
+    class Arguments:
+        task_service = graphene.ID(required=True)
+        input = TaskServiceInput(required=True)
+
+    task_service = graphene.Field(TaskServiceNode)
+
+    @staticmethod
+    def mutate(root, info, task_service, input=None):
+        """
+        Updates a task service
+        """
+        user = info.context.user
+        if not hasattr(user, "roles") or (
+            "ADMIN" not in user.roles and "DEV" not in user.roles
+        ):
+            raise GraphQLError("Not authenticated to create a task service.")
+
+        try:
+            validate_endpoint(input["url"])
+        except (ValidationError, ValueError) as err:
+            raise GraphQLError(
+                f"There was a problem with the service url: {err}"
+            )
+
+        _, kf_id = from_global_id(task_service)
+        service = TaskService.objects.get(kf_id=kf_id)
+        for k, v in input.items():
+            setattr(service, k, v)
+        service.save()
+
+        return UpdateTaskService(task_service=service)
+
+
 class Query:
     task_service = graphene.relay.Node.Field(
         TaskServiceNode, description="Retrieve a single task service"
@@ -94,4 +129,7 @@ class Query:
 class Mutation:
     create_task_service = CreateTaskService.Field(
         description="Register a new task service"
+    )
+    update_task_service = UpdateTaskService.Field(
+        description="Update a task service"
     )
