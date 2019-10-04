@@ -1,6 +1,7 @@
 import pytest
 from coordinator.api.models import Study
 from coordinator.api.factories.study import StudyFactory
+from coordinator.api.factories.release import ReleaseFactory
 
 
 ALL_STUDIES = """
@@ -11,7 +12,8 @@ query (
     $nameContains: String,
     $createdBefore: Float,
     $createdAfter: Float,
-    $orderBy: String
+    $orderBy: String,
+    $state: String
 ) {
     allStudies(
         kfId: $kfId,
@@ -30,6 +32,15 @@ query (
                 visible
                 deleted
                 createdAt
+                releases(state: $state) {
+                    edges {
+                        node {
+                            id
+                            kfId
+                            version
+                        }
+                    }
+                }
             }
         }
     }
@@ -58,3 +69,29 @@ def test_list_all_permissions(db, test_client, user_type, expected):
     resp = client.post("/graphql", data={"query": ALL_STUDIES})
     # Test that the correct number of releases are returned
     assert len(resp.json()["data"]["allStudies"]["edges"]) == expected
+
+
+def test_subquery(db, admin_client):
+    """
+    Test that a study's releases may be subqueried correctly
+    """
+    study = StudyFactory()
+    release1 = ReleaseFactory(
+        state="published", studies=[study], version="1.1.1"
+    )
+    release2 = ReleaseFactory(state="staged", studies=[study], version="1.1.2")
+
+    variables = {"state": "published"}
+    resp = admin_client.post(
+        "/graphql",
+        format="json",
+        data={"query": ALL_STUDIES, "variables": variables},
+    )
+
+    # Test that the correct number of releases are returned
+    assert len(resp.json()["data"]["allStudies"]["edges"]) == 1
+    study = resp.json()["data"]["allStudies"]["edges"][0]["node"]
+    assert len(study["releases"]["edges"]) == 1
+    release = study["releases"]["edges"][0]["node"]
+    assert release["version"] == "1.1.1"
+    assert release["kfId"] == release1.kf_id
