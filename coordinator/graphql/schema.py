@@ -4,7 +4,10 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from .releases import Query as ReleaseQuery, Mutation as ReleaseMutation
 from .tasks import Query as TaskQuery
-from .task_services import Query as TaskServiceQuery
+from .task_services import (
+    Query as TaskServiceQuery,
+    Mutation as TaskServiceMutation,
+)
 from .events import Query as EventQuery
 from .release_notes import Query as ReleaseNoteQuery
 from .studies import Query as StudyQuery
@@ -22,7 +25,7 @@ class Query(
     pass
 
 
-class Mutation(ObjectType, ReleaseMutation):
+class Mutation(ObjectType, ReleaseMutation, TaskServiceMutation):
     pass
 
 
