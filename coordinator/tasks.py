@@ -103,9 +103,18 @@ def init_task(release_id, task_service_id, task_id):
             json=body,
             timeout=settings.REQUEST_TIMEOUT,
         )
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as err:
         failed = True
         logger.error(f'problem requesting task for init: {resp.content}')
+
+        ev = Event(
+            event_type="error",
+            message=f"request to initialize task failed: {err}",
+            release=release,
+            task=task,
+            task_service=service,
+        )
+        ev.save()
 
     if resp and resp.status_code != 200:
         logger.error(f' invalid code from task for init: {resp.status_code}')
@@ -153,9 +162,18 @@ def start_release(release_id):
                 timeout=settings.REQUEST_TIMEOUT,
             )
             resp.raise_for_status()
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as err:
             logger.error(f'problem requesting task for start: {resp.content}')
             failed = True
+
+            ev = Event(
+                event_type="error",
+                message=f"request to start task failed: {err}",
+                release=release,
+                task=task,
+                task_service=service,
+            )
+            ev.save()
 
         # Check that command was accepted
         if resp and resp.status_code != 200:
@@ -213,10 +231,19 @@ def publish_release(release_id):
                 timeout=settings.REQUEST_TIMEOUT,
             )
             resp.raise_for_status()
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as err:
             logger.error(f'problem requesting task for publish: ' +
                          f'{resp.content}')
             failed = True
+
+            ev = Event(
+                event_type="error",
+                message=f"request to publish task failed: {err}",
+                release=release,
+                task=task,
+                task_service=service,
+            )
+            ev.save()
 
         # Check that command was accepted
         if resp and resp.status_code != 200:
@@ -267,8 +294,15 @@ def cancel_release(release_id, fail=False):
                 json=body,
                 timeout=settings.REQUEST_TIMEOUT,
             )
-        except requests.exceptions.RequestException:
-            pass
+        except requests.exceptions.RequestException as err:
+            ev = Event(
+                event_type="error",
+                message=f"request to cancel task failed: {err}",
+                release=release,
+                task=task,
+                task_service=service,
+            )
+            ev.save()
 
         task.cancel()
         task.save()
