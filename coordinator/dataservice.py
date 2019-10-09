@@ -5,15 +5,14 @@ from coordinator.api.models import Study
 
 def sync():
     if not settings.DATASERVICE_URL:
-        return
+        return [], []
 
     resp = requests.get(settings.DATASERVICE_URL + "/studies?limit=100")
-    print(resp.status_code)
     resp.raise_for_status()
 
     studies = Study.objects.all()
-    new = 0
-    deleted = 0
+    new = []
+    deleted = []
 
     for study in resp.json()["results"]:
         try:
@@ -27,7 +26,7 @@ def sync():
                 created_at=study["created_at"],
             )
             s.save()
-            new += 1
+            new.append(s)
             continue
 
         # Check for updated fields
@@ -40,7 +39,7 @@ def sync():
     coord_studies = set(s.kf_id for s in studies)
     ds_studies = set(s["kf_id"] for s in resp.json()["results"])
     missing_studies = coord_studies - ds_studies
-    deleted = len(missing_studies)
+    deleted = list(missing_studies)
     for study in missing_studies:
         s = Study.objects.get(kf_id=study)
         s.deleted = True
