@@ -15,6 +15,20 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
+def headers():
+    """ Construct headers for requests to task services """
+    headers = {
+        "Authorization": "Bearer "
+        + cache.get_or_set(
+            settings.CACHE_AUTH0_SERVICE_KEY,
+            get_service_token,
+            settings.CACHE_AUTH0_TIMEOUT,
+        )
+    }
+    headers.update(settings.REQUESTS_HEADERS)
+    return headers
+
+
 class EgoAuthentication(authentication.BaseAuthentication):
 
     @staticmethod
@@ -177,25 +191,29 @@ class Auth0Authentication(authentication.BaseAuthentication):
 
 
 def get_service_token():
-    """ Get a new token from ego """
-    url = f'{settings.EGO_API}/oauth/token'
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
+    """ Get a new token from Auth0 """
+    url = f"{settings.AUTH0_DOMAIN}/oauth/token"
+    headers = {"Content-Type": "application/json"}
+    data = {
+        "grant_type": "client_credentials",
+        "client_id": settings.AUTH0_CLIENT,
+        "client_secret": settings.AUTH0_SECRET,
+        "audience": settings.AUTH0_AUD,
     }
-    data = (f"grant_type=client_credentials&" +
-            f"client_id={settings.EGO['default']['CLIENT_ID']}&" +
-            f"client_secret={settings.EGO['default']['SECRET']}")
-    resp = requests.post(url, headers=headers, data=data)
 
-    if resp.status_code != 200:
-        logger.error(f'Problem retrieving JWT from ego: {resp.content}')
-        return
+    try:
+        resp = requests.post(
+            url, headers=headers, json=data, timeout=settings.REQUEST_TIMEOUT
+        )
+        resp.raise_for_status()
+    except requests.exceptions.RequestException as err:
+        logger.error(f"Problem retrieving access token from Auth0: {err}")
 
     content = resp.json()
-    if 'access_token' not in content or 'expires_in' not in content:
-        logger.error(f'Ego token response malformed: {resp.content}')
+
+    if "access_token" not in content:
+        logger.error(f"Access token response malformed: {resp.content}")
         return
 
-    token = content['access_token']
-    header = {'Authorization': 'Bearer '+token}
-    return header
+    token = content["access_token"]
+    return token
