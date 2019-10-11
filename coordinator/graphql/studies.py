@@ -1,9 +1,10 @@
+import graphene
 from django_filters import CharFilter, FilterSet, NumberFilter, OrderingFilter
-from graphene import relay, ObjectType, String
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from coordinator.api.models.study import Study
+from coordinator.dataservice import sync
 from .releases import ReleaseNode, ReleaseFilter
 
 
@@ -19,7 +20,7 @@ class StudyNode(DjangoObjectType):
     class Meta:
         model = Study
         filter_fields = {}
-        interfaces = (relay.Node,)
+        interfaces = (graphene.relay.Node,)
 
 
 class StudyFilter(FilterSet):
@@ -34,8 +35,35 @@ class StudyFilter(FilterSet):
         fields = ["kf_id", "visible", "deleted"]
 
 
+class SyncStudies(graphene.Mutation):
+    new = DjangoFilterConnectionField(StudyNode)
+    deleted = DjangoFilterConnectionField(StudyNode)
+
+    @staticmethod
+    def mutate(root, info):
+        """
+        Synchronize studies with the dataservice
+        """
+        user = info.context.user
+        if not hasattr(user, "roles") or (
+            "ADMIN" not in user.roles and "DEV" not in user.roles
+        ):
+            raise GraphQLError("Not authenticated to sync studies.")
+
+        try:
+            new, deleted = sync()
+        except requests.exceptions.RequestException as err:
+            raise GraphQLError(
+                "Problem getting studies from the Data Service: {err}"
+            )
+
+        return SyncStudies(new=new, deleted=deleted)
+
+
 class Query:
-    study = relay.Node.Field(StudyNode, description="Retrieve a single study")
+    study = graphene.relay.Node.Field(
+        StudyNode, description="Retrieve a single study"
+    )
     all_studies = DjangoFilterConnectionField(
         StudyNode,
         filterset_class=StudyFilter,
@@ -50,3 +78,9 @@ class Query:
             return Study.objects.all()
 
         return Study.objects.filter(visible=True).filter(deleted=False).all()
+
+
+class Mutation:
+    sync_studies = SyncStudies.Field(
+        description="Synchronize studies with the dataservice"
+    )

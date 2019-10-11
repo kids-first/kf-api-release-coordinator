@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from coordinator.api.models import Study, Release
 from coordinator.api.serializers import StudySerializer, ReleaseSerializer
+from coordinator.dataservice import sync
 
 
 class StudiesViewSet(viewsets.ReadOnlyModelViewSet):
@@ -30,54 +31,25 @@ class StudiesViewSet(viewsets.ReadOnlyModelViewSet):
         If the process for syncing studies becomes automated, then this
         may be moved to a task
         """
-        if not settings.DATASERVICE_URL:
-            return
 
-        resp = requests.get(settings.DATASERVICE_URL+'/studies?limit=100')
-        if resp.status_code != 200:
-            message = 'There was an error getting studies from the dataservice'
-            if resp.json() and 'message' in resp.json():
-                message = resp.json()['message']
-            return Response({'status': 'error',
-                             'message': f'{message}'}, resp.status_code)
+        try:
+            new, deleted = sync()
+        except requests.exceptions.RequestException as err:
+            message = "There was an error getting studies from the dataservice"
+            return Response(
+                {"status": "error", "message": f"{message}"},
+                err.response.status_code,
+            )
 
-        studies = Study.objects.all()
-        new = 0
-        deleted = 0
-
-        for study in resp.json()['results']:
-            try:
-                s = Study.objects.get(kf_id=study['kf_id'])
-            # We don't know about the study, create it
-            except Study.DoesNotExist:
-                s = Study(kf_id=study['kf_id'],
-                          name=study['name'],
-                          visible=study['visible'],
-                          created_at=study['created_at'])
-                s.save()
-                new += 1
-                continue
-
-            # Check for updated fields
-            for field in ['name', 'visible']:
-                if getattr(s, field) != study[field]:
-                    setattr(s, field, study[field])
-            s.save()
-
-        # Check if any studies were deleted from the dataservice
-        coord_studies = set(s.kf_id for s in studies)
-        ds_studies = set(s['kf_id'] for s in resp.json()['results'])
-        missing_studies = coord_studies - ds_studies
-        deleted = len(missing_studies)
-        for study in missing_studies:
-            s = Study.objects.get(kf_id=study)
-            s.deleted = True
-            s.save()
-
-        return Response({'status': 'ok',
-                         'new': new,
-                         'deleted': deleted,
-                         'message': f'Synchronized with dataservice'}, 200)
+        return Response(
+            {
+                "status": "ok",
+                "new": len(new),
+                "deleted": len(deleted),
+                "message": f"Synchronized with dataservice",
+            },
+            200,
+        )
 
 
 class StudyReleasesViewSet(viewsets.ReadOnlyModelViewSet):
