@@ -90,15 +90,18 @@ class UpdateTaskService(graphene.Mutation):
         ):
             raise GraphQLError("Not authenticated to create a task service.")
 
+        _, kf_id = from_global_id(task_service)
+        service = TaskService.objects.get(kf_id=kf_id)
+
+        # Only validate the endpoint if the url has been updated
         try:
-            validate_endpoint(input["url"])
+            if input["url"] != service.url:
+                validate_endpoint(input["url"])
         except (ValidationError, ValueError) as err:
             raise GraphQLError(
                 f"There was a problem with the service url: {err}"
             )
 
-        _, kf_id = from_global_id(task_service)
-        service = TaskService.objects.get(kf_id=kf_id)
         for k, v in input.items():
             setattr(service, k, v)
         service.save()
