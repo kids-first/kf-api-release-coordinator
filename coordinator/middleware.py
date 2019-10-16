@@ -114,10 +114,7 @@ class Auth0AuthenticationMiddleware:
 
         # If the token is a service token and has the right scope, we will
         # auth it as equivelant to an admin user
-        if (
-            token.get("gty") == "client-credentials"
-            and settings.CLIENT_ADMIN_SCOPE in token.get("scope", "").split()
-        ):
+        if token.get("gty") == "client-credentials":
             user = User(roles=["ADMIN"])
             # We will return the service user here without trying to save it
             # to the database.
