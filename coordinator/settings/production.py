@@ -169,7 +169,7 @@ CACHE_EGO_TIMEOUT = 86400
 # The public key will be fetched after the timeout window has elapsed, but
 # the service key will be refetched after it the expiration date included
 # in the last access token.
-AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "kids-first.auth0.com")
+AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "https://kids-first.auth0.com")
 AUTH0_JWKS = os.environ.get(
     "AUTH0_JWKS", "https://kids-first.auth0.com/.well-known/jwks.json"
 )

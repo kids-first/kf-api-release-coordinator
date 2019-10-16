@@ -73,27 +73,27 @@ class Auth0AuthenticationMiddleware:
         if user.is_authenticated:
             return user
 
-        token = request.META.get("hedaers")
-        if token is None:
-            header = request.META.get("headers")
-            # No headers
-            if header is None:
-                return None
-            token = header.get("Authorization", None)
+        encoded = request.META.get("HTTP_AUTHORIZATION")
         # No Authorization header
-        if token is None:
-            return None
+        if encoded is None:
+            encoded = request.META.get('headers')
+            if encoded is None:
+                return None
+            encoded = encoded.get('Authorization')
+            if encoded is None:
+                return None
         # Unexpected token type
-        if "Bearer " not in token:
+        if "Bearer " not in encoded:
             return None
 
-        token = token.split("Bearer ")[-1]
+        encoded = encoded.split("Bearer ")[-1]
+        token = None
 
         try:
             # Validate JWT using the Auth0 key
             public_key = Auth0AuthenticationMiddleware._get_auth0_key()
             token = jwt.decode(
-                token,
+                encoded,
                 public_key,
                 algorithms="RS256",
                 # audience=settings.AUTH0_AUD,
@@ -114,10 +114,7 @@ class Auth0AuthenticationMiddleware:
 
         # If the token is a service token and has the right scope, we will
         # auth it as equivelant to an admin user
-        if (
-            token.get("gty") == "client-credentials"
-            and settings.CLIENT_ADMIN_SCOPE in token.get("scope", "").split()
-        ):
+        if token.get("gty") == "client-credentials":
             user = User(roles=["ADMIN"])
             # We will return the service user here without trying to save it
             # to the database.
@@ -134,7 +131,8 @@ class Auth0AuthenticationMiddleware:
             if groups is None or roles is None or sub is None:
                 return AnonymousUser()
 
-        profile = Auth0AuthenticationMiddleware._get_profile(token)
+        profile = Auth0AuthenticationMiddleware._get_profile(encoded)
+
         # Problem getting the profile, don't try to create the user now
         if profile is None:
             user = User(groups=groups, roles=roles)
@@ -159,7 +157,7 @@ class Auth0AuthenticationMiddleware:
         """
         try:
             resp = requests.get(
-                f"{settings.AUTH0_API}/userinfo",
+                f"{settings.AUTH0_DOMAIN}/userinfo",
                 headers={"Authorization": "Bearer " + encoded},
                 timeout=5,
             )
