@@ -157,7 +157,7 @@ class Auth0AuthenticationMiddleware:
         """
         try:
             resp = requests.get(
-                f"{settings.AUTH0_API}/userinfo",
+                f"{settings.AUTH0_DOMAIN}/userinfo",
                 headers={"Authorization": "Bearer " + encoded},
                 timeout=5,
             )
