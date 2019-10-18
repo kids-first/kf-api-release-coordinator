@@ -44,15 +44,14 @@ class Query:
         Only return events for published releases for everyone else.
         """
         user = info.context.user
-        if hasattr(user, "roles") and (
-            "ADMIN" in user.roles or "DEV" in user.roles
+        if hasattr(user, "auth_roles") and (
+            "ADMIN" in user.auth_roles or "DEV" in user.auth_roles
         ):
             return Event.objects.all()
 
-        if hasattr(user, "groups") and len(user.groups) > 0:
-            return (
-                Event.objects.filter(release__studies__kf_id__in=user.groups)
-                | Event.objects.filter(release__state="published")
-            )
+        if hasattr(user, "auth_groups") and len(user.auth_groups) > 0:
+            return Event.objects.filter(
+                release__studies__kf_id__in=user.auth_groups
+            ) | Event.objects.filter(release__state="published")
 
         return Event.objects.filter(release__state="published").all()

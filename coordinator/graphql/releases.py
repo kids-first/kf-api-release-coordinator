@@ -50,8 +50,8 @@ class StartRelease(graphene.Mutation):
         Create a new release and start the release process
         """
         user = info.context.user
-        if not hasattr(user, "roles") or (
-            "ADMIN" not in user.roles and "DEV" not in user.roles
+        if not hasattr(user, "auth_roles") or (
+            "ADMIN" not in user.auth_roles and "DEV" not in user.auth_roles
         ):
             raise GraphQLError("Not authenticated to create a release.")
 
@@ -81,8 +81,8 @@ class CancelRelease(graphene.Mutation):
         Cancel a release
         """
         user = info.context.user
-        if not hasattr(user, "roles") or (
-            "ADMIN" not in user.roles and "DEV" not in user.roles
+        if not hasattr(user, "auth_roles") or (
+            "ADMIN" not in user.auth_roles and "DEV" not in user.auth_roles
         ):
             raise GraphQLError("Not authenticated to cancel a release.")
 
@@ -122,7 +122,7 @@ class PublishRelease(graphene.Mutation):
         by an administrator.
         """
         user = info.context.user
-        if not hasattr(user, "roles") or "ADMIN" not in user.roles:
+        if not hasattr(user, "auth_roles") or "ADMIN" not in user.auth_roles:
             raise GraphQLError("Not authenticated to publish a release.")
 
         _, kf_id = from_global_id(release)
@@ -157,8 +157,8 @@ class Query:
 
     def resolve_all_releases(self, info, **kwargs):
         user = info.context.user
-        if hasattr(user, "roles") and (
-            "ADMIN" in user.roles or "DEV" in user.roles
+        if hasattr(user, "auth_roles") and (
+            "ADMIN" in user.auth_roles or "DEV" in user.auth_roles
         ):
             return Release.objects.all()
 

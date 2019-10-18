@@ -45,8 +45,8 @@ class SyncStudies(graphene.Mutation):
         Synchronize studies with the dataservice
         """
         user = info.context.user
-        if not hasattr(user, "roles") or (
-            "ADMIN" not in user.roles and "DEV" not in user.roles
+        if not hasattr(user, "auth_roles") or (
+            "ADMIN" not in user.auth_roles and "DEV" not in user.auth_roles
         ):
             raise GraphQLError("Not authenticated to sync studies.")
 
@@ -72,8 +72,8 @@ class Query:
 
     def resolve_all_studies(self, info, **kwargs):
         user = info.context.user
-        if hasattr(user, "roles") and (
-            "ADMIN" in user.roles or "DEV" in user.roles
+        if hasattr(user, "auth_roles") and (
+            "ADMIN" in user.auth_roles or "DEV" in user.auth_roles
         ):
             return Study.objects.all()
 
