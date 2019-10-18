@@ -6,7 +6,6 @@ from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import action
 from rest_framework.response import Response
 import django_filters.rest_framework
-from coordinator.authentication import Auth0Authentication, EgoAuthentication
 from coordinator.tasks import (
     init_release,
     publish_release,
@@ -39,7 +38,6 @@ class ReleaseViewSet(viewsets.ModelViewSet, UpdateModelMixin):
     partial_update:
     Updates a release given a `kf_id` replacing only specified fields
     """
-    authentication_classes = (Auth0Authentication, EgoAuthentication,)
     permission_classes = (GroupPermission,)
     lookup_field = 'kf_id'
     queryset = Release.objects.order_by('-created_at').all()
