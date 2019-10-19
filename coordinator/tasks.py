@@ -4,7 +4,7 @@ import logging
 from django.conf import settings
 from django.core.cache import cache
 from coordinator.authentication import headers
-from coordinator.api.models import Task, TaskService, Release
+from coordinator.api.models import Task, TaskService, Release, Event
 
 
 logger = logging.getLogger()
@@ -300,7 +300,7 @@ def cancel_release(release_id, fail=False):
                 message=f"request to cancel task failed: {err}",
                 release=release,
                 task=task,
-                task_service=service,
+                task_service=task.task_service,
             )
             ev.save()
 
