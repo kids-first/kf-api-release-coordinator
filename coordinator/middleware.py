@@ -16,21 +16,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-@dataclass
-class User:
-    username: str
-    email: str
-    first_name: str
-    last_name: str
-    sub: str
-    groups: List[str] = field(default_factory=list)
-    roles: List[str] = field(default_factory=list)
-
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
+User = get_user_model()
 
 
 class Auth0AuthenticationMiddleware:
@@ -62,7 +48,8 @@ class Auth0AuthenticationMiddleware:
             # Assume user is admin if running in dev mode
             return User(
                 username="devadmin",
-                roles=["ADMIN"],
+                auth_roles=["ADMIN"],
+                auth_groups=[],
                 email="admin@kidsfirstdrc.org",
                 first_name="dev",
                 last_name="admin",
@@ -74,24 +61,17 @@ class Auth0AuthenticationMiddleware:
             return user
 
         encoded = request.META.get("HTTP_AUTHORIZATION")
-        # No Authorization header
-        if encoded is None:
-            encoded = request.META.get('headers')
-            if encoded is None:
-                return None
-            encoded = encoded.get('Authorization')
-            if encoded is None:
-                return None
-        # Unexpected token type
-        if "Bearer " not in encoded:
-            return None
+        if encoded is None and "headers" in request.META:
+            encoded = request.META["headers"].get("Authorization")
 
-        encoded = encoded.split("Bearer ")[-1]
-        token = None
+        if not encoded or not encoded.startswith("Bearer "):
+            return AnonymousUser()
+        encoded = encoded.replace("Bearer ", "")
 
         try:
             # Validate JWT using the Auth0 key
             public_key = Auth0AuthenticationMiddleware._get_auth0_key()
+
             token = jwt.decode(
                 encoded,
                 public_key,
@@ -115,37 +95,48 @@ class Auth0AuthenticationMiddleware:
         # If the token is a service token and has the right scope, we will
         # auth it as equivelant to an admin user
         if token.get("gty") == "client-credentials":
-            user = User(roles=["ADMIN"])
+            user = User()
+            user.auth_roles = ["ADMIN"]
+            user.auth_groups = []
             # We will return the service user here without trying to save it
             # to the database.
             return user
 
-        # Try to resolve ego fields
         if groups is None or roles is None or sub is None:
-            context = token.get("context", {}).get("user", {})
-            groups = context.get("groups")
-            roles = context.get("roles")
-            # Currently unused
-            permissions = context.get("permissions")
+            return AnonymousUser()
 
-            if groups is None or roles is None or sub is None:
-                return AnonymousUser()
+        # Now we know that the token is valid so we will try to see if the user
+        # is in our database yet, if so, we will return that user, if not, we
+        # will create a new user by fetching more information from auth0 and
+        # saving it in the database
+        try:
+            user = User.objects.get(sub=token["sub"])
+            # The user is already in the database, update their last login
+            update_last_login(None, user)
+        except User.DoesNotExist:
+            profile = Auth0AuthenticationMiddleware._get_profile(encoded)
+            # Problem getting the profile, don't try to create the user now
+            if profile is None:
+                user = User(auth_groups=groups, auth_roles=roles)
+                return user
+            user = User(
+                username=profile.get("nickname", ""),
+                email=profile.get("email", ""),
+                first_name=profile.get("given_name", ""),
+                last_name=profile.get("family_name", ""),
+                picture=profile.get("picture", ""),
+                auth_groups=[],
+                auth_roles=[],
+                sub=token.get("sub"),
+            )
+            user.save()
+            update_last_login(None, user)
 
-        profile = Auth0AuthenticationMiddleware._get_profile(encoded)
-
-        # Problem getting the profile, don't try to create the user now
-        if profile is None:
-            user = User(groups=groups, roles=roles)
-            return user
-        user = User(
-            username=profile.get("nickname", ""),
-            email=profile.get("email", ""),
-            first_name=profile.get("given_name", ""),
-            last_name=profile.get("family_name", ""),
-            groups=groups,
-            roles=roles,
-            sub=token.get("sub"),
-        )
+        # NB: We ALWAYS use the JWT as the source of truth for authorization
+        # fields. They will always be stored as empty arrays in the database
+        # and populated on every request from the token after validation.
+        user.auth_groups = groups
+        user.auth_roles = roles
 
         return user
 

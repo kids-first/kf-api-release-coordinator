@@ -37,6 +37,7 @@ RQ_API_TOKEN = os.environ.get('RQ_API_TOKEN', None)
 INSTALLED_APPS = [
     'coordinator.api.apps.ApiConfig',
     'coordinator.graphql.apps.GraphQLConfig',
+    'coordinator',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -212,6 +213,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'coordinator.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/

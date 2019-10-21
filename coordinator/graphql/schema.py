@@ -11,6 +11,7 @@ from .task_services import (
 from .events import Query as EventQuery
 from .release_notes import Query as ReleaseNoteQuery
 from .studies import Query as StudyQuery, Mutation as StudyMutation
+from .users import Query as UserQuery
 
 
 class Query(
@@ -21,6 +22,7 @@ class Query(
     EventQuery,
     ReleaseNoteQuery,
     StudyQuery,
+    UserQuery,
 ):
     pass
 

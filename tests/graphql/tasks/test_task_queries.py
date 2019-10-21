@@ -35,7 +35,7 @@ query (
     [
         ("admin", lambda: 30),
         ("dev", lambda: 30),
-        ("user", lambda: 10),
+        ("user", lambda: 20),
         ("anon", lambda: 10),
     ],
 )

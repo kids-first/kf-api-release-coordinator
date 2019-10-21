@@ -1,7 +1,6 @@
 from rest_framework import viewsets
 import django_filters.rest_framework
 
-from coordinator.authentication import Auth0Authentication, EgoAuthentication
 from coordinator.permissions import AdminOrReadOnlyPermission
 from coordinator.api.serializers import ReleaseNoteSerializer
 from coordinator.api.models import ReleaseNote
@@ -35,7 +34,6 @@ class ReleaseNoteViewSet(viewsets.ModelViewSet):
     Completely remove the note from the coordinator.
     """
 
-    authentication_classes = (Auth0Authentication, EgoAuthentication)
     permission_classes = (AdminOrReadOnlyPermission,)
     lookup_field = "kf_id"
     queryset = ReleaseNote.objects.order_by("-created_at").all()

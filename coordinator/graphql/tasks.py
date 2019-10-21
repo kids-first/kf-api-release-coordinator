@@ -43,17 +43,17 @@ class Query:
 
     def resolve_all_tasks(self, info, **kwargs):
         user = info.context.user
-        if hasattr(user, "roles") and (
-            "ADMIN" in user.roles or "DEV" in user.roles
+        if hasattr(user, "auth_roles") and (
+            "ADMIN" in user.auth_roles or "DEV" in user.auth_roles
         ):
             return Task.objects.all()
 
         queryset = Task.objects.filter(release__state="published")
 
         # Return tasks from any releases that the user has a study in
-        if user and user.groups is list and len(user.groups) > 0:
+        if user and hasattr(user, "auth_groups") and len(user.auth_groups) > 0:
             queryset = queryset | Task.objects.filter(
-                release__studies__kf_id__in=user.groups
+                release__studies__kf_id__in=user.auth_groups
             )
 
         return queryset

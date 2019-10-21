@@ -36,7 +36,7 @@ class Event(models.Model):
                                   choices=EVENTS,
                                   default='info',
                                   help_text='The type of event')
-    message = models.CharField(max_length=200,
+    message = models.CharField(max_length=1000,
                                help_text='The message describing the event')
     created_at = models.DateTimeField(auto_now_add=True,
                                       help_text='Time the event was created')

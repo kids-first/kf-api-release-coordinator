@@ -33,7 +33,7 @@ class DevPermission(permissions.BasePermission):
         if isinstance(request.user, AnonymousUser):
             return False
 
-        roles = request.user.get('roles', [])
+        roles = request.user.auth_roles
 
         if "ADMIN" in roles or "DEV" in roles:
             return True
@@ -62,7 +62,7 @@ class AdminOrReadOnlyPermission(permissions.BasePermission):
         if isinstance(request.user, AnonymousUser):
             return False
 
-        roles = request.user.get("roles", [])
+        roles = request.user.auth_roles
 
         if "ADMIN" in roles:
             return True
@@ -92,8 +92,8 @@ class GroupPermission(permissions.BasePermission):
         if isinstance(request.user, AnonymousUser):
             return False
 
-        roles = request.user.get('roles', [])
-        groups = request.user.get('groups', [])
+        roles = request.user.auth_roles
+        groups = request.user.auth_groups
 
         if 'ADMIN' in roles:
             return True
@@ -119,8 +119,8 @@ class GroupPermission(permissions.BasePermission):
         if isinstance(request.user, AnonymousUser):
             return False
 
-        roles = request.user.get('roles', [])
-        groups = request.user.get('groups', [])
+        roles = request.user.auth_roles
+        groups = request.user.auth_groups
 
         if 'ADMIN' in roles:
             return True

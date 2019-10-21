@@ -14,38 +14,6 @@ import jwt
 BASE_URL = "http://testserver"
 
 
-@pytest.yield_fixture(scope="session", autouse=True)
-def ego_key_mock():
-    """
-    Mocks out the response from the /oauth/token/public_key endpoint
-    """
-    auth = "coordinator.authentication.EgoAuthentication"
-    with mock.patch(f"{auth}._get_new_key") as get_key:
-        with open("tests/keys/public_key.pem", "rb") as f:
-            get_key.return_value = f.read()
-            yield get_key
-
-
-@pytest.yield_fixture(autouse=True)
-def mock_ego(mocker):
-    """
-    Mocks requests to ego
-
-    POST requests are assumed to go to /oauth/token and will respond
-      with a new access_token
-    """
-    mock_auth_requests = mocker.patch(
-        "coordinator.authentication.requests.post"
-    )
-    mock_post_resp = Mock()
-    mock_post_resp.status_code = 200
-    mock_post_resp.json.return_value = {
-        "access_token": "abc",
-        "expires_in": 1000,
-    }
-    mock_auth_requests.return_value = mock_post_resp
-
-
 @pytest.yield_fixture
 def client():
     """ Sets client to use json requests """
@@ -260,11 +228,11 @@ def token():
     with given roles.
     """
     with open("tests/keys/private_key.pem", "rb") as f:
-        ego_key = f.read()
+        key = f.read()
 
     def make_token(groups=None, roles=None):
         """
-        Returns an ego JWT for a user with given roles and groups
+        Returns a JWT for a user with given roles and groups
         """
         if groups is None:
             groups = []
@@ -277,29 +245,26 @@ def token():
             "iat": now.timestamp(),
             "exp": tomorrow.timestamp(),
             "sub": "cfa211bc-6fa8-4a03-bb81-cf377f99da47",
-            "iss": "ego",
-            "aud": "creator",
+            "iss": "auth0",
+            "aud": "https://kf-study-creator.kidsfirstdrc.org",
             "jti": "7b42a89d-85e3-4954-81a0-beccb12f32d5",
-            "context": {
-                "user": {
-                    "name": "user@d3b.center",
-                    "email": "user@d3b.center",
-                    "status": "Approved",
-                    "firstName": "Bobby",
-                    "lastName": "TABLES;",
-                    "createdAt": 1531440000000,
-                    "lastLogin": 1551293729279,
-                    "preferredLanguage": None,
-                    "groups": groups,
-                    "roles": roles,
-                    "permissions": [],
-                }
-            },
+            "https://kidsfirstdrc.org/groups": groups,
+            "https://kidsfirstdrc.org/roles": roles,
+            "https://kidsfirstdrc.org/permissions": [],
         }
 
-        return jwt.encode(token, ego_key, algorithm="RS256").decode("utf8")
+        encoded = jwt.encode(token, key, algorithm="RS256").decode("utf8")
+        return encoded
 
     return make_token
+
+
+@pytest.fixture(scope="module")
+def service_token():
+    """
+    Generate a service token that will be used in machine-to-machine auth
+    """
+    return 'abc'
 
 
 @pytest.yield_fixture
@@ -331,6 +296,17 @@ def auth0_key_mock():
         with open("tests/keys/jwks.json", "r") as f:
             get_key.return_value = json.load(f)["keys"][0]
             yield get_key
+
+
+@pytest.fixture(scope="module", autouse=True)
+def auth0_service_mock(service_token):
+    """
+    Mocks out the response from the /.well-known/jwks.json endpoint on auth0
+    """
+    auth = "coordinator.authentication.get_service_token"
+    with mock.patch(auth) as get_token:
+        get_token.return_value = service_token
+        yield get_token
 
 
 @pytest.fixture(scope="module", autouse=True)
