@@ -171,7 +171,7 @@ def start_release(release_id):
                 message=f"request to start task failed: {err}",
                 release=release,
                 task=task,
-                task_service=service,
+                task_service=task.task_service,
             )
             ev.save()
 
@@ -241,7 +241,7 @@ def publish_release(release_id):
                 message=f"request to publish task failed: {err}",
                 release=release,
                 task=task,
-                task_service=service,
+                task_service=task_service,
             )
             ev.save()
 
