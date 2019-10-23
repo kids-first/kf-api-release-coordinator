@@ -254,7 +254,7 @@ def publish_release(release_id):
         if (resp and 'state' in resp.json() and
            resp.json()['state'] != 'publishing'):
             logger.error(f'invalid state returned from task for publish: ' +
-                         '{resp.content}')
+                         f'{resp.content}')
             failed = True
 
         if failed:
