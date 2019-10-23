@@ -132,10 +132,8 @@ class PublishRelease(graphene.Mutation):
         except Release.DoesNotExist:
             raise GraphQLError("The release was not found.")
 
-        try:
-            release.publish()
-            release.save()
-        except django_fsm.TransitionNotAllowed:
+        # Only allow a release to be published if it's staged
+        if release.state not in ["staged"]:
             raise GraphQLError(
                 f"The release in state {release.state} may not be published."
             )

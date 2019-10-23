@@ -57,6 +57,7 @@ def test_publish_permissions(db, test_client, user_type, expected):
     if expected:
         assert "kfId" in resp.json()["data"]["publishRelease"]["release"]
     else:
+
         assert "errors" in resp.json()
         assert "Not authenticated" in resp.json()["errors"][0]["message"]
 
@@ -92,9 +93,11 @@ def test_publish_release_from_state(db, admin_client, mocker, state, allowed):
     if allowed:
         # Check that the release task was queued
         assert mock_rq.enqueue.call_count == 1
+        # The state shouldn't have changed yet as the publish task won't have
+        # been executed
         assert (
             resp.json()["data"]["publishRelease"]["release"]["state"]
-            == "publishing"
+            == "staged"
         )
     else:
         assert "errors" in resp.json()
