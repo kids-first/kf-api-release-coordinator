@@ -7,8 +7,7 @@ from coordinator.authentication import headers
 from coordinator.api.models import Task, TaskService, Release, Event
 
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @django_rq.job

@@ -11,8 +11,7 @@ from rest_framework import authentication
 from rest_framework import exceptions
 
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def headers():
