@@ -1,4 +1,5 @@
 import django_rq
+import django_fsm
 import requests
 import logging
 from django.conf import settings
@@ -17,6 +18,7 @@ def health_check(task_service_id):
 
     :param task_service_id: The kf_id of the service to check
     """
+    logger.info(f"Checking task service status for {task_service_id}")
     task_service = TaskService.objects.get(kf_id=task_service_id)
     task_service.refresh_from_db()
     task_service.health_check()
@@ -29,6 +31,7 @@ def status_check(task_id):
 
     :param task_service_id: The kf_id of the service to check
     """
+    logger.info(f"Checking task status for {task_id}")
     task = Task.objects.get(kf_id=task_id)
     task.status_check()
 
@@ -40,6 +43,7 @@ def release_status_check(release_id):
 
     :param release_id: The kf_id of the release to check
     """
+    logger.info(f"Checking release status for {release_id}")
     release = Release.objects.get(kf_id=release_id)
     release.status_check()
 
@@ -52,6 +56,7 @@ def init_release(release_id):
 
     :param release_id: The kf_id of the release
     """
+    logger.info(f"Initializing release {release_id}")
     release = Release.objects.get(kf_id=release_id)
     task_services = TaskService.objects.all()
 
@@ -73,10 +78,7 @@ def init_release(release_id):
         task = Task(task_service=service, release=release)
         task.save()
 
-        django_rq.enqueue(init_task,
-                          release.kf_id,
-                          service.kf_id,
-                          task.kf_id)
+        django_rq.enqueue(init_task, release.kf_id, service.kf_id, task.kf_id)
 
 
 @django_rq.job
@@ -84,14 +86,19 @@ def init_task(release_id, task_service_id, task_id):
     """
     Creates a new task and requests a task service initialize it
     """
+    logger.info(
+        f"Initializing task {task_id} "
+        + f"for service {task_service_id} "
+        + f"and release {release_id}"
+    )
     release = Release.objects.select_related().get(kf_id=release_id)
     service = TaskService.objects.get(kf_id=task_service_id)
     task = Task.objects.get(kf_id=task_id)
 
     body = {
-        'action': 'initialize',
-        'task_id': task.kf_id,
-        'release_id': release.kf_id
+        "action": "initialize",
+        "task_id": task.kf_id,
+        "release_id": release.kf_id,
     }
     failed = False
     resp = None
@@ -104,7 +111,7 @@ def init_task(release_id, task_service_id, task_id):
         )
     except requests.exceptions.RequestException as err:
         failed = True
-        logger.error(f'problem requesting task for init: {resp.content}')
+        logger.error(f"problem requesting task for init: {err}")
 
         ev = Event(
             event_type="error",
@@ -116,7 +123,7 @@ def init_task(release_id, task_service_id, task_id):
         ev.save()
 
     if resp and resp.status_code != 200:
-        logger.error(f' invalid code from task for init: {resp.status_code}')
+        logger.error(f" invalid code from task for init: {resp.status_code}")
         failed = True
 
     if failed:
@@ -131,7 +138,7 @@ def init_task(release_id, task_service_id, task_id):
         task.save()
 
     # Check if we're ready to start running tasks
-    if all([t.state == 'initialized' for t in release.tasks.all()]):
+    if all([t.state == "initialized" for t in release.tasks.all()]):
         django_rq.enqueue(start_release, release_id)
 
 
@@ -140,6 +147,7 @@ def start_release(release_id):
     """
     Start a release by issueing the 'start' command to all task services.
     """
+    logger.info(f"Starting release {release_id}")
     release = Release.objects.select_related().get(kf_id=release_id)
 
     release.start()
@@ -147,9 +155,9 @@ def start_release(release_id):
 
     for task in release.tasks.all():
         body = {
-            'action': 'start',
-            'task_id': task.kf_id,
-            'release_id': release.kf_id
+            "action": "start",
+            "task_id": task.kf_id,
+            "release_id": release.kf_id,
         }
         failed = False
         resp = None
@@ -162,7 +170,7 @@ def start_release(release_id):
             )
             resp.raise_for_status()
         except requests.exceptions.RequestException as err:
-            logger.error(f'problem requesting task for start: {resp.content}')
+            logger.error(f"problem requesting task for start: {resp.content}")
             failed = True
 
             ev = Event(
@@ -176,14 +184,20 @@ def start_release(release_id):
 
         # Check that command was accepted
         if resp and resp.status_code != 200:
-            logger.error(f'invalid code from task for start: ' +
-                         '{resp.status_code}')
+            logger.error(
+                f"invalid code from task for start: " + "{resp.status_code}"
+            )
             failed = True
 
-        if (resp and 'state' in resp.json() and
-           resp.json()['state'] != 'running'):
-            logger.error(f'invalid state returned from task for start: ' +
-                         '{resp.content}')
+        if (
+            resp
+            and "state" in resp.json()
+            and resp.json()["state"] != "running"
+        ):
+            logger.error(
+                f"invalid state returned from task for start: "
+                + "{resp.content}"
+            )
             failed = True
 
         if failed:
@@ -203,6 +217,8 @@ def publish_release(release_id):
     """
     Publish a release by sending 'publish' action to all tasks
     """
+    logger.info(f"Publishing release {release_id}")
+
     release = Release.objects.select_related().get(kf_id=release_id)
     release.publish()
     tasks = release.tasks.all()
@@ -216,9 +232,9 @@ def publish_release(release_id):
 
     for task in tasks:
         body = {
-            'action': 'publish',
-            'task_id': task.kf_id,
-            'release_id': release.kf_id
+            "action": "publish",
+            "task_id": task.kf_id,
+            "release_id": release.kf_id,
         }
         failed = False
         resp = None
@@ -231,8 +247,9 @@ def publish_release(release_id):
             )
             resp.raise_for_status()
         except requests.exceptions.RequestException as err:
-            logger.error(f'problem requesting task for publish: ' +
-                         f'{resp.content}')
+            logger.error(
+                f"problem requesting task for publish: " + f"{resp.content}"
+            )
             failed = True
 
             ev = Event(
@@ -246,8 +263,9 @@ def publish_release(release_id):
 
         # Check that command was accepted
         if resp and resp.status_code != 200:
-            logger.error(f'invalid code from task for publish: ' +
-                         '{resp.status_code}')
+            logger.error(
+                f"invalid code from task for publish: " + "{resp.status_code}"
+            )
             failed = True
 
         if (resp and 'state' in resp.json() and
@@ -273,18 +291,27 @@ def cancel_release(release_id, fail=False):
     """
     Cancels a release by sending 'cancel' action to all tasks
     """
+    logger.info(
+        f"{'Canceling' if not fail else 'Failing'} release {release_id}"
+    )
+
     release = Release.objects.get(kf_id=release_id)
+
+    # In case another task has already canceled or failed this release
+    if release.state in ["canceled", "failed"]:
+        logger.warn(f"Release is already marked as {release.state}")
+        return
 
     for task in release.tasks.all():
         # The task may have been the one to cause the cancel/fail
         # Don't try to change its state if it's already canceled/failed
-        if task.state in ['canceled', 'failed', 'rejected']:
+        if task.state in ["canceled", "failed", "rejected"]:
             continue
 
         body = {
-            'action': 'cancel',
-            'task_id': task.kf_id,
-            'release_id': release.kf_id
+            "action": "cancel",
+            "task_id": task.kf_id,
+            "release_id": release.kf_id,
         }
         try:
             requests.post(
@@ -306,8 +333,11 @@ def cancel_release(release_id, fail=False):
         task.cancel()
         task.save()
 
-    if fail:
-        release.failed()
-    else:
-        release.canceled()
+    try:
+        if fail:
+            release.failed()
+        else:
+            release.canceled()
+    except django_fsm.TransitionNotAllowed as err:
+        logger.info(f"Tried to make an invalid transition: {err}")
     release.save()
