@@ -259,8 +259,9 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "rq_console": {
-            "format": "%(asctime)s %(message)s",
+            "format": "[{asctime}] {levelname} {module}: {message}",
             "datefmt": "%H:%M:%S",
+            "style": "{"
         },
     },
     "handlers": {
@@ -273,6 +274,14 @@ LOGGING = {
     },
     'loggers': {
         "rq.worker": {
+            "handlers": ["rq_console"],
+            "level": "ERROR"
+        },
+        "coordinator.authentication": {
+            "handlers": ["rq_console"],
+            "level": "INFO"
+        },
+        "coordinator.tasks": {
             "handlers": ["rq_console"],
             "level": "INFO"
         },

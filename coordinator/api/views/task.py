@@ -52,8 +52,6 @@ class TaskViewSet(viewsets.ModelViewSet):
         # If the task is failed
         if resp.data['state'] == 'failed':
             release = Task.objects.get(kf_id=kf_id).release
-            release.failed()
-            release.save()
             django_rq.enqueue(cancel_release, release.kf_id, True)
         # If the task is canceled
         if resp.data['state'] == 'canceled':
