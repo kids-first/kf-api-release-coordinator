@@ -76,6 +76,8 @@ CORS_ORIGIN_REGEX_WHITELIST = (
     r'^(https?:\/\/)?([a-z0-9-]+)*.netlify\.com$',
 )
 
+CORS_ALLOW_CREDENTIALS = True
+
 # Assume we're in local environment if there is no vault url
 if os.environ.get('VAULT_URL', None) is None:
     CORS_ORIGIN_REGEX_WHITELIST += (r'^(https?:\/\/)?localhost.*$',)
