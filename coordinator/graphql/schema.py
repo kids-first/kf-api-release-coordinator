@@ -1,4 +1,5 @@
-from graphene import relay, ObjectType, Schema
+from django.core.cache import cache
+from graphene import relay, ObjectType, Field, Schema, String
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -14,6 +15,17 @@ from .studies import Query as StudyQuery, Mutation as StudyMutation
 from .users import Query as UserQuery
 
 
+def get_version_info():
+    from coordinator.version_info import COMMIT, VERSION
+    return {"commit": COMMIT, "version": VERSION}
+
+
+class Status(ObjectType):
+    name = String()
+    version = String()
+    commit = String()
+
+
 class Query(
     ObjectType,
     ReleaseQuery,
@@ -24,7 +36,17 @@ class Query(
     StudyQuery,
     UserQuery,
 ):
-    pass
+    status = Field(Status)
+
+    def resolve_status(parent, info):
+        """
+        Return status information about the coordinator.
+        """
+        # Retrieve from cache in the case that we have to parse git commands
+        # to get version details.
+        info = cache.get_or_set("VERSION_INFO", get_version_info)
+
+        return Status(name="Kids First Release Coordinator", **info)
 
 
 class Mutation(
