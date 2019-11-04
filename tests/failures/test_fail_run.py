@@ -69,9 +69,11 @@ def test_fail_running(admin_client, dev_client, client, transactional_db,
     task = resp.json()['results'][0]
 
     # Fail the task from the task service
-    resp = client.patch(BASE_URL+'/tasks/'+task['kf_id'],
-                        json.dumps({'state': 'failed'}),
-                        content_type='application/json')
+    resp = admin_client.patch(
+        BASE_URL + "/tasks/" + task["kf_id"],
+        json.dumps({"state": "failed"}),
+        content_type="application/json",
+    )
 
     worker.work(burst=True)
 
@@ -127,9 +129,11 @@ def test_cancel_running(admin_client, dev_client, client, transactional_db,
     task = resp.json()['results'][0]
 
     # Fail the task from the task service
-    resp = client.patch(BASE_URL+'/tasks/'+task['kf_id'],
-                        json.dumps({'state': 'canceled'}),
-                        content_type='application/json')
+    resp = admin_client.patch(
+        BASE_URL + "/tasks/" + task["kf_id"],
+        json.dumps({"state": "canceled"}),
+        content_type="application/json",
+    )
 
     worker.work(burst=True)
 
