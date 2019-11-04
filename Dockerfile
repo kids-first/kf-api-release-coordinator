@@ -18,6 +18,11 @@ RUN         pip install awscli
 
 ADD         . /app
 
+# Bake version number
+RUN         COMMIT=`git rev-parse --short HEAD` && echo "COMMIT=\"${COMMIT}\"" > /app/coordinator/version_info.py \
+            && VERSION=`git describe --always --tags` && echo "VERSION=\"${VERSION}\"" >> /app/coordinator/version_info.py
+
+
 RUN         python /app/setup.py install \
             && python /app/manage.py collectstatic -v0 --noinput
 
