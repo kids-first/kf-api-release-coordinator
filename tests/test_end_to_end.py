@@ -8,8 +8,8 @@ from coordinator.api.models import Release, Task, TaskService, Event
 BASE_URL = 'http://testserver'
 
 
-def test_full_release(client, dev_client, transactional_db, mocker, worker,
-                      study):
+def test_full_release(client, admin_client, dev_client, transactional_db,
+                      mocker, worker, study):
     """
     Test a full release:
     1) Create task service
@@ -110,9 +110,11 @@ def test_full_release(client, dev_client, transactional_db, mocker, worker,
     assert res['release'] == BASE_URL+'/releases/'+release_id
 
     # Send back a response to the coordinator mocking the task
-    resp = client.patch(BASE_URL+'/tasks/'+task_id,
-                        json.dumps({'progress': 50}),
-                        content_type='application/json')
+    resp = admin_client.patch(
+        BASE_URL + "/tasks/" + task_id,
+        json.dumps({"progress": 50}),
+        content_type="application/json",
+    )
     assert resp.status_code == 200
     res = resp.json()
     assert res['state'] == 'running'
@@ -120,9 +122,11 @@ def test_full_release(client, dev_client, transactional_db, mocker, worker,
 
     # Tell the coordinator the task has been staged
     # Send back a response to the coordinator mocking the task
-    resp = client.patch(BASE_URL+'/tasks/'+task_id,
-                        json.dumps({'state': 'staged', 'progress': 100}),
-                        content_type='application/json')
+    resp = admin_client.patch(
+        BASE_URL + "/tasks/" + task_id,
+        json.dumps({"state": "staged", "progress": 100}),
+        content_type="application/json",
+    )
 
     assert resp.status_code == 200
     res = resp.json()
@@ -146,9 +150,11 @@ def test_full_release(client, dev_client, transactional_db, mocker, worker,
     worker.work(burst=True)
 
     # Mock a task's response telling the coordinator it has published
-    resp = client.patch(BASE_URL+'/tasks/'+task_id,
-                        json.dumps({'state': 'published', 'progress': 100}),
-                        content_type='application/json')
+    resp = admin_client.patch(
+        BASE_URL + "/tasks/" + task_id,
+        json.dumps({"state": "published", "progress": 100}),
+        content_type="application/json",
+    )
     assert resp.status_code == 200
     res = resp.json()
     assert res['state'] == 'published'

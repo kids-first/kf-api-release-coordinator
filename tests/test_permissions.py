@@ -29,14 +29,14 @@ STUDY_URL = f"{BASE_URL}/studies/"
         ("user", "/tasks", "get", 200),
         ("user", "/tasks", "post", 403),
         ("user", "/tasks/<kf_id>", "get", 200),
-        ("user", "/tasks/<kf_id>", "patch", 200),  # TODO: This shouldn't be ok
+        ("user", "/tasks/<kf_id>", "patch", 403),
         ("user", "/tasks/<kf_id>", "put", 403),
         ("user", "/tasks/<kf_id>", "delete", 403),
         # anon
         ("anon", "/tasks", "get", 200),
         ("anon", "/tasks", "post", 403),
         ("anon", "/tasks/<kf_id>", "get", 200),
-        ("anon", "/tasks/<kf_id>", "patch", 200),  # TODO: This shouldn't be ok
+        ("anon", "/tasks/<kf_id>", "patch", 403),
         ("anon", "/tasks/<kf_id>", "put", 403),
         ("anon", "/tasks/<kf_id>", "delete", 403),
     ],
