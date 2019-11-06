@@ -1,3 +1,36 @@
+# Kids First Release Coordinator Release 1.8.0
+
+## Features
+
+Add mutations for GraphQL api.
+
+### Summary
+
+Feature Emojis: ✨x6 🐛x4 🔊x2 🔒x1 🖼x1 🔧x1 👷x1 ♻️x1
+Feature Labels: [feature](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/feature) x9 [bug](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/bug) x3 [devops](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/devops) x2 [refactor](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/refactor) x2 [documentation](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/documentation) x1
+
+### New features and changes
+
+- (#239) ✨ Add status query - @dankolbman
+- (#238) 🔒 Make task updates protected - @dankolbman
+- (#235) 🖼 Update readme - @dankolbman
+- (#236) 🔧 Allow cookies in requests - @dankolbman
+- (#234) 🔊 Add task logging - @dankolbman
+- (#233) 🐛 Fix error message - @dankolbman
+- (#232) 🐛 Don't change to publishing state immediately - @dankolbman
+- (#231) 🐛 Fix task events - @dankolbman
+- (#230) ✨ User profiles - @dankolbman
+- (#229) 👷 Changing Jenkins to Production library - @blackdenc
+- (#228) 🐛 Fix auth headers - @dankolbman
+- (#227) ♻️ Only validate url when changed - @dankolbman
+- (#226) ✨ Add syncStudies mutation - @dankolbman
+- (#212) Terraform 0.12 Upgrade - @blackdenc
+- (#224) 🔊 Create events for requests errors - @dankolbman
+- (#223) ✨ Add Task Service mutations - @dankolbman
+- (#220) ✨ Add release subquery to studies - @dankolbman
+- (#219) ✨ Graphql release mutations - @dankolbman
+
+
 # Kids First Release Coordinator Release 1.7.0
 
 ## Features
