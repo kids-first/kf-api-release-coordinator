@@ -62,4 +62,4 @@ class StudyReleasesViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return Study.objects.get(kf_id=self.kwargs['study_kf_id']) \
-                            .release_set.order_by('-created_at')
+                            .releases.order_by('-created_at')
