@@ -46,6 +46,7 @@ def get_service_token():
             url, headers=headers, json=data, timeout=settings.REQUEST_TIMEOUT
         )
         resp.raise_for_status()
+        logger.info(f"Retrieved a new client_credentials token from Auth0")
     except requests.exceptions.RequestException as err:
         logger.error(f"Problem retrieving access token from Auth0: {err}")
 
