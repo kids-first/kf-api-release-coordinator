@@ -43,9 +43,8 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pytest --cov=coordinator
-            coverage xml
-            python-codacy-coverage -r coverage.xml
+            pytest --cov=./
+            codecov --token=$CODECOV_TOKEN
           environment:
             - FLASK_APP: "manage"
       - run:
