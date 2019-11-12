@@ -69,6 +69,46 @@ class StartRelease(graphene.Mutation):
         return StartRelease(release=release)
 
 
+class UpdateReleaseInput(graphene.InputObjectType):
+    name = graphene.String(required=False)
+    description = graphene.String(required=False)
+
+
+class UpdateRelease(graphene.Mutation):
+    class Arguments:
+        release = graphene.ID(required=True)
+        input = UpdateReleaseInput(required=True)
+
+    release = graphene.Field(ReleaseNode)
+
+    @staticmethod
+    def mutate(root, info, release, input=None):
+        """
+        Update an existing release
+        """
+        user = info.context.user
+        if not hasattr(user, "auth_roles") or (
+            "ADMIN" not in user.auth_roles and "DEV" not in user.auth_roles
+        ):
+            raise GraphQLError("Not authenticated to update the release.")
+
+        _, kf_id = from_global_id(release)
+
+        try:
+            release = Release.objects.get(kf_id=kf_id)
+        except Release.DoesNotExist:
+            raise GraphQLError("The release was not found.")
+
+        if "name" in input:
+            release.name = input["name"]
+        if "description" in input:
+            release.description = input["description"]
+
+        release.save()
+
+        return UpdateRelease(release=release)
+
+
 class CancelRelease(graphene.Mutation):
     class Arguments:
         release = graphene.ID(required=True)
@@ -165,5 +205,6 @@ class Query:
 
 class Mutation:
     start_release = StartRelease.Field(description="Start a new release")
+    update_release = UpdateRelease.Field(description="Update a release")
     cancel_release = CancelRelease.Field(description="Cancel a release")
     publish_release = PublishRelease.Field(description="Publish a release")
