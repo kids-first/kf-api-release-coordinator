@@ -128,18 +128,28 @@ DATABASES = {
 
 
 # Redis
+redis_host = os.environ.get("REDIS_HOST", "localhost")
+redis_port = os.environ.get("REDIS_PORT", 6379)
 RQ_QUEUES = {
-    'default': {
-        'HOST': os.environ.get('REDIS_HOST', 'localhost'),
-        'PORT': os.environ.get('REDIS_PORT', 6379),
-        'DB': 0,
-        'DEFAULT_TIMEOUT': 30,
+    "default": {
+        "HOST": redis_host,
+        "PORT": redis_port,
+        "DB": 0,
+        "DEFAULT_TIMEOUT": 30,
     },
-    'health_checks': {
-        'HOST': os.environ.get('REDIS_HOST', 'localhost'),
-        'PORT': os.environ.get('REDIS_PORT', 6379),
-        'DB': 0,
-        'DEFAULT_TIMEOUT': 30,
+    "health_checks": {
+        "HOST": redis_host,
+        "PORT": redis_port,
+        "DB": 0,
+        "DEFAULT_TIMEOUT": 30,
+    },
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "redis_cache.RedisCache",
+        "LOCATION": "{}:{}".format(redis_host, redis_port),
+        "OPTIONS": {"DB": 1},
     }
 }
 
@@ -147,6 +157,8 @@ redis_pass = os.environ.get('REDIS_PASS', False)
 if redis_pass:
     RQ_QUEUES['default']['PASSWORD'] = redis_pass
     RQ_QUEUES['health_checks']['PASSWORD'] = redis_pass
+    CACHES["default"]["OPTIONS"]["PASSWORD"] = redis_pass
+
 
 # EGO oauth creds
 EGO = {
