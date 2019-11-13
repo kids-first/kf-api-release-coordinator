@@ -76,7 +76,7 @@ class Release(models.Model):
     tags = ArrayField(models.CharField(max_length=50, blank=True),
                       blank=True, default=list,
                       help_text='Tags to group the release by')
-    studies = models.ManyToManyField(Study,
+    studies = models.ManyToManyField(Study, related_name="releases",
                                      help_text='kf_ids of the studies '
                                      'in this release')
     version = VersionField(partial=False, coerce=False,

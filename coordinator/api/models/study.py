@@ -28,7 +28,7 @@ class Study(models.Model):
         """
         from coordinator.api.models.release import Release
         try:
-            return self.release_set.latest('created_at').version
+            return self.releases.latest('created_at').version
         except Release.DoesNotExist:
             return None
 
@@ -45,7 +45,7 @@ class Study(models.Model):
             return self._last_published_release
 
         try:
-            self._last_published_release = (self.release_set
+            self._last_published_release = (self.releases
                                                 .filter(state='published')
                                                 .latest('created_at'))
             return self._last_published_release

@@ -21,7 +21,7 @@ def test_many_to_many_model(transactional_db, studies):
     assert len(Release.objects.first().studies.all()) == 2
 
     # Inspect from the study side
-    assert Study.objects.get(kf_id='SD_00000001').release_set.first() == r1
+    assert Study.objects.get(kf_id='SD_00000001').releases.first() == r1
 
     # Now make a new release
     r2 = Release(name='Release 2')
@@ -35,9 +35,9 @@ def test_many_to_many_model(transactional_db, studies):
     assert len(Release.objects.first().studies.all()) == 2
 
     # Inspect from the study side
-    assert Study.objects.get(kf_id='SD_00000001').release_set.count() == 2
-    assert Study.objects.get(kf_id='SD_00000000').release_set.count() == 1
-    assert Study.objects.get(kf_id='SD_00000002').release_set.count() == 1
+    assert Study.objects.get(kf_id='SD_00000001').releases.count() == 2
+    assert Study.objects.get(kf_id='SD_00000000').releases.count() == 1
+    assert Study.objects.get(kf_id='SD_00000002').releases.count() == 1
 
 
 def test_nested_releases(admin_client, transactional_db, release, studies):

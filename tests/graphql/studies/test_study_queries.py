@@ -76,12 +76,17 @@ def test_subquery(db, admin_client):
     Test that a study's releases may be subqueried correctly
     """
     study = StudyFactory()
+    other_study = StudyFactory()
     release1 = ReleaseFactory(
         state="published", studies=[study], version="1.1.1"
     )
     release2 = ReleaseFactory(state="staged", studies=[study], version="1.1.2")
+    # This release won't include the study of interest
+    release3 = ReleaseFactory(
+        state="published", studies=[other_study], version="1.1.3"
+    )
 
-    variables = {"state": "published"}
+    variables = {"state": "published", "kfId": study.kf_id}
     resp = admin_client.post(
         "/graphql",
         format="json",
@@ -95,3 +100,16 @@ def test_subquery(db, admin_client):
     release = study["releases"]["edges"][0]["node"]
     assert release["version"] == "1.1.1"
     assert release["kfId"] == release1.kf_id
+
+    variables = {"state": "published", "kfId": other_study.kf_id}
+    resp = admin_client.post(
+        "/graphql",
+        format="json",
+        data={"query": ALL_STUDIES, "variables": variables},
+    )
+    assert len(resp.json()["data"]["allStudies"]["edges"]) == 1
+    study = resp.json()["data"]["allStudies"]["edges"][0]["node"]
+    assert len(study["releases"]["edges"]) == 1
+    release = study["releases"]["edges"][0]["node"]
+    assert release["version"] == "1.1.3"
+    assert release["kfId"] == release3.kf_id
