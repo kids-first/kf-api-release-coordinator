@@ -63,3 +63,20 @@ def test_remove_release_note_not_found(db, admin_client):
     assert "errors" in resp.json()
     errors = resp.json()["errors"]
     assert "does not exist" in errors[0]["message"]
+
+
+def test_remove_release_note(db, admin_client):
+    """
+    Test that we may not remove release notes that do not exist
+    """
+    release_note = ReleaseNoteFactory()
+    release_note_id = to_global_id("ReleaseNoteNode", release_note.kf_id)
+
+    variables = {"releaseNote": release_note_id}
+    resp = admin_client.post(
+        "/graphql",
+        format="json",
+        data={"query": REMOVE_RELEASE_NOTE, "variables": variables},
+    )
+
+    assert ReleaseNote.objects.count() == 0
