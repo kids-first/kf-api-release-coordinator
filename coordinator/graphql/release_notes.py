@@ -133,6 +133,39 @@ class UpdateReleaseNote(graphene.Mutation):
         return UpdateReleaseNote(release_note=release_note)
 
 
+class RemoveReleaseNote(graphene.Mutation):
+    class Arguments:
+        release_note = graphene.ID(
+            required=True, description="The release note to remove"
+        )
+
+    success = graphene.Boolean()
+
+    @staticmethod
+    def mutate(root, info, release_note):
+        """
+        Delete an existing release note
+        """
+        user = info.context.user
+        if not hasattr(user, "auth_roles") or (
+            "ADMIN" not in user.auth_roles and "DEV" not in user.auth_roles
+        ):
+            raise GraphQLError("Not authenticated to delete a release note.")
+
+        try:
+            _, release_note_id = from_global_id(release_note)
+            release_note = ReleaseNote.objects.get(kf_id=release_note_id)
+        except ReleaseNote.DoesNotExist as err:
+            raise GraphQLError(
+                f"Release note {release_note_id} does not exist"
+            )
+
+        release_note.delete()
+        release_note.save()
+
+        return RemoveReleaseNote(success=True)
+
+
 class Query:
     event = graphene.relay.Node.Field(
         ReleaseNoteNode, description="Retrieve a single release note"
@@ -171,4 +204,7 @@ class Mutation:
     )
     update_release_note = UpdateReleaseNote.Field(
         description="Update an existing release note"
+    )
+    remove_release_note = RemoveReleaseNote.Field(
+        description="Remove an existing release note"
     )
