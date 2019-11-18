@@ -161,7 +161,6 @@ class RemoveReleaseNote(graphene.Mutation):
             )
 
         release_note.delete()
-        release_note.save()
 
         return RemoveReleaseNote(success=True)
 
