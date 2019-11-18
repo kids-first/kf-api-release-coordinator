@@ -10,7 +10,10 @@ from .task_services import (
     Mutation as TaskServiceMutation,
 )
 from .events import Query as EventQuery
-from .release_notes import Query as ReleaseNoteQuery
+from .release_notes import (
+    Query as ReleaseNoteQuery,
+    Mutation as ReleaseNoteMutation,
+)
 from .studies import Query as StudyQuery, Mutation as StudyMutation
 from .users import Query as UserQuery
 
@@ -50,7 +53,11 @@ class Query(
 
 
 class Mutation(
-    ObjectType, ReleaseMutation, TaskServiceMutation, StudyMutation
+    ObjectType,
+    ReleaseMutation,
+    TaskServiceMutation,
+    StudyMutation,
+    ReleaseNoteMutation,
 ):
     pass
 
