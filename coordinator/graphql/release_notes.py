@@ -90,6 +90,49 @@ class CreateReleaseNote(graphene.Mutation):
         return CreateReleaseNote(release_note=release_note)
 
 
+class UpdateReleaseNoteInput(graphene.InputObjectType):
+    description = graphene.String(
+        required=True,
+        description="Description of changes made to a study within a release",
+    )
+
+
+class UpdateReleaseNote(graphene.Mutation):
+    class Arguments:
+        release_note = graphene.ID(
+            required=True, description="The release note to update"
+        )
+        input = UpdateReleaseNoteInput(required=True)
+
+    release_note = graphene.Field(ReleaseNoteNode)
+
+    @staticmethod
+    def mutate(root, info, release_note, input):
+        """
+        Update an existing release note
+        """
+        user = info.context.user
+        if not hasattr(user, "auth_roles") or (
+            "ADMIN" not in user.auth_roles and "DEV" not in user.auth_roles
+        ):
+            raise GraphQLError("Not authenticated to update a release note.")
+
+        try:
+            _, release_note_id = from_global_id(release_note)
+            release_note = ReleaseNote.objects.get(kf_id=release_note_id)
+        except ReleaseNote.DoesNotExist as err:
+            raise GraphQLError(
+                f"Release note {release_note_id} does not exist"
+            )
+
+        if "description" in input:
+            release_note.description = input["description"]
+
+        release_note.save()
+
+        return UpdateReleaseNote(release_note=release_note)
+
+
 class Query:
     event = graphene.relay.Node.Field(
         ReleaseNoteNode, description="Retrieve a single release note"
@@ -125,4 +168,7 @@ class Query:
 class Mutation:
     create_release_note = CreateReleaseNote.Field(
         description="Create a new release note for a given study in release"
+    )
+    update_release_note = UpdateReleaseNote.Field(
+        description="Update an existing release note"
     )
