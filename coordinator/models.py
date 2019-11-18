@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.utils.translation import gettext_lazy as _
 from coordinator.api.models.study import Study
 
 
@@ -43,6 +44,11 @@ class User(AbstractUser):
     Stores only basic information about the user, namely their primary id
     that may be used to fetch their full profile.
     """
+    USERNAME_FIELD = "sub"
+    # This overrides the AbstractUser username which has a unique contraint
+    # on it in preference of the sub being the unique field.
+    username = models.CharField(_("username"), max_length=150, unique=False)
+
     sub = models.CharField(
         max_length=150,
         unique=True,

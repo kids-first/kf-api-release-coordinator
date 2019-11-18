@@ -116,7 +116,7 @@ class Query(object):
         user = info.context.user
 
         # Unauthed and service users do not have profiles
-        if not user.is_authenticated or user is None or user.email == "":
+        if not user.is_authenticated or user is None:
             raise GraphQLError("not authenticated as a user with a profile")
 
         return user
