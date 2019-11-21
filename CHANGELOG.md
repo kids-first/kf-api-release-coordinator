@@ -1,3 +1,26 @@
+# Kids First Release Coordinator Release 1.9.0
+
+## Features
+
+Adds new mutations and changes cache to utilize redis.
+
+### Summary
+
+Feature Emojis: 🔧x3 🐛x2 ✨x2 👷x1
+Feature Labels: [devops](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/devops) x3 [bug](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/bug) x2 [feature](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/feature) x2 [refactor](https://api.github.com/repos/kids-first/kf-api-release-coordinator/labels/refactor) x1
+
+### New features and changes
+
+- (#249) 🐛 Don't resave release note on remove - @dankolbman
+- (#248) ✨ Add release note mutations - @dankolbman
+- (#247) 🔧 Allow duplicate usernames accross users - @dankolbman
+- (#241) 🐛 Add releated_name to release relationship - @dankolbman
+- (#246) ✨ Add mutation to edit release - @dankolbman
+- (#245) 🔧 Store cache in redis - @dankolbman
+- (#243) 🔧 Remap port to standard coordinator service port - @dankolbman
+- (#242) 👷 Add codacy coverage - @dankolbman
+
+
 # Kids First Release Coordinator Release 1.8.0
 
 ## Features
