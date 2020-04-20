@@ -1,4 +1,5 @@
 import factory
+from factory.fuzzy import FuzzyChoice
 
 from coordinator.api.models.release import Release
 from coordinator.api.factories.study import StudyFactory
@@ -13,6 +14,9 @@ class ReleaseFactory(factory.django.DjangoModelFactory):
     description = factory.Faker("bs")
     tasks = factory.RelatedFactory(
         "coordinator.api.factories.task.TaskFactory", "release"
+    )
+    state = FuzzyChoice(
+        ["waiting", "failed", "canceled", "staged", "rejected", "published"]
     )
 
     @factory.post_generation

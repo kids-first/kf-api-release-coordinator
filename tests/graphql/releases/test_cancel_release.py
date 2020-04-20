@@ -44,7 +44,7 @@ def test_cancel_permissions(db, test_client, user_type, expected):
     USER - May not cancel relases
     anonomous - May not cancel releases
     """
-    release = ReleaseFactory()
+    release = ReleaseFactory(state="running")
     variables = {"release": to_global_id("ReleaseNode", release.kf_id)}
 
     client = test_client(user_type)
