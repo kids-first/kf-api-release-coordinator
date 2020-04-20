@@ -25,5 +25,5 @@ class ReleaseFactory(factory.django.DjangoModelFactory):
             for study in extracted:
                 self.studies.add(study)
         else:
-            study = StudyFactory(kf_id="SD_TESTTEST")
+            study = StudyFactory(kf_id="SD_ME0WME0W")
             self.studies.add(study)
