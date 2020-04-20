@@ -4,17 +4,14 @@
 #
 version: 2
 jobs:
-  build:
-    branches:
-      ignore:
-        - gh-pages
+  test:
     docker:
       - image: circleci/python:3.7
       - image: postgres:9.5
       - image: redis:latest
         environment:
-        - POSTGRES_USER=postgres
-        - POSTGRES_DB=test
+          - POSTGRES_USER=postgres
+          - POSTGRES_DB=test
 
     working_directory: ~/repo
 
@@ -24,7 +21,7 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-{{ checksum "requirements.txt" }}
 
       - run:
           name: install dependencies
@@ -38,7 +35,7 @@ jobs:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
-        
+
       - run:
           name: run tests
           command: |
@@ -46,7 +43,7 @@ jobs:
             pytest --cov=./
             codecov --token=$CODECOV_TOKEN
           environment:
-            - FLASK_APP: "manage"
+            - FLASK_APP: 'manage'
       - run:
           name: Lint documentation
           command: |
@@ -78,3 +75,40 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
+    publish:
+      docker:
+        - image: circleci/buildpack-deps:stretch
+      environment:
+        IMAGE_NAME: kfdrc/kf-api-release-coordinator
+      steps:
+        - setup_remote_docker
+        - run:
+            name: Build Docker Image
+            command: docker build -t $IMAGE_NAME:latest .
+        - run:
+            name: Publish Docker Image to Docker Hub
+            command: |
+              echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+              IMAGE_TAG=${CIRCLE_TAG/v/''}
+              docker push $IMAGE_NAME:latest
+              export pat="^([0-9]+)\.([0-9]+)\.([0-9]+)$
+              if [[ ! $IMAGE_TAG =~ [^$pat] ]]; then
+                  docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
+                  docker push $IMAGE_NAME:$IMAGE_TAG
+              fi
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore:
+                - gh-pages
+      - publish:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
