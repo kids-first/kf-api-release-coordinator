@@ -5,6 +5,7 @@ services:
     image: postgres:12
     environment:
       - POSTGRES_DB=coordinator
+      - POSTGRES_PASSWORD=password
   redis:
     image: redis:latest
   coordinator:
@@ -15,13 +16,10 @@ services:
     command: '/app/bin/dev_entrypoint.sh'
     volumes:
       - ./:/app/
+    env_file: docker.env
     ports:
       - '5001:5000'
     environment:
-      - PG_NAME=coordinator
-      - PG_HOST=pg
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-coordinator.settings.testing}
       - PRELOAD_DATA=FAKE
     depends_on:
@@ -33,13 +31,10 @@ services:
       target: dev
     image: coordinator:latest
     command: '/app/bin/dev_worker.sh'
+    env_file: docker.env
     volumes:
       - ./:/app/
     environment:
-      - PG_NAME=coordinator
-      - PG_HOST=pg
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-coordinator.settings.testing}
     depends_on:
       - pg
