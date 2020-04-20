@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   pg:
-    image: postgres:9.5
+    image: postgres:12
     environment:
       - POSTGRES_DB=coordinator
   redis:

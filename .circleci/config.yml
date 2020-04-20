@@ -7,11 +7,12 @@ jobs:
   test:
     docker:
       - image: circleci/python:3.7
-      - image: postgres:9.5
-      - image: redis:latest
+      - image: postgres:12
         environment:
           - POSTGRES_USER=postgres
+          - POSTGRES_PASSWORD=password
           - POSTGRES_DB=test
+      - image: redis:latest
 
     working_directory: ~/repo
 
