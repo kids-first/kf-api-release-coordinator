@@ -30,4 +30,7 @@ class ReleaseFactory(factory.django.DjangoModelFactory):
                 self.studies.add(study)
         else:
             study = StudyFactory(kf_id="SD_ME0WME0W")
+            study = StudyFactory(kf_id="SD_W2PQV9FJ")
+            study = StudyFactory(kf_id="SD_QQXC6C3V")
+            study = StudyFactory(kf_id="SD_ODWXI1TE")
             self.studies.add(study)
