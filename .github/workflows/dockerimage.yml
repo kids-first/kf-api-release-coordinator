@@ -1,0 +1,21 @@
+name: Docker Development Images
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login
+        run: echo $PASSWORD | docker login -u $USERNAME --password-stdin
+        env:
+          USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build image
+        run: docker build --target dev -t kfdrc/kf-api-release-coordinator:latest .
+      - name: Publish image
+        run: docker push kfdrc/kf-api-release-coordinator:latest
