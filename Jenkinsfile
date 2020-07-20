@@ -14,6 +14,6 @@ ecs_service_type_1_standard {
     vcpu_task                  = "2048"
     memory_task                = "4096"
     health_check_path = "/oauth/token/public_key"
-    dependencies = "ecr,postgres_rds"
+    dependencies = "ecr"
     friendly_dns_name = "release-coordinator"
 }
