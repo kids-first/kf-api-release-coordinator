@@ -2,6 +2,7 @@
 ecs_service_type_1_standard {
     ecs_service_type_1_version = "feature/skip-wrapper-build"
     deploy_scripts_version = "feature/skip-wrapper-build"
+    skip_wrapper_build = "true"
     projectName = "kf-api-release-coordinator"
     environments = "dev,qa,prd"
     docker_image_type = "alpine"
