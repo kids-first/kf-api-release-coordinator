@@ -2,7 +2,6 @@
 ecs_service_existing_alb {
     projectName                = "kf-api-release-coordinator-worker"
     path_pattern              = "/release-coordinator-worker*"
-    deploy_scripts_version     = "master"
     host_based_routing         = "0"
     alb_name                   = "kf-api-release-coordinator"
     orgFullName                = "kids-first"
