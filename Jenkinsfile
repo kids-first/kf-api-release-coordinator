@@ -1,6 +1,5 @@
 @Library(value="kids-first/aws-infra-jenkins-shared-libraries", changelog=false) _
 ecs_service_type_1_standard {
-    skip_wrapper_build = "true"
     projectName = "kf-api-release-coordinator"
     environments = "dev,qa,prd"
     docker_image_type = "alpine"
