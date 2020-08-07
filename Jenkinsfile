@@ -2,6 +2,7 @@
 ecs_service_type_1_standard {
     projectName = "kf-api-release-coordinator"
     ecs_service_type_1_version = "bugfix/alpine-entrypoint-issue"
+    deploy_scripts_version = "bugfix/alpine-bash"
     environments = "dev,qa,prd"
     docker_image_type = "alpine"
     entrypoint_command = "/app/bin/entrypoint.sh" 
