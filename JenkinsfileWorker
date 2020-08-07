@@ -10,7 +10,7 @@ ecs_service_existing_alb {
     build_environments         = "dev,qa,prd"
     docker_image_type          = "alpine"
     create_default_iam_role    = "1"
-    entrypoint_command         = "/start_up.sh"
+    entrypoint_command         = "/app/bin/entrypoint.sh"
     quick_deploy               = "true"
     container_port             = "80"
     health_check_path          = "/oauth/token/public_key"
