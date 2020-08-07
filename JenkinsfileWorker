@@ -13,7 +13,7 @@ ecs_service_existing_alb {
     entrypoint_command         = "/app/bin/entrypoint.sh"
     quick_deploy               = "true"
     container_port             = "80"
-    health_check_path          = "/oauth/token/public_key"
+    health_check_path          = "/"
     internal_app               = "false"
     dependencies               = "ecr"
 }
