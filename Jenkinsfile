@@ -1,6 +1,7 @@
 @Library(value="kids-first/aws-infra-jenkins-shared-libraries", changelog=false) _
 ecs_service_type_1_standard {
     projectName = "kf-api-release-coordinator"
+    ecs_service_type_1_version = "bugfix/alpine-entrypoint-issue"
     environments = "dev,qa,prd"
     docker_image_type = "alpine"
     entrypoint_command = "/app/bin/entrypoint.sh" 
