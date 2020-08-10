@@ -4,6 +4,7 @@ ecs_service_existing_alb {
     path_pattern              = "/release-coordinator-worker*"
     host_based_routing         = "0"
     alb_name                   = "kf-api-release-coordinator"
+    attach_to_alb              = "false"
     orgFullName                = "kids-first"
     account                    = "kf-strides"
     environments               = "dev,qa,prd"
