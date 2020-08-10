@@ -6,7 +6,6 @@ ecs_service_existing_alb {
     alb_name                   = "kf-api-release-coordinator"
     attach_to_alb              = "false"
     orgFullName                = "kids-first"
-    account                    = "kf-strides"
     environments               = "dev,qa,prd"
     build_environments         = "dev,qa,prd"
     docker_image_type          = "alpine"
