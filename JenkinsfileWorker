@@ -1,6 +1,7 @@
 @Library(value='kids-first/aws-infra-jenkins-shared-libraries', changelog=false) _
 ecs_service_existing_alb {
     projectName                = "kf-api-release-coordinator-worker"
+    module_verion              = "bugfix/detach-from-alb"
     path_pattern               = "/release-coordinator-worker*"
     deploy_scripts_verion      = "feature/check-for-existing-tags"
     host_based_routing         = "0"
