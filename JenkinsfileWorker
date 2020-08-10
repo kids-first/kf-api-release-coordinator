@@ -3,7 +3,7 @@ ecs_service_existing_alb {
     projectName                = "kf-api-release-coordinator-worker"
     module_version              = "bugfix/detach-from-alb"
     path_pattern               = "/release-coordinator-worker*"
-    deploy_scripts_verion      = "feature/check-for-existing-tags"
+    deploy_scripts_version      = "feature/check-for-existing-tags"
     host_based_routing         = "0"
     alb_name                   = "kf-api-release-coordinator"
     attach_to_alb              = "false"
