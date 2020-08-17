@@ -98,12 +98,14 @@ RQ_QUEUES = {
         'PORT': os.environ.get('REDIS_PORT', 6379),
         'DB': 0,
         'DEFAULT_TIMEOUT': 30,
+        'SSL': os.environ.get('REDIS_SSL', False),
     },
     'health_checks': {
         'HOST': os.environ.get('REDIS_HOST', 'localhost'),
         'PORT': os.environ.get('REDIS_PORT', 6379),
         'DB': 0,
         'DEFAULT_TIMEOUT': 30,
+        'SSL': os.environ.get('REDIS_SSL', False),
     }
 }
 
