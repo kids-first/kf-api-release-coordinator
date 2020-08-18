@@ -125,21 +125,24 @@ DATABASES = {
 
 
 # Redis
+redis_host = os.environ.get("REDIS_HOST", "localhost")
+redis_port = os.environ.get("REDIS_PORT", 6379)
+redis_ssl = os.environ.get("REDIS_SSL", "True") == "True"
 RQ_QUEUES = {
-    'default': {
-        'HOST': os.environ.get('REDIS_HOST', 'localhost'),
-        'PORT': os.environ.get('REDIS_PORT', 6379),
-        'SSL': os.environ.get('REDIS_SSL', False),
-        'DB': 0,
-        'DEFAULT_TIMEOUT': 30,
+    "default": {
+        "HOST": redis_host,
+        "PORT": redis_port,
+        "SSL": redis_ssl,
+        "DB": 0,
+        "DEFAULT_TIMEOUT": 30,
     },
-    'health_checks': {
-        'HOST': os.environ.get('REDIS_HOST', 'localhost'),
-        'PORT': os.environ.get('REDIS_PORT', 6379),
-        'DB': 0,
-        'DEFAULT_TIMEOUT': 30,
-        'SSL': os.environ.get('REDIS_SSL', False),
-    }
+    "health_checks": {
+        "HOST": redis_host,
+        "PORT": redis_port,
+        "SSL": redis_ssl,
+        "DB": 0,
+        "DEFAULT_TIMEOUT": 30,
+    },
 }
 
 redis_pass = os.environ.get('REDIS_PASS', False)
