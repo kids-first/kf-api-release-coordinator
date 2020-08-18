@@ -51,13 +51,6 @@ COPY        dev-requirements.txt /app/
 RUN         pip install -r /app/dev-requirements.txt
 
 
-# Production stage containing vault to load secrets
 FROM base as prd
-
-RUN apk --update add jq wget
-
-RUN wget -q -O vault.zip https://releases.hashicorp.com/vault/1.0.3/vault_1.0.3_linux_amd64.zip \ 
-    && unzip vault.zip \
-    && mv vault /usr/local/bin
 
 CMD ["/app/bin/entrypoint.sh"]
