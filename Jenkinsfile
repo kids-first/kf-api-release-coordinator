@@ -14,4 +14,5 @@ ecs_service_type_1_standard {
     health_check_path = "/"
     dependencies = "ecr"
     friendly_dns_name = "release-coordinator"
+    additional_ssl_cert_domain_name = "*.kidsfirstdrc.org"
 }
