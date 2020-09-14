@@ -1,3 +1,23 @@
+# Kids First Release Coordinator Change History
+
+## Release 1.9.1
+
+### Summary
+
+- Emojis: 🔧 x3, 🐛 x1, 🏭 x1, 👷 x1, ⬆️ x1, 🤡 x1
+- Categories: Other Changes x5, Fixes x1, Ops x2
+
+### New features and changes
+
+- [#268](https://github.com/kids-first/kf-api-release-coordinator/pull/268) - 🔧 Added JenkinsfileWorker - [e8caed93](https://github.com/dankolbman/kf-api-release-coordinator/commit/e8caed9307d0eeb0b2b24cae03049a7a28c57a6f) by [alubneuski](https://github.com/alubneuski)
+- [#267](https://github.com/kids-first/kf-api-release-coordinator/pull/267) - 🔧 Updated to standard deploy - [f6906748](https://github.com/dankolbman/kf-api-release-coordinator/commit/f69067486f46e61af5459672ba6399cacb4ccf1d) by [alubneuski](https://github.com/alubneuski)
+- [#262](https://github.com/kids-first/kf-api-release-coordinator/pull/262) - 🔧 Add SSL setting to RQ config - [bb956caa](https://github.com/dankolbman/kf-api-release-coordinator/commit/bb956caa775b658707cb387793897193134886fc) by [dankolbman](https://github.com/dankolbman)
+- [#259](https://github.com/kids-first/kf-api-release-coordinator/pull/259) - 🐛 Fix release factory - [647fb5c5](https://github.com/dankolbman/kf-api-release-coordinator/commit/647fb5c5b6288d61065e76e5255a3f0da9012709) by [dankolbman](https://github.com/dankolbman)
+- [#258](https://github.com/kids-first/kf-api-release-coordinator/pull/258) - 🏭 Use more fake studies for releases - [9a36b54a](https://github.com/dankolbman/kf-api-release-coordinator/commit/9a36b54a52e6c8b55e2a99ea0feaef3b3c2194d7) by [dankolbman](https://github.com/dankolbman)
+- [#257](https://github.com/kids-first/kf-api-release-coordinator/pull/257) - 👷 Publish to dockerhub action - [437da285](https://github.com/dankolbman/kf-api-release-coordinator/commit/437da28579cf3696871bf085132bb26f5638e22c) by [dankolbman](https://github.com/dankolbman)
+- [#255](https://github.com/kids-first/kf-api-release-coordinator/pull/255) - ⬆️ Bump django from 2.1.11 to 2.2.13 - [ddf9e4b4](https://github.com/dankolbman/kf-api-release-coordinator/commit/ddf9e4b43cac6b83cc831a08c56cd8b2fa69b862) by [dependabot[bot]](https://github.com/apps/dependabot)
+- [#254](https://github.com/kids-first/kf-api-release-coordinator/pull/254) - 🤡 Improve mocks - [8102d56a](https://github.com/dankolbman/kf-api-release-coordinator/commit/8102d56a9e070bc58ca5577e10988e4595d5f6b1) by [dankolbman](https://github.com/dankolbman)
+
 # Kids First Release Coordinator Release 1.9.0
 
 ## Features
