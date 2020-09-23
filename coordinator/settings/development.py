@@ -65,19 +65,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_WHITELIST = (
-    'kidsfirstdrc.org',
-    'kids-first.io',
-)
-
-CORS_ORIGIN_REGEX_WHITELIST = (
-    r'^(https?:\/\/)?([a-z0-9-]+[.])*kidsfirstdrc\.org$',
-    r'^(https?:\/\/)?([a-z0-9-]+[.])*kids-first\.io$',
-)
-
-# Assume we're in local environment if there is no vault url
-if os.environ.get('VAULT_URL', None) is None:
-    CORS_ORIGIN_REGEX_WHITELIST += (r'^(https?:\/\/)?localhost.*$',)
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'coordinator.urls'
 

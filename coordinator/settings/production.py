@@ -65,22 +65,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_WHITELIST = (
-    'kidsfirstdrc.org',
-    'kids-first.io',
-)
-
-CORS_ORIGIN_REGEX_WHITELIST = (
+CORS_ALLOWED_ORIGIN_REGEXES = (
     r'^(https?:\/\/)?([a-z0-9-]+[.])*kidsfirstdrc\.org$',
     r'^(https?:\/\/)?([a-z0-9-]+[.])*kids-first\.io$',
-    r'^(https?:\/\/)?([a-z0-9-]+)*.netlify\.com$',
+    r'^(https?:\/\/)?([a-z0-9-]+[.])*netlify\.com$',
+    r'^(https?:\/\/)?([a-z0-9-]+[.])*netlify\.app$',
 )
 
 CORS_ALLOW_CREDENTIALS = True
-
-# Assume we're in local environment if there is no vault url
-if os.environ.get('VAULT_URL', None) is None:
-    CORS_ORIGIN_REGEX_WHITELIST += (r'^(https?:\/\/)?localhost.*$',)
 
 ROOT_URLCONF = 'coordinator.urls'
 
