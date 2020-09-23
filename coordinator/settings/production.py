@@ -65,16 +65,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ORIGIN_WHITELIST = (
-    'kidsfirstdrc.org',
-    'kids-first.io',
-)
-
-CORS_ORIGIN_REGEX_WHITELIST = (
+CORS_ALLOWED_ORIGIN_REGEXES = (
     r'^(https?:\/\/)?([a-z0-9-]+[.])*kidsfirstdrc\.org$',
     r'^(https?:\/\/)?([a-z0-9-]+[.])*kids-first\.io$',
-    r'^(https?:\/\/)?([a-z0-9-]+)*.netlify\.com$',
-    r'^(https?:\/\/)?([a-z0-9-]+)*.netlify\.app$',
+    r'^(https?:\/\/)?([a-z0-9-]+[.])*netlify\.com$',
+    r'^(https?:\/\/)?([a-z0-9-]+[.])*netlify\.app$',
 )
 
 CORS_ALLOW_CREDENTIALS = True
