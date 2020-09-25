@@ -284,7 +284,7 @@ LOGGING = {
     'loggers': {
         "rq.worker": {
             "handlers": ["rq_console"],
-            "level": "ERROR"
+            "level": "DEBUG"
         },
         "coordinator.authentication": {
             "handlers": ["rq_console"],
