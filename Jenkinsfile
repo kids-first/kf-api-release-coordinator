@@ -3,7 +3,7 @@ ecs_service_type_1_standard {
     projectName = "kf-api-release-coordinator"
     environments = "dev,qa,prd"
     docker_image_type = "alpine"
-    entrypoint_command = "/app/bin/entrypoint.sh" 
+    entrypoint_command = "/app/bin/entrypoint.sh"
     quick_deploy = "true"
     internal_app = "false"
     container_port = "80"
@@ -13,6 +13,8 @@ ecs_service_type_1_standard {
     memory_task                = "4096"
     health_check_path = "/"
     dependencies = "ecr"
+    create_sns_topic = "1"
+    create_default_iam_role = "0"
     friendly_dns_name = "release-coordinator"
     additional_ssl_cert_domain_name = "*.kidsfirstdrc.org"
 }
