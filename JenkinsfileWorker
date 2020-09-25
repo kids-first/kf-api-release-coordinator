@@ -16,5 +16,6 @@ ecs_service_existing_alb {
     health_check_path          = "/"
     internal_app               = "false"
     dependencies               = "ecr"
-    deploy_scripts_version      = "master"
+    deploy_scripts_version     = "master"
+    create_default_iam_role    = "0"
 }
