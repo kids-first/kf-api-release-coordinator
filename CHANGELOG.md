@@ -1,5 +1,18 @@
 # Kids First Release Coordinator Change History
 
+## Release 1.9.2
+
+### Summary
+
+- Emojis: 🔧 x2
+- Categories: Other Changes x2
+
+### New features and changes
+
+- [#272](https://github.com/kids-first/kf-api-release-coordinator/pull/272) - 🔧 Removed IAM and added SNS - [6942a096](https://github.com/dankolbman/kf-api-release-coordinator/commit/6942a0968dc8628b6c3a6dcc68faf8a966e61d6a) by [alubneuski](https://github.com/alubneuski)
+- [#270](https://github.com/kids-first/kf-api-release-coordinator/pull/270) - 🔧 Update CORs whitelist for netlify - [8485b724](https://github.com/dankolbman/kf-api-release-coordinator/commit/8485b7249890c96680ba5d69255003a4a3b717ea) by [dankolbman](https://github.com/dankolbman)
+
+
 ## Release 1.9.1
 
 ### Summary
