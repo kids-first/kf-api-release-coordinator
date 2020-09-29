@@ -17,4 +17,5 @@ ecs_service_type_1_standard {
     create_default_iam_role = "0"
     friendly_dns_name = "release-coordinator"
     additional_ssl_cert_domain_name = "*.kidsfirstdrc.org"
+    qa_cidr                    = "0.0.0.0/0"
 }
