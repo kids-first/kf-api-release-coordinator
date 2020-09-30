@@ -43,7 +43,7 @@ def get_service_token():
   
     print("DEBUG:" + settings.AUTH0_CLIENT)
     print("DEBUG:" + settings.AUTH0_AUD)
-    print("DEBUG:" + settings.AUTH0_SECRET[4:7)
+    print("DEBUG:" + settings.AUTH0_SECRET[4:7])
 
 
     try:
