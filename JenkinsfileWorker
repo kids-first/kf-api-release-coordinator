@@ -9,7 +9,7 @@ ecs_service_existing_alb {
     environments               = "dev,qa,prd"
     build_environments         = "dev,qa,prd"
     docker_image_type          = "alpine"
-    create_default_iam_role    = "1"
+    create_default_iam_role    = "0"
     entrypoint_command         = "/app/bin/entrypoint.sh"
     quick_deploy               = "true"
     container_port             = "80"
