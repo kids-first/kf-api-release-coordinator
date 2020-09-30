@@ -1,5 +1,5 @@
 #!/bin/ash
-echo $AUTH0_CLIENT | '{print substr($1,1,10)}'
+echo $AUTH0_CLIENT | awk '{print substr($1,1,10)}'
 echo $AUTH0_SECRET | awk '{print substr($1,1,7)}'
 echo $AUTH0_AUD
 export | grep AUTH0 | grep -v AUTH0_SECRET 
