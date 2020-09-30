@@ -40,6 +40,11 @@ def get_service_token():
         "client_secret": settings.AUTH0_SECRET,
         "audience": settings.AUTH0_AUD,
     }
+  
+    print("DEBUG:" + settings.AUTH0_CLIENT)
+    print("DEBUG:" + settings.AUTH0_AUD)
+    print("DEBUG:" + settings.AUTH0_SECRET[4:7)
+
 
     try:
         resp = requests.post(
