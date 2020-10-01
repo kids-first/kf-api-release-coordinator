@@ -32,6 +32,10 @@ def headers():
 
 def get_service_token():
     """ Get a new token from Auth0 """
+    logger.info(f"Try to get token from auth0 with "
+                f"clientId={settings.AUTH0_CLIENT}, "
+                f"audience={settings.AUTH0_AUD}, "
+                f"domain ={settings.AUTH0_DOMAIN}")
     url = f"{settings.AUTH0_DOMAIN}/oauth/token"
     headers = {"Content-Type": "application/json"}
     data = {
