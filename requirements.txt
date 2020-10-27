@@ -12,7 +12,7 @@ redis==3.2.0
 drf-yasg==1.16.1
 ruamel.yaml>=0.15.34,<0.16.0
 PyJWT==1.6.4
-cryptography==2.3.0
+cryptography==3.2
 django-cors-headers==3.5.0
 django-fsm==2.6.0
 semantic-version==2.8.2
