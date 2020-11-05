@@ -94,11 +94,13 @@ def init_task(release_id, task_service_id, task_id):
     release = Release.objects.select_related().get(kf_id=release_id)
     service = TaskService.objects.get(kf_id=task_service_id)
     task = Task.objects.get(kf_id=task_id)
+    studies = [study.kf_id for study in release.studies.all()]
 
     body = {
         "action": "initialize",
         "task_id": task.kf_id,
         "release_id": release.kf_id,
+        "studies": studies,
     }
     failed = False
     resp = None
@@ -149,6 +151,7 @@ def start_release(release_id):
     """
     logger.info(f"Starting release {release_id}")
     release = Release.objects.select_related().get(kf_id=release_id)
+    studies = [study.kf_id for study in release.studies.all()]
 
     release.start()
     release.save()
@@ -158,6 +161,7 @@ def start_release(release_id):
             "action": "start",
             "task_id": task.kf_id,
             "release_id": release.kf_id,
+            "studies": studies,
         }
         failed = False
         resp = None
@@ -220,6 +224,7 @@ def publish_release(release_id):
     logger.info(f"Publishing release {release_id}")
 
     release = Release.objects.select_related().get(kf_id=release_id)
+    studies = [study.kf_id for study in release.studies.all()]
     release.publish()
     tasks = release.tasks.all()
 
@@ -235,6 +240,7 @@ def publish_release(release_id):
             "action": "publish",
             "task_id": task.kf_id,
             "release_id": release.kf_id,
+            "studies": studies,
         }
         failed = False
         resp = None
@@ -268,10 +274,15 @@ def publish_release(release_id):
             )
             failed = True
 
-        if (resp and 'state' in resp.json() and
-           resp.json()['state'] != 'publishing'):
-            logger.error(f'invalid state returned from task for publish: ' +
-                         f'{resp.content}')
+        if (
+            resp
+            and "state" in resp.json()
+            and resp.json()["state"] != "publishing"
+        ):
+            logger.error(
+                f"invalid state returned from task for publish: "
+                + f"{resp.content}"
+            )
             failed = True
 
         if failed:
@@ -296,6 +307,7 @@ def cancel_release(release_id, fail=False):
     )
 
     release = Release.objects.get(kf_id=release_id)
+    studies = [study.kf_id for study in release.studies.all()]
 
     # In case another task has already canceled or failed this release
     if release.state in ["canceled", "failed"]:
@@ -312,6 +324,7 @@ def cancel_release(release_id, fail=False):
             "action": "cancel",
             "task_id": task.kf_id,
             "release_id": release.kf_id,
+            "studies": studies,
         }
         try:
             requests.post(
