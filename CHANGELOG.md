@@ -1,5 +1,20 @@
 # Kids First Release Coordinator Change History
 
+## Release 1.9.3
+
+### Summary
+
+- Emojis: ✨ x1, 🔧 x1, ? x2
+- Categories: Additions x1, Other Changes x3
+
+### New features and changes
+
+- [#278](https://github.com/kids-first/kf-api-release-coordinator/pull/278) - ✨ Include studies when communicating with tasks - [b9fcb426](https://github.com/dankolbman/kf-api-release-coordinator/commit/b9fcb426a28ef3881bc16f77c5ed3ca4d77b0fd8) by [dankolbman](https://github.com/dankolbman)
+- [#276](https://github.com/kids-first/kf-api-release-coordinator/pull/276) - 🔧 Add some log to troubleshoot issues with auth0 - [d0054810](https://github.com/dankolbman/kf-api-release-coordinator/commit/d0054810e2df7cd80bc44aca7c9c1cc765e1ad63) by [jecos](https://github.com/jecos)
+- [#275](https://github.com/kids-first/kf-api-release-coordinator/pull/275) -  Update JenkinsfileWorker - [420b84db](https://github.com/dankolbman/kf-api-release-coordinator/commit/420b84dbf699809fdbdad92148c6a0b7727cc7f8) by [alubneuski](https://github.com/alubneuski)
+- [#274](https://github.com/kids-first/kf-api-release-coordinator/pull/274) -  Added open port - [f55b7c17](https://github.com/dankolbman/kf-api-release-coordinator/commit/f55b7c170b7376e5ea52d0aec76e6e45891974fd) by [alubneuski](https://github.com/alubneuski)
+
+
 ## Release 1.9.2
 
 ### Summary
