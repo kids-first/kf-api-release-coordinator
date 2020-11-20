@@ -1,9 +1,11 @@
-@Library(value='kids-first/aws-infra-jenkins-shared-libraries', changelog=false) _
+@Library(value='kids-first/aws-infra-jenkins-shared-libraries@feature/add-tests', changelog=false) _
 ecs_service_existing_alb {
     projectName                = "kf-api-release-coordinator-worker"
     path_pattern               = "/release-coordinator-worker*"
     host_based_routing         = "0"
     alb_name                   = "kf-api-release-coordinator"
+    deploy_scripts_version = "feature/add-tests"
+    ecs_service_type_1_version = "feature/add-tests"
     attach_to_alb              = "false"
     orgFullName                = "kids-first"
     environments               = "dev,qa,prd"

@@ -1,4 +1,4 @@
-@Library(value="kids-first/aws-infra-jenkins-shared-libraries", changelog=false) _
+@Library(value="kids-first/aws-infra-jenkins-shared-libraries@feature/add-tests", changelog=false) _
 ecs_service_type_1_standard {
     projectName = "kf-api-release-coordinator"
     environments = "dev,qa,prd"
@@ -7,6 +7,8 @@ ecs_service_type_1_standard {
     quick_deploy = "true"
     internal_app = "false"
     container_port = "80"
+    deploy_scripts_version = "feature/add-tests"
+    ecs_service_type_1_version = "feature/add-tests"
     vcpu_container             = "2048"
     memory_container           = "4096"
     vcpu_task                  = "2048"
