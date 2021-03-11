@@ -18,4 +18,5 @@ ecs_service_type_1_standard {
     friendly_dns_name = "release-coordinator"
     additional_ssl_cert_domain_name = "*.kidsfirstdrc.org"
     qa_cidr                    = "0.0.0.0/0"
+    publish_to_public_repo = "true"
 }
