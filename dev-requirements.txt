@@ -4,7 +4,7 @@ pytest-django==3.1.2
 mock==2.0.0
 pytest-mock==1.9.0
 pytest-cov==2.5.1
-codecov==2.0.15
+codecov==2.0.16
 pycodestyle==2.5.0
 pytest-codestyle==1.4.0
 doc8==0.8.0
